@@ -1,0 +1,193 @@
+Agis comme un développeur full-stack senior avec plus de 50 ans d’expérience en développement web, UX/UI, architecture logicielle, performance et optimisation de conversion.
+
+Conçois un site vitrine professionnel, solide et orienté conversion pour une entreprise appelée :
+
+POUYETRANS – Transport & Déménagement
+
+CONTEXTE RÉEL :
+
+PouyeTrans est un service de transport basé au Sénégal.
+Le véhicule est un Renault Master 3 places avec grande capacité de chargement.
+Le service transporte uniquement :
+
+Bagages
+
+Déménagements
+
+Meubles
+
+Outils
+
+Marchandises
+
+Il ne transporte PAS de passagers.
+
+Le chauffeur a plus de 10 ans d’expérience.
+Il travaille 7j/7 (week-end inclus).
+Il transporte partout au Sénégal et peut effectuer des trajets hors du pays.
+Les biens sont sécurisés.
+Il aide au chargement si les bagages ne sont pas lourds.
+Pour les charges lourdes ou volumineuses, un supplément peut être demandé.
+
+OBJECTIFS DU SITE :
+
+Inspirer confiance immédiatement
+
+Montrer la solidité et le sérieux du service
+
+Générer des demandes de devis
+
+Optimiser la conversion mobile (WhatsApp + appel direct)
+
+Donner une image professionnelle et fiable
+
+STYLE VISUEL :
+
+Design moderne, robuste et professionnel
+
+Couleurs principales : bleu foncé (confiance), orange (logistique), blanc
+
+Interface claire et rassurante
+
+Mobile-first
+
+Bouton WhatsApp flottant visible en permanence
+
+Bouton Appel direct fixe
+
+Animations légères et élégantes
+
+Typographie forte et lisible
+
+Sections bien espacées
+
+STRUCTURE COMPLÈTE DU SITE :
+
+HERO SECTION IMPACTANTE
+Image de fond : Renault Master chargé ou en route
+Titre :
+"Transport sécurisé de bagages et déménagements au Sénégal"
+Sous-titre :
+"Plus de 10 ans d’expérience – Service fiable 7j/7"
+Boutons :
+
+Demander un devis
+
+Appeler maintenant
+
+WhatsApp
+
+SECTION PRÉSENTATION DU VÉHICULE
+Titre :
+"Un véhicule adapté à vos besoins"
+Contenu :
+
+Renault Master 3 places
+
+Grande capacité de chargement
+
+Idéal pour déménagements et marchandises
+
+Chargement organisé et sécurisé
+
+Véhicule entretenu régulièrement
+
+SECTION SERVICES
+Cartes modernes avec icônes :
+
+Déménagement maison et appartement
+
+Transport de meubles
+
+Transport d’outils et matériel professionnel
+
+Livraison de marchandises
+
+Transport national et international
+
+SECTION SÉCURITÉ & PROFESSIONNALISME
+Mettre en avant :
+
+10+ ans d’expérience
+
+Travail 7j/7
+
+Respect des délais
+
+Biens sécurisés
+
+Aide au chargement selon conditions
+
+Devis personnalisé
+
+SECTION TRANSPARENCE
+Bloc explicatif clair :
+"Aide au chargement incluse pour charges légères. Supplément possible pour charges lourdes."
+
+SECTION ZONE D’INTERVENTION
+Carte du Sénégal
+Liste : Dakar, Thiès, Touba, Kaolack, Saint-Louis, Ziguinchor + transport hors du pays
+
+SECTION GALERIE
+Grille d’images :
+
+Master extérieur
+
+Master chargé
+
+Organisation du chargement
+
+Transport en cours
+
+SECTION FORMULAIRE DE DEVIS OPTIMISÉ
+Champs :
+
+Nom
+
+Téléphone
+
+Ville départ
+
+Ville destination
+
+Type de chargement
+
+Volume estimé
+
+Date
+
+Message
+Bouton :
+"Recevoir mon devis"
+
+FOOTER PROFESSIONNEL
+
+Logo PouyeTrans
+
+Téléphone
+
+WhatsApp
+
+Email
+
+Copyright
+
+EXIGENCES TECHNIQUES :
+
+Utiliser React + Tailwind CSS
+
+Code propre et structuré
+
+Architecture modulaire
+
+Optimisé performance
+
+SEO local (transport Sénégal, déménagement Dakar, transport bagages Sénégal)
+
+Responsive parfait mobile, tablette et desktop
+
+Le résultat doit ressembler à un site professionnel de transport logistique moderne, crédible, solide et orienté conversion.
+
+le chauffeur me demande de lui ajouter une géolocalisation qui lui permet de rejoindre facilement le 
+lieu du client lors de la demande du devis.Il me demande aussi de changer le nom par PouyeTransportExpress et créer un logo.
+Il m'a fournit égalemant le numero de telephone: 771110168 et l'email:modoupouye0168@gmail.com
