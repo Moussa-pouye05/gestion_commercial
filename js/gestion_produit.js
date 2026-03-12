@@ -860,8 +860,8 @@ async function loadApprovisionnements() {
             tableBody.innerHTML = data.approvisionnements.map(app => {
                 const date = new Date(app.date_approvisionnement);
                 const dateStr = date.toLocaleDateString('fr-FR');
-                const etatClass = app.etat === 'valide' ? 'bg-green-500' : (app.etat === 'annule' ? 'bg-red-500' : 'bg-gray-500');
-                const etatText = app.etat === 'valide' ? 'Validé' : (app.etat === 'annule' ? 'Annulé' : 'En cours');
+                const etatClass = app.status === 'recu' ? 'bg-green-500' : (app.status === 'annule' ? 'bg-red-500' : 'bg-gray-500');
+                const etatText = app.status === 'recu' ? 'Validé' : (app.status === 'annule' ? 'Annulé' : 'En cours');
                 
                 return `
                     <tr class="hover:bg-gray-50 transition duration-200">

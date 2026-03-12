@@ -30,7 +30,7 @@ try {
 
     // Create approvisionnement record
     $stmt = $pdo->prepare("INSERT INTO approvisionnements (date_approvisionnement,id_fournisseur,status ,id_admin) 
-                           VALUES (NOW(),:fournisseur,  'en_cour', :admin)");
+                           VALUES (NOW(),:fournisseur,  'recu', :admin)");
     $stmt->execute([
         ":fournisseur" => $fournisseurId,
         ":admin" => $_SESSION['user']['id'] ?? 1

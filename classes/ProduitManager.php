@@ -256,17 +256,6 @@ class ProduitManager
             return 0;
         }
     }
-    //pourcentage de stock
-    public function pourcentageStock(): array{
-        try {
-            $req = $this->pdo->prepare("SELECT LEAST((quantite/stock_min)*100,100) AS pourcentage FROM poduits");
-            $req->execute();
-            return $req->fetchAll(PDO::FETCH_ASSOC);
-            
-        } catch (PDOException $e) {
-            return [];
-        }
-    }
 public function updateProduit(Produit $produit): array{
     try {
         $req = $this->pdo->prepare("UPDATE poduits SET image=:img,nom=:nom,prix_achat=:achat,prix_vente=:vente,quantite=:quantite,id_categorie=:id_cat,code_barre=:code WHERE id=:id");
