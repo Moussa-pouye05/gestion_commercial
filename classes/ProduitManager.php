@@ -96,8 +96,8 @@ class ProduitManager
                 ];
             }
 
-            $smtt = $this->pdo->prepare("INSERT INTO poduits (image, nom, prix_vente, prix_achat, quantite, seuilCritique, id_categorie, id_admin, code_barre)
-                                        VALUES (:img, :nom, :vente, :achat, :quantite, :seuil, :id_cat, :id_admin, :code)");
+            $smtt = $this->pdo->prepare("INSERT INTO poduits (image, nom, prix_vente, prix_achat, quantite, seuilCritique,stock_min, id_categorie, id_admin, code_barre)
+                                        VALUES (:img, :nom, :vente, :achat, :quantite, :seuil,:stock_min, :id_cat, :id_admin, :code)");
             $smtt->execute([
                 ":img" => $produit->getPhoto(),
                 ":nom" => $produit->getNom(),
@@ -105,6 +105,7 @@ class ProduitManager
                 ":achat" => $produit->getPrixAchat(),
                 ":quantite" => $produit->getQuantite(),
                 ":seuil" => 5,
+                ":stock_min" => 100,
                 ":id_cat" => $produit->getCatId(),
                 ":id_admin" => $_SESSION['user']['id'],
                 ":code" => $codeBarre
@@ -247,7 +248,7 @@ class ProduitManager
 
     public function totalAmountProduct(): int{
         try {
-            $req = $this->pdo->prepare("SELECT SUM(prix_vente) as somme FROM poduits");
+            $req = $this->pdo->prepare("SELECT SUM(prix_vente*quantite) as somme FROM poduits");
             $req->execute();
             $total = $req->fetch(PDO::FETCH_ASSOC)['somme'] ?? 0;
             return $total;
@@ -255,7 +256,17 @@ class ProduitManager
             return 0;
         }
     }
-
+    //pourcentage de stock
+    public function pourcentageStock(): array{
+        try {
+            $req = $this->pdo->prepare("SELECT LEAST((quantite/stock_min)*100,100) AS pourcentage FROM poduits");
+            $req->execute();
+            return $req->fetchAll(PDO::FETCH_ASSOC);
+            
+        } catch (PDOException $e) {
+            return [];
+        }
+    }
 public function updateProduit(Produit $produit): array{
     try {
         $req = $this->pdo->prepare("UPDATE poduits SET image=:img,nom=:nom,prix_achat=:achat,prix_vente=:vente,quantite=:quantite,id_categorie=:id_cat,code_barre=:code WHERE id=:id");

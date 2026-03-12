@@ -28,6 +28,7 @@ if (!empty($produits["success"]) && isset($produits["produits"])) {
             "prix_vente" => $p->getPrixVente(),
             "prix_achat" => $p->getPrixAchat(),
             "quantite" => $p->getQuantite(),
+            "stock_min" => 100,
             "id_categorie" => $p->getCatId(),
             "code_barre" => $p->getCodeBarre()
         ];

@@ -4,7 +4,7 @@ const cancelAddCategorie = document.getElementById("cancelAddCategorie");
 const addCategorie = document.getElementById("addCategorie");
 
 const modalAddProduit = document.getElementById("modalAddProduit");
-const addProduit = document.getElementById("addProduit");
+const addProduit = document.getElementById("btnAddProduit");
 
 const modalAddStock = document.getElementById("modalAddStock");
 const addStock = document.getElementById("addStock");
@@ -124,24 +124,231 @@ function renderProduitModal(categories = []) {
     }
 }
 
+// Modal Add Produit
 if (modalAddProduit && addProduit) {
-    addProduit.addEventListener("click", async () => {
-        const categories = await getCategorie();
-        renderProduitModal(categories);
-        modalAddProduit.classList.add("flex");
-        modalAddProduit.classList.remove("hidden");
-    });
+    const btnAddProduit = document.getElementById("btnAddProduit");
+    if (btnAddProduit) {
+        btnAddProduit.addEventListener("click", async () => {
+            const categories = await getCategorie();
+            renderProduitModal(categories);
+            modalAddProduit.classList.add("flex");
+            modalAddProduit.classList.remove("hidden");
+        });
+    }
 }
 
 //modal add stock
 if (modalAddStock && addStock && cancelAddStock) {
-    addStock.addEventListener("click", () => {
+    addStock.addEventListener("click", async () => {
+        // Load suppliers
+        await loadFournisseursForApprovisionnement();
+        // Load products
+        await loadProductsForApprovisionnement();
         modalAddStock.classList.add("flex");
         modalAddStock.classList.remove("hidden");
     });
     cancelAddStock.addEventListener("click", () => {
         modalAddStock.classList.add("hidden");
         modalAddStock.classList.remove("flex");
+    });
+}
+
+// Load fournisseurs for approvisionnement modal
+async function loadFournisseursForApprovisionnement() {
+    try {
+        const response = await fetch("../php/post_read_fournisseur.php");
+        const data = await response.json();
+        const select = document.querySelector('select[name="fournisseur"]');
+        if (select && data.fournisseurs) {
+            select.innerHTML = '<option value="">Choisir fournisseur</option>';
+            data.fournisseurs.forEach(f => {
+                const option = document.createElement("option");
+                option.value = f.id;
+                option.textContent = f.nom;
+                select.appendChild(option);
+            });
+        }
+    } catch (error) {
+        console.log("Erreur chargement fournisseurs:", error);
+    }
+}
+
+// Load products for approvisionnement modal
+let approvisionnementProducts = [];
+async function loadProductsForApprovisionnement() {
+    try {
+        const response = await fetch("../php/post_read_produit.php?page=1&search=&categorie=");
+        const data = await response.json();
+        if (data.produits) {
+            approvisionnementProducts = data.produits;
+            renderApprovisionnementProducts();
+        }
+    } catch (error) {
+        console.log("Erreur chargement produits:", error);
+    }
+}
+
+function renderApprovisionnementProducts() {
+    const tbody = document.getElementById("produitBody");
+    if (!tbody) return;
+    
+    tbody.innerHTML = approvisionnementProducts.map((p, index) => `
+        <tr>
+            <td class="p-2">
+                <select class="produit-select w-full border rounded px-2 py-1 text-sm" data-index="${index}">
+                    <option value="">Choisir</option>
+                    ${approvisionnementProducts.map(prod => `
+                        <option value="${prod.id}" data-prix="${prod.prix_achat}">${prod.nom}</option>
+                    `).join('')}
+                </select>
+            </td>
+            <td class="p-2">
+                <input type="number" min="1" value="1" class="quantite-input w-20 border rounded px-2 py-1 text-sm" data-index="${index}">
+            </td>
+            <td class="p-2">
+                <input type="number" min="0" value="0" class="prix-input w-24 border rounded px-2 py-1 text-sm" data-index="${index}">
+            </td>
+            <td class="p-2">
+                <button type="button" class="text-red-500 hover:text-red-700 remove-row" data-index="${index}">
+                    <i class="fa-solid fa-trash"></i>
+                </button>
+            </td>
+        </tr>
+    `).join('');
+
+    // Add event listeners for remove buttons
+    tbody.querySelectorAll('.remove-row').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const row = e.target.closest('tr');
+            row.remove();
+        });
+    });
+
+    // Add event listeners for product selection to auto-fill prix
+    tbody.querySelectorAll('.produit-select').forEach(select => {
+        select.addEventListener('change', (e) => {
+            const selectedOption = e.target.options[e.target.selectedIndex];
+            const prixInput = e.target.closest('tr').querySelector('.prix-input');
+            if (selectedOption.dataset.prix) {
+                prixInput.value = selectedOption.dataset.prix;
+            }
+        });
+    });
+}
+
+// Add new product row to approvisionnement
+const btnAddRow = document.getElementById('btnAddRow');
+if (btnAddRow) {
+    btnAddRow.addEventListener('click', () => {
+        const tbody = document.getElementById("produitBody");
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td class="p-2">
+                <select class="produit-select w-full border rounded px-2 py-1 text-sm" name="produit[]">
+                    <option value="">Choisir</option>
+                    ${approvisionnementProducts.map(prod => `
+                        <option value="${prod.id}" data-prix="${prod.prix_achat}">${prod.nom}</option>
+                    `).join('')}
+                </select>
+            </td>
+            <td class="p-2">
+                <input type="number" min="1" value="1" name="quantite[]" class="quantite-input w-20 border rounded px-2 py-1 text-sm">
+            </td>
+            <td class="p-2">
+                <input type="number" min="0" value="0" name="prix_achat[]" class="prix-input w-20 border rounded px-2 py-1 text-sm">
+            </td>
+            <td class="p-2">
+                <button type="button" class="text-red-500 hover:text-red-700 remove-row">
+                    <i class="fa-solid fa-trash"></i>
+                </button>
+            </td>
+        `;
+        tbody.appendChild(tr);
+        
+        // Add event listeners
+        tr.querySelector('.remove-row').addEventListener('click', () => tr.remove());
+        tr.querySelector('.produit-select').addEventListener('change', (e) => {
+            const selectedOption = e.target.options[e.target.selectedIndex];
+            const prixInput = tr.querySelector('.prix-input');
+            if (selectedOption.dataset.prix) {
+                prixInput.value = selectedOption.dataset.prix;
+            }
+        });
+    });
+}
+
+// Handle approvisionnement form submission
+const formAppro = document.getElementById("formAppro");
+if (formAppro) {
+    formAppro.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        
+        const fournisseur = document.querySelector('select[name="fournisseur"]')?.value;
+        if (!fournisseur) {
+            alert("Veuillez sélectionner un fournisseur");
+            return;
+        }
+
+        // Collect products data
+        const produits = [];
+        const tbody = document.getElementById("produitBody");
+        const rows = tbody.querySelectorAll('tr');
+        
+        rows.forEach(row => {
+            const produitSelect = row.querySelector('.produit-select');
+            const quantiteInput = row.querySelector('.quantite-input');
+            const prixInput = row.querySelector('.prix-input');
+            
+            const produitId = produitSelect?.value;
+            const quantite = parseInt(quantiteInput?.value || 0);
+            const prixAchat = parseFloat(prixInput?.value || 0);
+            
+            if (produitId && quantite > 0) {
+                produits.push({
+                    id: produitId,
+                    quantite: quantite,
+                    prix_achat: prixAchat
+                });
+            }
+        });
+
+        if (produits.length === 0) {
+            alert("Veuillez ajouter au moins un produit");
+            return;
+        }
+
+        try {
+            const formData = new FormData();
+            formData.append('fournisseur', fournisseur);
+            formData.append('produits', JSON.stringify(produits));
+
+            const response = await fetch("../php/post_add_approvisionnement.php", {
+                method: "POST",
+                body: formData
+            });
+            
+            const data = await response.json();
+            
+            if (data.success) {
+                alert("Approvisionnement ajouté avec succès!");
+                formAppro.reset();
+                modalAddStock.classList.add("hidden");
+                modalAddStock.classList.remove("flex");
+                // Reload products and stats
+                loadProduit(currentProduitPage, currentProduitSearch, currentProduitCategorie);
+                getTotalProduit();
+                stockFaible();
+                totalCategorie();
+                sommeProduit();
+                // Reload approvisionnements
+                loadApprovisionnements();
+            } else {
+                alert(data.message || "Erreur lors de l'approvisionnement");
+            }
+        } catch (error) {
+            console.log("Erreur:", error);
+            alert("Erreur lors de l'approvisionnement");
+        }
     });
 }
 
@@ -296,8 +503,27 @@ async function loadProduit(page = 1, search = currentProduitSearch, categorie = 
             }
             return;
         }
-
+        
         for (let item of datas.produits) {
+            let color , text ;
+            let pourcentage = Math.min((item.quantite / item.stock_min) * 100, 100).toFixed(0);
+            pourcentage = Math.round(pourcentage)
+            if (pourcentage <= 15) {
+                color = "bg-red-500";
+                text = "text-red-500";
+            } 
+            else if (pourcentage <= 30) {
+                color = "bg-orange-500";
+                text = "text-orange-500";
+            } 
+            else if (pourcentage <= 60) {
+                color = "bg-yellow-500";
+                text = "text-yellow-600";
+            } 
+            else {
+                color = "bg-green-500";
+                text = "text-green-500";
+            }
             const profileSrc = buildProfileSrc(item.image);
             const produitCard = document.createElement("div");
             produitCard.className = "produit-card bg-white rounded-2xl shadow-sm hover:shadow-md transition duration-300 overflow-hidden min-h-[320px]";
@@ -331,16 +557,16 @@ async function loadProduit(page = 1, search = currentProduitSearch, categorie = 
                 <!-- Stock -->
                 <div class="flex justify-between items-center mt-3 text-xs">
                     <span class="text-gray-500">
-                        Stock: <span class="font-medium text-gray-700">${item.quantite} unites</span>
+                        Stock: <span class="font-medium text-gray-700">${item.quantite} unités</span>
                     </span>
-                    <span class="text-green-600 font-medium">
-                        50%
+                    <span class="msg-pct ${text} font-medium">
+                        ${pourcentage}%
                     </span>
                 </div>
     
                 <!-- Barre de progression -->
-                <div class="w-full bg-gray-100 h-[20px] rounded-full mt-2">
-                    <div class="bg-green-500 h-[20px] rounded-full" style="width:50%"></div>
+                <div class="w-full bg-gray-500 h-4 rounded-full mt-2 mb-2 ">
+                    <div class="${color} h-4 rounded-full py-1" style="width:${pourcentage}%"></div>
                 </div>
 
                 <!-- Actions -->
@@ -491,10 +717,19 @@ document.addEventListener("DOMContentLoaded", () => {
     getTotalProduit()
     stockFaible()
     totalCategorie()
-    sommeProduit()
+    sommeProduit();
+    pourcentageStock()
     
 })
-
+async function pourcentageStock(){
+    try {
+        const response = await fetch("../php/post_pourcentage_stock.php");
+        const pourcentage = await response.json();
+        return pourcentage.pourcentageStock;
+    } catch (error) {
+        console.log("Erreur:" + error)
+    }
+}
 async function getTotalProduit(){
     try{
         const response = await fetch("../php/post_getTotal_produit.php");
@@ -557,7 +792,6 @@ async function editProduit(){
             body: formData
         });
         const data = await response.json();
-        console.log(data)
         if(msg_prod){
             msg_prod.textContent = data.message || "Erreur lors de la modification"
             msg_prod.classList.remove("text-green-500","text-red-500")
@@ -565,6 +799,10 @@ async function editProduit(){
         }
         if(data.success){  
             await loadProduit(currentProduitPage,currentProduitSearch,currentProduitCategorie) 
+            getTotalProduit()
+            stockFaible()
+            totalCategorie()
+            sommeProduit()
             setTimeout(() =>{
                 if(!modalEditProduit) return
                 modalEditProduit.classList.remove("flex")
@@ -608,4 +846,62 @@ async function deleteProduit(id) {
         alert("Erreur lors de la suppression du produit");
     }
 }
+
+// Charger les approvisionnements récents
+async function loadApprovisionnements() {
+    const tableBody = document.getElementById("approvisionnementTable");
+    if (!tableBody) return;
+    
+    try {
+        const response = await fetch("../php/post_read_approvisionnement.php");
+        const data = await response.json();
+        
+        if (data.success && data.approvisionnements.length > 0) {
+            tableBody.innerHTML = data.approvisionnements.map(app => {
+                const date = new Date(app.date_approvisionnement);
+                const dateStr = date.toLocaleDateString('fr-FR');
+                const etatClass = app.etat === 'valide' ? 'bg-green-500' : (app.etat === 'annule' ? 'bg-red-500' : 'bg-gray-500');
+                const etatText = app.etat === 'valide' ? 'Validé' : (app.etat === 'annule' ? 'Annulé' : 'En cours');
+                
+                return `
+                    <tr class="hover:bg-gray-50 transition duration-200">
+                        <td class="px-6 py-2">
+                            #${app.id}<br>
+                            <span class="text-xs text-gray-400">${dateStr}</span>
+                        </td>
+                        <td class="px-6 py-2 font-medium text-gray-900">
+                            ${app.produits || 'Aucun'}
+                        </td>
+                        <td class="px-6 py-2">
+                            ${app.fournisseur_nom || '-'}
+                        </td>
+                        <td class="px-6 py-2">
+                            ${app.total_quantite || 0}
+                        </td>
+                        <td class="px-6 py-2">
+                            <button class="${etatClass} hover:opacity-80 text-white px-3 py-1 rounded-lg font-semibold transition text-xs">
+                                ${etatText}
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        } else {
+            tableBody.innerHTML = `
+                <tr>
+                    <td colspan="5" class="px-6 py-4 text-center text-gray-500">
+                        Aucun approvisionnement récent
+                    </td>
+                </tr>
+            `;
+        }
+    } catch (error) {
+        console.log("Erreur chargement approvisionnements:", error);
+    }
+}
+
+// Charger les approvisionnements au chargement de la page
+document.addEventListener("DOMContentLoaded", () => {
+    loadApprovisionnements();
+});
 

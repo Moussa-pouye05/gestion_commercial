@@ -6,8 +6,8 @@ spl_autoload_register(function($class){
 });
 
 $con = new ProduitManager($pdo);
-$nbr = $con->totalAmountProduct();
+$nbr = $con->pourcentageStock();
 
 echo json_encode([
-    "somme_produit" => number_format($nbr,2,"."," ")
+    "pourcentageStock" => $nbr
 ]);
