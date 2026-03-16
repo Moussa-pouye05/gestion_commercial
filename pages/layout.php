@@ -15,9 +15,11 @@ session_start();
 <body class="bg-gray-100">
   <?php include "../components/nav.php"; ?>
   <?php include "../components/header.php"; ?>
-  <main class="w-full md:w-[80%] ml-0 md:ml-[20%] lg:w-[82%] lg:ml-[18%] mt-12 py-[22px] px-2 h-screen bg-gray-100">
+
+  <main class="w-full md:w-[80%] ml-0 md:ml-[20%] lg:w-[82%] lg:ml-[18%] mt-12 py-[22px] px-2 min-h-screen bg-gray-100 relative">
       <?php include $content; ?>
   </main>
+
   <script src="../js/script.js"></script>
   <script src="../js/commande.js"></script>
   <script src="../js/vendeur.js"></script>

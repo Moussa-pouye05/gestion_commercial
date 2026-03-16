@@ -3,7 +3,7 @@
   <!-- sidebar -->
   <div
     class="sidebar fixed top-0  h-full w-0 sm:w-0 md:w-[20%] lg:w-[18%] overflow-hidden
-    bg-white z-10 shadow-[0_4px_8px_rgba(0,0,0,0.1),_0_6px_20px_rgba(0,0,0,0.19)]
+    bg-white z-50 shadow-[0_4px_8px_rgba(0,0,0,0.1),_0_6px_20px_rgba(0,0,0,0.19)]
       transition-all duration-300"
   >
     <div class="flex items-center justify-between pt-8 px-6">

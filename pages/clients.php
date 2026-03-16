@@ -10,13 +10,13 @@
   ?>
 <section class="mt-2">
         <div class="text-2xl font-bold text-slate-600 my-2">Clients/</div>
-        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8 ">
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-8 ">
              <div class="h-20 flex-1 rounded-md flex items-center justify-between px-4 
                          sm:px-6 md:px-8 lg:px-8 gap-4 bg-[#fff]">
                <i class="fa-solid fa-users text-blue-500 text-2xl"></i>
                <div>
                      <p class="text-sm text-gray-500">Total clients</p>
-                     <p class="text-xl font-bold">1,234</p>
+                     <p class="total-client text-xl font-bold">0</p>
                </div>
              </div>    
              <div class="h-20 flex-1 bg-[#fff] rounded-md flex items-center justify-between gap-4 px-4 
@@ -24,23 +24,16 @@
                 <i class="fa-solid fa-user-check text-green-500 text-2xl"></i>
                 <div>
                      <p class="text-sm text-gray-500">Clients actifs</p>
-                     <p class="text-xl font-bold">987</p>
+                     <p class="clients-actifs text-xl font-bold">0</p>
                 </div>
              </div>    
-             <div class="h-20 flex-1 bg-[#fff] rounded-md flex items-center justify-between gap-4 px-4 
-                         sm:px-6 md:px-8 lg:px-6">
-                    <i class="fa-solid fa-cart-shopping text-orange-500 text-2xl"></i>
-             <div>
-                 <p class="text-sm text-gray-500">Commandes</p>
-                 <p class="text-xl font-bold">456</p>
-             </div>
-             </div>    
+                 
              <div class="h-20 flex-1 bg-[#fff] rounded-md flex items-center justify-between gap-4 px-4 
                          sm:px-6 md:px-8 lg:px-6">
                     <i class="fa-solid fa-star text-yellow-400 text-2xl"></i>
              <div>
                  <p class="text-sm text-gray-500">Fidélité</p>
-                 <p class="text-xl font-bold">85%</p>
+                 <p class="fidelite text-xl font-bold">0%</p>
              </div>
              </div>    
         </div>

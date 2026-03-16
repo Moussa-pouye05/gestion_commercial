@@ -493,6 +493,19 @@ async function loadProduit(page = 1, search = currentProduitSearch, categorie = 
     try {
         const response = await fetch(`../php/post_read_produit.php?page=${page}&search=${encodeURIComponent(currentProduitSearch)}&categorie=${encodeURIComponent(currentProduitCategorie)}`);
         const datas = await response.json();
+        let actionHtml = "";
+        if (datas.role === "admin") {
+            actionHtml = `
+                <div class="produit-card-actions flex gap-2">
+                    <button type="button" class="btn-edit flex-1 px-3 py-2 text-xs font-semibold rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition">
+                        Modifier
+                    </button>
+                    <button type="button" class="btn-delete flex-1 px-3 py-2 text-xs font-semibold rounded-lg bg-red-600 text-white hover:bg-red-700 transition">
+                        Supprimer
+                    </button>
+                </div>
+            `;
+        }
         card.innerHTML = "";
 
         if (!Array.isArray(datas.produits) || datas.produits.length === 0) {
@@ -509,6 +522,7 @@ async function loadProduit(page = 1, search = currentProduitSearch, categorie = 
             let pourcentage = Math.min((item.quantite / item.stock_min) * 100, 100).toFixed(0);
             pourcentage = Math.round(pourcentage)
             if (pourcentage <= 15) {
+
                 color = "bg-red-500";
                 text = "text-red-500";
             } 
@@ -559,47 +573,49 @@ async function loadProduit(page = 1, search = currentProduitSearch, categorie = 
                     <span class="text-gray-500">
                         Stock: <span class="font-medium text-gray-700">${item.quantite} unités</span>
                     </span>
-                    <span class="msg-pct ${text} font-medium">
+                    <span class="msg-pct ${text} font-medium text">
                         ${pourcentage}%
                     </span>
                 </div>
     
                 <!-- Barre de progression -->
                 <div class="w-full bg-gray-500 h-4 rounded-full mt-2 mb-2 ">
-                    <div class="${color} h-4 rounded-full py-1" style="width:${pourcentage}%"></div>
+                    <div class="${color} h-4 rounded-full py-1 color" style="width:${pourcentage}%"></div>
                 </div>
 
                 <!-- Actions -->
-                <div class="produit-card-actions flex gap-2">
-                    <button type="button" class="btn-edit flex-1 px-3 py-2 text-xs font-semibold rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition">
-                        Modifier
-                    </button>
-                    <button type="button" class="btn-delete flex-1 px-3 py-2 text-xs font-semibold rounded-lg bg-red-600 text-white hover:bg-red-700 transition">
-                        Supprimer
-                    </button>
-                </div>
                 
+                ${actionHtml}
+        
             </div>
     `;
             card.appendChild(produitCard);
 
-            produitCard.querySelector(".btn-edit").addEventListener("click", () => {
-                modalEditProduit.classList.remove("hidden");
-                modalEditProduit.classList.add("flex");
-                getDataProduit(item);
-            })
-            
-            // Supprimer le produit
-            produitCard.querySelector(".btn-delete").addEventListener("click", () => {
-                if(confirm("Voulez-vous vraiment supprimer ce produit?")) {
-                    deleteProduit(item.id);
-                }
-            })
-            
-            cancelEditProduit.addEventListener("click", () => {
-                modalEditProduit.classList.add("hidden");
-                modalEditProduit.classList.remove("flex");
-            })
+            const btnEdit = produitCard.querySelector(".btn-edit");
+            const btnDelete = produitCard.querySelector(".btn-delete");
+
+            if (btnEdit) {
+                btnEdit.addEventListener("click", () => {
+                    modalEditProduit.classList.remove("hidden");
+                    modalEditProduit.classList.add("flex");
+                    getDataProduit(item);
+                });
+            }
+
+            if (btnDelete) {
+                btnDelete.addEventListener("click", () => {
+                    if(confirm("Voulez-vous vraiment supprimer ce produit?")) {
+                        deleteProduit(item.id);
+                    }
+                });
+            }
+
+            if (cancelEditProduit) {
+                cancelEditProduit.addEventListener("click", () => {
+                    modalEditProduit.classList.add("hidden");
+                    modalEditProduit.classList.remove("flex");
+                });
+            }
         }
 
         renderProduitPagination(datas.totalPages, datas.currentPage);
@@ -718,53 +734,59 @@ document.addEventListener("DOMContentLoaded", () => {
     stockFaible()
     totalCategorie()
     sommeProduit();
-    pourcentageStock()
     
 })
-async function pourcentageStock(){
-    try {
-        const response = await fetch("../php/post_pourcentage_stock.php");
-        const pourcentage = await response.json();
-        return pourcentage.pourcentageStock;
-    } catch (error) {
-        console.log("Erreur:" + error)
-    }
-}
+const total_produit = document.querySelector(".total-produit")
 async function getTotalProduit(){
     try{
         const response = await fetch("../php/post_getTotal_produit.php");
         const total = await response.json();
-        document.querySelector(".total-produit").textContent = total.totalProduit;
+        if(total_produit){
+            total_produit.textContent = total.totalProduit;
+        }
+        
     }catch(error){
         console.log("Erreur:" + error)
     }
     
 }
+const stock_faible = document.querySelector(".stock-faible")
 async function stockFaible(){
     try{
         const response = await fetch("../php/post_stockFail.php");
         const total = await response.json();
-        document.querySelector(".stock-faible").textContent = total.stockFaible;
+        if(stock_faible){
+            stock_faible.textContent = total.stockFaible;
+        }
+        
     }catch(error){
         console.log("Erreur:" + error)
     }
     
 }
+let total_cat = document.querySelector(".categorie")
 async function totalCategorie(){
     try{
         const response = await fetch("../php/post_total_cat.php");
         const total = await response.json();
-        document.querySelector(".categorie").textContent = total.totalCategorie;
+        if(total_cat){
+            total_cat.textContent = total.totalCategorie;
+        }
+        
     }catch(error){
         console.log("Erreur:" + error);
     }
     
 }
+const somme_po = document.querySelector(".somme-produit")
 async function sommeProduit(){
     try{
         const response = await fetch("../php/post_somme_produit.php");
         const total = await response.json();
-        document.querySelector(".somme-produit").textContent = total.somme_produit + " F CFA";
+        if(somme_po){
+            somme_po.textContent = total.somme_produit + " F CFA";
+        }
+        
     }catch(error){
         console.log("Erreur:" + error);
     }

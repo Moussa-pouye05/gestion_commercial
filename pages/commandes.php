@@ -23,7 +23,7 @@
 
             <input 
                 type="text" 
-                id="search" 
+                id="searchCommande" 
                 placeholder="Rechercher une commande..."
                 class="bg-transparent w-full text-sm focus:outline-none"
             >
@@ -41,9 +41,9 @@
     </div>
 
 </div>
-<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
 
-    <!-- 🟡 En cours -->
+    <!-- En cours -->
     <div class="bg-white rounded-xl shadow-sm hover:shadow-md transition px-4 py-2 border border-gray-100">
 
         <div class="flex items-center justify-between">
@@ -58,13 +58,14 @@
 
         <div class="mt-3">
             <p class="text-xs text-gray-500">Commandes</p>
-            <h3 class="text-xl font-semibold text-gray-800">24</h3>
+            <!-- <div>count-xl font-semiboldEnCours</div>  -->
+            <h3 class="text text-gray-800" id="countEnCours">0</h3>
         </div>
 
     </div>
 
 
-    <!-- 🟢 Clôturées -->
+    <!-- Clôturées -->
     <div class="bg-white rounded-xl shadow-sm hover:shadow-md transition px-4 py-2 border border-gray-100">
 
         <div class="flex items-center justify-between">
@@ -79,13 +80,14 @@
 
         <div class="mt-3">
             <p class="text-xs text-gray-500">Commandes</p>
-            <h3 class="text-xl font-semibold text-gray-800">130</h3>
+            <h3 class="text-xl font-semibold text-gray-800" id="countCloturee">0</h3>
         </div>
+        
 
     </div>
 
 
-    <!-- 🔴 Annulées -->
+    <!-- Annulées -->
     <div class="bg-white rounded-xl shadow-sm hover:shadow-md transition px-4 py-2 border border-gray-100">
 
         <div class="flex items-center justify-between">
@@ -100,32 +102,111 @@
 
         <div class="mt-3">
             <p class="text-xs text-gray-500">Commandes</p>
-            <h3 class="text-xl font-semibold text-gray-800">6</h3>
+            <h3 class="text-xl font-semibold text-gray-800" id="countAnnulee">0</h3>
         </div>
 
     </div>
-
+    <div class=" flex-1 bg-[#fff] rounded-md flex items-center justify-between gap-4 px-4 
+                         sm:px-6 md:px-8 lg:px-6">
+                    <i class="fa-solid fa-cart-shopping text-orange-500 text-2xl"></i>
+             <div>
+                 <p class="text-sm text-gray-500">Commandes du jours</p>
+                 <p class="total-commande text-xl font-bold">456</p>
+             </div>
+    </div>
 </div>
-<div class="absolute top-0 left-0 w-full h-full flex items-center justify-center hide bg-[rgba(0,0,0,0.19)]" id="modalAddCommande">
-            <form action="">
-                <div class="bg-white p-6 rounded-md shadow-lg w-[400px]">
-                    <h2 class="text-xl font-semibold mb-4">Ajouter un commande</h2>
-                            
-                            <select name="" id="" class="w-full mb-4 rounded-md border border-slate-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-slate-400">
-                                <option value="">Client</option>
-                            </select>
-                            <input type="number" placeholder="Quantité..." class="w-full px-4 py-2 mb-4 rounded-md border border-slate-300 focus:outline-none focus:ring-2 focus:ring-slate-400">
+<div class="absolute top-0 left-0 w-full h-full hidden items-center justify-center bg-black/50 z-50"  id="modalAddCommande">
+            <form class="bg-white p-6 rounded-xl shadow-md max-w-5xl mx-auto" id="saveCommande">
 
-                            <select name="" id="" class="w-full mb-4 rounded-md border border-slate-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-slate-400">
-                                <option value="">Produit</option>
-                            </select>
-                         
-                    <div class="flex justify-end gap-2">
-                        <button type="button" id="cancelAddCommande" class="px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-md transition">Annuler</button>
-                        <button type="submit" class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-md transition">Ajouter</button>
-                    </div>
-                </div>
-            </form>
+    <h2 class="text-xl font-semibold mb-6" id="formTitle">Nouvelle commande</h2>
+
+    <!-- Client -->
+    <div class="grid md:grid-cols-1 gap-4 mb-6">
+        <div>
+            <label class="text-sm text-gray-600">Client</label>
+            <select class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 client-select" id="clientSelect" required>
+                <option value="">Choisir un client</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- Produits -->
+    <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+
+            <thead class="bg-gray-100">
+                <tr>
+                    <th class="p-2 text-left">Produit</th>
+                    <th class="p-2">Prix</th>
+                    <th class="p-2">Quantité</th>
+                    <th class="p-2">Sous-total</th>
+                    <th class="p-2"></th>
+                </tr>
+            </thead>
+
+            <tbody id="commandeBody">
+
+                <tr>
+                    <td class="p-2">
+                        <select class="w-full border rounded-md px-2 py-1 produit-select">
+                            <option value="">Produit</option>
+                        </select>
+                    </td>
+
+                    <td class="p-2">
+                        <input type="number" class="w-full border rounded-md px-2 py-1 prix-input" value="0" min="0">
+                    </td>
+
+                    <td class="p-2">
+                        <input type="number" class="w-full border rounded-md px-2 py-1 quantite-input" value="1" min="1">
+                    </td>
+
+                    <td class="p-2 text-center font-medium sous-total">
+                        0 FCFA
+                    </td>
+
+                    <td class="p-2 text-center">
+                        <button type="button" class="text-red-500" onclick="removeRow(this)">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+
+            </tbody>
+
+        </table>
+    </div>
+
+    <!-- Ajouter produit -->
+    <div class="mt-4">
+        <button type="button" id="addProduit"
+            class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700">
+            + Ajouter produit
+        </button>
+    </div>
+
+    <!-- Total -->
+    <div class="flex justify-end mt-6">
+        <div class="bg-gray-100 p-4 rounded-lg w-60">
+            <p class="flex justify-between text-sm">
+                <span>Total</span>
+                <span class="font-semibold total-display">0 FCFA</span>
+            </p>
+        </div>
+    </div>
+
+    <!-- Boutons -->
+    <div class="flex justify-end gap-3 mt-6">
+        <button type="button" class="bg-gray-500 text-white px-4 py-2 rounded-lg" id="cancelAddCommande">
+            Annuler
+        </button>
+
+        <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700">
+            Enregistrer la commande
+        </button>
+    </div>
+
+</form>
         </div>
 <div class="bg-white shadow-lg rounded-2xl p-4 mt-4 mb-4">
     
@@ -133,13 +214,13 @@
     <div class="flex justify-between items-center mb-4">
             <h2 class="text-xl font-semibold text-gray-700">10 derniers commandes</h2>
             <select 
-                name="commande" 
-                id="commande"
+                name="etat" 
+                id="etatFilter"
                 class="bg-gray-50 border border-gray-200 
                        text-sm px-4 py-2 rounded-xl 
                        focus:outline-none focus:ring-2 focus:ring-blue-400 transition">
                 <option value="">Toutes Commandes</option>
-                <option value="">Test</option>
+                <option value="en_cours">En cours</option>
             </select>
             <select 
                 name="days" 
@@ -154,136 +235,59 @@
 
     <!-- Responsive wrapper -->
     <div class="overflow-x-auto">
-        <table class="min-w-full text-sm text-left text-gray-600">
-            
-            <thead class="bg-gray-100 text-gray-700 uppercase text-xs tracking-wider">
+        <table class="w-full text-sm">
+
+            <thead class="bg-gray-100">
                 <tr>
-                    <th class="px-6 py-3">Date</th>
-                    <th class="px-6 py-3">Produis</th>
-                    <th class="px-6 py-3">Totals</th>
-                    <th class="px-6 py-3">Etat</th>
-                    <th class="px-6 py-3">Action</th>
+                    <th class="p-3 text-left">N°</th>
+                    <th class="p-3 text-left">Client</th>
+                    <th class="p-3 text-left">Date</th>
+                    <th class="p-3 text-left">Total</th>
+                    <th class="p-3 text-left">Statut</th>
+                    <th class="p-3 text-center">Actions</th>
                 </tr>
             </thead>
 
-            <tbody class="divide-y divide-gray-200">
-                <tr class="hover:bg-gray-50 transition duration-200">
-                    <td>
-                        
-                        02/12/25
+            <tbody id="commandesTable">
+
+                <!-- <tr class="border-b hover:bg-gray-50">
+                    <td class="p-3 font-medium">CMD-001</td>
+
+                    <td class="p-3">Moussa Diop</td>
+
+                    <td class="p-3">18/03/2026</td>
+
+                    <td class="p-3 font-semibold text-blue-600">
+                        25 000 FCFA
                     </td>
-                    <td class="px-6 py-2 font-medium text-gray-900">
-                        Getzner
-                    </td>
-                    <td class="px-6 py-2">
-                        1128 F CFA
-                    </td>
-                    <td class="px-6 py-2">
-                        <span class="text-[10px] px-2 py-0.5 rounded-full bg-gray-50 text-gray-600 font-medium">
-                           en cour
+
+                    <td class="p-3">
+                        <span class="bg-green-100 text-green-600 text-xs px-2 py-1 rounded">
+                            Payée
                         </span>
                     </td>
-                    <td class="px-6 py-2">
-                      <div class="flex items-center gap-2">
-                  
-                          <!-- Détail -->
-                          <button class="w-8 h-8 flex items-center justify-center rounded-md bg-blue-50 text-blue-600  hover:bg-blue-100 transition">
-                              <i class="fa-solid fa-eye text-sm"></i>
-                          </button>
-                  
-                          <!-- Modifier -->
-                          <button class="w-8 h-8 flex items-center justify-center rounded-md bg-yellow-50 text-yellow-600 hover:bg-yellow-100 transition">
-                              <i class="fa-solid fa-pen text-sm"></i>
-                          </button>
-                  
-                          <!-- Supprimer -->
-                          <button class="w-8 h-8 flex items-center justify-center rounded-md bg-red-50 text-red-600 hover:bg-red-100 transition">
-                              <i class="fa-solid fa-trash text-sm"></i>
-                          </button>
-                  
-                      </div>
-                     </td>
-                </tr>
+
+                    <td class="p-3 flex justify-center gap-2">
+
+                        <button class="bg-blue-50 text-blue-600 p-2 rounded hover:bg-blue-100">
+                            <i class="fa-solid fa-eye"></i>
+                        </button>
+
+                        <button class="bg-yellow-50 text-yellow-600 p-2 rounded hover:bg-yellow-100">
+                            <i class="fa-solid fa-pen"></i>
+                        </button>
+
+                        <button class="bg-red-50 text-red-600 p-2 rounded hover:bg-red-100">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+
+                    </td>
+                </tr> -->
+
             </tbody>
 
         </table>
     </div>
 </div>
-    <h2 class="text-xl font-semibold text-gray-700">Factures clients</h2>
-    <div class="text-[10px] text-slate-500">Gerez les factures de vos clients</div>
-    <div class="bg-white shadow-lg rounded-2xl p-4 mt-4 mb-4">
-    
-    <!-- Titre -->
-    <div class="flex justify-between items-center mb-4">
-            <h2 class="text-xl font-semibold text-gray-700">10 derniers Facture</h2>
-            <select 
-                name="commande" 
-                id="commande"
-                class="bg-gray-50 border border-gray-200 
-                       text-sm px-4 py-2 rounded-xl 
-                       focus:outline-none focus:ring-2 focus:ring-blue-400 transition">
-                <option value="">Toutes Factures</option>
-                <option value="">Test</option>
-            </select>
-    </div>
-
-    <!-- Responsive wrapper -->
-    <div class="overflow-x-auto">
-        <table class="min-w-full text-sm text-left text-gray-600">
-            
-            <thead class="bg-gray-100 text-gray-700 uppercase text-xs tracking-wider">
-                <tr>
-                    <th class="px-6 py-3">N Facture</th>
-                    <th class="px-6 py-3">Date</th>
-                    <th class="px-6 py-3">clients</th>
-                    <th class="px-6 py-3">Produits</th>
-                    <th class="px-6 py-3">Montants</th>
-                    <th class="px-6 py-3">Action</th>
-                </tr>
-            </thead>
-
-            <tbody class="divide-y divide-gray-200">
-                <tr class="hover:bg-gray-50 transition duration-200">
-                    <td>
-                        
-                       1222
-                    </td>
-                    <td class="px-6 py-2 font-medium text-gray-900">
-                         02/12/25
-                    </td>
-                    <td class="px-6 py-2">
-                        Modou
-                    </td>
-                    <td class="px-6 py-2">
-                        Getzner
-                    </td>
-                    <td class="px-6 py-2">
-                        22 000 F CFA
-                    </td>
-                    <td class="px-6 py-2">
-                      <div class="flex items-center gap-2">
-                  
-                          <!-- Détail -->
-                          <button class="w-8 h-8 flex items-center justify-center rounded-md bg-blue-50 text-blue-600  hover:bg-blue-100 transition">
-                              <i class="fa-solid fa-download"></i>
-                          </button>
-                  
-                          <!-- Modifier -->
-                          <button class="w-8 h-8 flex items-center justify-center rounded-md bg-yellow-50 text-yellow-600 hover:bg-yellow-100 transition">
-                              <i class="fa-solid fa-pen text-sm"></i>
-                          </button>
-                  
-                          <!-- Supprimer -->
-                          <button class="w-8 h-8 flex items-center justify-center rounded-md bg-red-50 text-red-600 hover:bg-red-100 transition">
-                              <i class="fa-solid fa-trash text-sm"></i>
-                          </button>
-                  
-                      </div>
-                     </td>
-                </tr>
-            </tbody>
-
-        </table>
-    </div>
-</div>
+    <!--  -->
 </section>

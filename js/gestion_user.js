@@ -4,7 +4,7 @@ const formVendeurEdit = document.getElementById("form_vendeur");
 const modalEditVendeur = document.getElementById("modalEditVendeur");
 const cancelEditVendeur = document.getElementById("cancelEditVendeur");
 const pagination = document.getElementById("pagination");
-const searchInput = document.getElementById("search");
+const searchInputUser = document.getElementById("search");
 const modale = document.getElementById("deleteModal");
 const cancelBtn = document.getElementById("cancelDelete");
 const confirmBtn = document.getElementById("confirmDelete");
@@ -67,8 +67,8 @@ document.addEventListener("DOMContentLoaded", () => {
         loadVendeur(currentPage);
     }
 
-    if (isVendeurPage && searchInput) {
-        searchInput.addEventListener("input", (e) => {
+    if (isVendeurPage && searchInputUser) {
+        searchInputUser.addEventListener("input", (e) => {
             const value = e.target.value || "";
             clearTimeout(searchDebounceTimer);
             searchDebounceTimer = setTimeout(() => {
@@ -107,9 +107,9 @@ async function loadVendeur(page = 1, search = currentSearch) {
                 <td class="px-6 py-2 font-medium text-gray-900">${item.email}</td>
                 <td class="px-6 py-2">${item.telephone}</td>
                 <td class="px-6 py-2">
-                    <div class="niveau text-green-500 float-right text-sm">50%</div>
-                    <div class="w-full bg-gray-100 h-2 rounded-full mt-6">
-                        <div class="bg-green-500 h-2 rounded-full" style="width:50%"></div>
+                    <div class=" text-green-500 float-right text-sm">50%</div>
+                    <div class="w-full bg-gray-100 h-4 rounded-full mt-6">
+                        <div class="bg-green-500 h-4 rounded-full" py-1 style="width:50%"></div>
                     </div>
                 </td>
                 <td class="px-6 py-2 flex gap-2">

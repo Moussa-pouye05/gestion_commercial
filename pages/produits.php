@@ -107,12 +107,14 @@
             </select>
 
             <!-- Ajouter Catégorie -->
+             <?php if($_SESSION['user']['role'] === "admin"):?>
             <button 
                 id="addCategorie"
                 class="flex items-center gap-2 bg-white border border-gray-200 px-4 py-2 rounded-xl text-sm font-medium hover:bg-gray-100 transition shadow-sm">
                 <i class="fa-solid fa-layer-group text-gray-500"></i>
                 Catégorie
             </button>
+            
             <button 
                 id="btnAddProduit"
                 class="flex items-center gap-2  bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl text-sm font-medium shadow-md transition">
@@ -125,7 +127,7 @@
                 <i class="fa-solid fa-archive"></i>
                 Stocker
             </button>
-
+            <?php endif?>
         </div>
 
     </div>

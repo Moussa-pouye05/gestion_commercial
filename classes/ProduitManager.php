@@ -64,7 +64,34 @@ class ProduitManager
             ];
         }
     }
-
+    public function getProduit(): array{
+        try {
+            $req = $this->pdo->query("SELECT * FROM poduits");
+            $result = [];
+            while($datas = $req->fetch(PDO::FETCH_ASSOC)){
+                $produits = new Produit(
+                    (int) $datas['id'],
+                    $datas['image'],
+                    $datas['nom'],
+                    (float) $datas['prix_vente'],
+                    (float) $datas['prix_achat'],
+                    (int) $datas['quantite'],
+                    (int) $datas['id_categorie'],
+                    $datas['code_barre']
+                );
+                $result[] = $produits;
+            }
+            return [
+                "success" => true,
+                "produits" => $result
+            ];
+        } catch (PDOException $e) {
+            return [
+                "success" => false,
+                "message" => "Erreur"
+            ];
+        }
+    }
     public function genererCodeProduit(): string
     {
         $req = $this->pdo->query("SELECT MAX(id) as max_id FROM poduits");

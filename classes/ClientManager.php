@@ -76,6 +76,27 @@ class ClientManager{
             ];
     }
 }
+
+public function getClient(): array{
+    try {
+        $req = $this->pdo->query("SELECT * FROM clients");
+        $result = [];
+        while($datas = $req->fetch(PDO::FETCH_ASSOC)){
+            $clients = new Client((int)$datas['id'],$datas['nom'],$datas['telephone'],$datas['adresse']);
+            $result[] = $clients;
+        }
+        return [
+                "success" => true,
+                "clients" => $result
+            ];
+
+    } catch (PDOException $e) {
+        return [
+            "success" => false,
+            "message" => "Erreur" . $e->getMessage()
+        ];
+    }
+}
 //Compter le nombre utilisateur
 public function countClients(string $search = ""){
     if ($search === "") {
@@ -114,6 +135,71 @@ public function deleteClient($id): bool{
         return true;
     }catch(PDOException $e){
         return false;
+    }
+}
+
+public function getTotalClient(): int{
+    try {
+        $req = $this->pdo->prepare("SELECT COUNT(*) as totalClient FROM clients ");
+        $req->execute();
+        $nb_cl = $req->fetch(PDO::FETCH_ASSOC)['totalClient'] ?? 0;
+        return $nb_cl;
+    } catch (PDOException $e) {
+        return 0;
+    }
+}
+public function getTotalClientActif(): int{
+    try {
+        $req = $this->pdo->prepare("SELECT COUNT(*) as clients_actifs
+            FROM clients c
+            WHERE EXISTS(
+            SELECT 1 
+            FROM commandes cmd
+            WHERE cmd.id_client = c.id )
+            ");
+        $req->execute();
+        $nb_actif = $req->fetch(PDO::FETCH_ASSOC)['clients_actifs'] ?? 0;
+        return $nb_actif;    
+    } catch (PDOException $e) {
+        return 0;
+    }
+}
+
+public function getTotalCommande(): int{
+    try {
+        $req = $this->pdo->prepare("SELECT COUNT(*) AS total_commandes FROM commandes WHERE date_commande >= CURDATE() AND date_commande < CURDATE() + INTERVAL 1 DAY");
+        $req->execute();
+        $nb_cmd = $req->fetch(PDO::FETCH_ASSOC)['total_commandes'] ?? 0;
+        return $nb_cmd;
+    } catch (PDOException $e) {
+        return 0;
+    }
+}
+
+public function fidelite(){
+    try {
+        $req = $this->pdo->prepare("SELECT ROUND(
+(
+    SELECT COUNT(*) 
+    FROM (
+        SELECT id_client
+        FROM commandes
+        GROUP BY id_client
+        HAVING COUNT(id) > 1
+    ) t
+)
+/
+(
+    SELECT COUNT(DISTINCT id_client)
+    FROM commandes
+)
+* 100
+, 0) AS taux_fidelite;");
+$req->execute();
+$taux = $req->fetch(PDO::FETCH_ASSOC)['taux_fidelite'] ?? 0;
+return $taux;
+    } catch (PDOException $e) {
+        return 0;
     }
 }
 }

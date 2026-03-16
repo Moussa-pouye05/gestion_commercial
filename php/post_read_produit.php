@@ -39,5 +39,6 @@ echo json_encode([
     "produits" => $result,
     "totalPages" => $totalPages,
     "currentPage" => $page,
-    "totalProduits" => $totalProduits
+    "totalProduits" => $totalProduits,
+    "role" => $_SESSION['user']['role']
 ]);

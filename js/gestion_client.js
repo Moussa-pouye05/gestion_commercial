@@ -37,6 +37,7 @@ async function createClient() {
         const datas = await response.json();
 
         if (datas.success) {
+            await totalClient();
             if (succes_connect) succes_connect.textContent = datas.message;
             if (isClientPage) {
                 await loadClient(currentPageClient);
@@ -68,6 +69,10 @@ document.addEventListener("DOMContentLoaded", () => {
             }, 300);
         }); 
     }
+    totalClient()
+    clientActif()
+    totalCommande()
+    fidelite()
 });
 async function loadClient(page = 1, search = currentSearchClient) {
     currentPageClient = page;
@@ -224,6 +229,7 @@ async function deleteClient(id){
             const msgDeleteClient = document.querySelector(".delete-client")
             if(data.success){
                 await loadClient(currentPageClient,currentSearchClient)
+                await totalClient();
                 if(msgDeleteClient) msgDeleteClient.classList.remove("hidden")
             }
         setTimeout(() =>{
@@ -237,4 +243,57 @@ async function deleteClient(id){
         deleteModalClient.classList.remove("flex")
         clientToDelete = null
     })
+}
+let total_client = document.querySelector(".total-client")
+async function totalClient(){
+    try {
+        const response = await fetch("../php/post_total_client.php");
+        const data = await response.json();
+        if(total_client){
+            total_client.textContent = data.total_cl
+        }
+        
+    } catch (error) {
+        console.log("Erreur:" + error)
+    }
+}
+let clientsActif = document.querySelector(".clients-actifs");
+async function clientActif(){
+    try {
+        const response = await fetch("../php/post_client_actif.php");
+        const data = await response.json();
+        if(clientsActif){
+            clientsActif.textContent = data.clients_actifs
+        }
+        
+    } catch (error) {
+        console.log("Erreur:" + error)
+    }
+}
+let total_cmd = document.querySelector(".total-commande")
+async function totalCommande(){
+    try {
+        const response = await fetch("../php/post_total_commande.php");
+        const data = await response.json();
+        if(total_cmd){
+            total_cmd.textContent = data.total_commandes
+        }
+        
+    } catch (error) {
+        console.log("Erreur:" +error)
+    }
+}
+const taux_fidelite = document.querySelector(".fidelite");
+
+async function fidelite(){
+    try {
+        const response = await fetch("../php/post_taux_fidel.php");
+        const data = await response.json();
+        
+        if(taux_fidelite){
+            taux_fidelite.textContent = data.taux_fidelite + "%"
+        }
+    } catch (error) {
+        console.log("Erreur:" + error);
+    }
 }

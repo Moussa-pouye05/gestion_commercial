@@ -16,14 +16,19 @@ let currentPageFourn = 1;
 let currentSearchFourn = "";
 let searchDebounceTimerFourn = null;
 
+if(addFourn){
 addFourn.addEventListener("click", () => {
     modalFourn.classList.add("flex");
     modalFourn.classList.remove("hidden");
 })
+}
+if(closeModalFour){
 closeModalFour.addEventListener("click", () => {
     modalFourn.classList.remove("flex");
     modalFourn.classList.add("hidden");
 })
+}
+
 
 if (formFournisseur) {
     formFournisseur.addEventListener("submit", (e) => {
