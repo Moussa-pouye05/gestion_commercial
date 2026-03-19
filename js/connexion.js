@@ -3,7 +3,7 @@ const form_connect = document.getElementById("form_connexion")
 if(form_connect){
 form_connect.addEventListener("submit", (e) =>{
     e.preventDefault()
-    connexion()
+    connexion();
 })
 }
 
@@ -12,6 +12,7 @@ async function connexion(){
         const email = document.getElementById("email").value;
         const password = document.getElementById("password").value;
         const btn = document.querySelector(".btn")
+        const error_connect = document.querySelector(".error_connect")
         
         let formData = new FormData();
         formData.append("email", email);
@@ -19,24 +20,47 @@ async function connexion(){
 
         btn.disabled = true;
         btn.innerHTML = "Connexion...";
-        const error_connect = document.querySelector(".error_connect")
+        error_connect.textContent = "";
+
         const response = await fetch("../php/post_connexion.php",{
             method: 'POST',
             body: formData
         });
-        let data = await response.json();
-        
-        error_connect.textContent = data.message
-        
-        if(data.success){
-            setTimeout(() =>{
-                window.location.href = "../view/accueil_view.php"
-            },1000)
+        const data = await response.json();
+
+        if (!data.success) {
+            error_connect.textContent = data.message || "Email ou mot de passe incorrect";
+            return;
         }
+
+        if (data.role === "admin") {
+            setTimeout(() => {
+                window.location.href = "../view/accueil_view.php";
+            }, 500);
+            return;
+        }
+
+        if (data.role === "vendeur") {
+            setTimeout(() => {
+                window.location.href = "../view/accueil_vendeur_view.php";
+            }, 500);
+            return;
+        }
+
+        error_connect.textContent = "Role utilisateur invalide";
         btn.disabled = false;
         btn.innerHTML = "Connexion"
     } catch (error) {
-        
+        const error_connect = document.querySelector(".error_connect")
+        if (error_connect) {
+            error_connect.textContent = "Erreur lors de la connexion";
+        }
+    } finally {
+        const btn = document.querySelector(".btn");
+        if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = "Connexion";
+        }
     }
     
 }

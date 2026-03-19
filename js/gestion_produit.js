@@ -148,6 +148,7 @@ if (modalAddStock && addStock && cancelAddStock) {
         modalAddStock.classList.remove("hidden");
     });
     cancelAddStock.addEventListener("click", () => {
+        resetApprovisionnementForm();
         modalAddStock.classList.add("hidden");
         modalAddStock.classList.remove("flex");
     });
@@ -177,7 +178,7 @@ async function loadFournisseursForApprovisionnement() {
 let approvisionnementProducts = [];
 async function loadProductsForApprovisionnement() {
     try {
-        const response = await fetch("../php/post_read_produit.php?page=1&search=&categorie=");
+        const response = await fetch("../php/post_read_produit.php?page=1&search=&categorie=&limit=0");
         const data = await response.json();
         if (data.produits) {
             approvisionnementProducts = data.produits;
@@ -191,89 +192,85 @@ async function loadProductsForApprovisionnement() {
 function renderApprovisionnementProducts() {
     const tbody = document.getElementById("produitBody");
     if (!tbody) return;
-    
-    tbody.innerHTML = approvisionnementProducts.map((p, index) => `
-        <tr>
-            <td class="p-2">
-                <select class="produit-select w-full border rounded px-2 py-1 text-sm" data-index="${index}">
-                    <option value="">Choisir</option>
-                    ${approvisionnementProducts.map(prod => `
-                        <option value="${prod.id}" data-prix="${prod.prix_achat}">${prod.nom}</option>
-                    `).join('')}
-                </select>
-            </td>
-            <td class="p-2">
-                <input type="number" min="1" value="1" class="quantite-input w-20 border rounded px-2 py-1 text-sm" data-index="${index}">
-            </td>
-            <td class="p-2">
-                <input type="number" min="0" value="0" class="prix-input w-24 border rounded px-2 py-1 text-sm" data-index="${index}">
-            </td>
-            <td class="p-2">
-                <button type="button" class="text-red-500 hover:text-red-700 remove-row" data-index="${index}">
-                    <i class="fa-solid fa-trash"></i>
-                </button>
-            </td>
-        </tr>
+
+    tbody.innerHTML = "";
+    addApprovisionnementRow();
+}
+
+function buildApprovisionnementProductOptions() {
+    return approvisionnementProducts.map(prod => `
+        <option value="${prod.id}" data-prix="${prod.prix_achat}">${prod.nom}</option>
     `).join('');
+}
 
-    // Add event listeners for remove buttons
-    tbody.querySelectorAll('.remove-row').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            const row = e.target.closest('tr');
-            row.remove();
-        });
+function handleApprovisionnementProductChange(select, row) {
+    const selectedOption = select.options[select.selectedIndex];
+    const prixInput = row.querySelector('.prix-input');
+
+    if (selectedOption?.dataset.prix) {
+        prixInput.value = selectedOption.dataset.prix;
+        return;
+    }
+
+    prixInput.value = 0;
+}
+
+function addApprovisionnementRow() {
+    const tbody = document.getElementById("produitBody");
+    if (!tbody) return;
+
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+        <td class="p-2">
+            <select class="produit-select w-full border rounded px-2 py-1 text-sm" name="produit[]">
+                <option value="">Choisir</option>
+                ${buildApprovisionnementProductOptions()}
+            </select>
+        </td>
+        <td class="p-2">
+            <input type="number" min="1" value="1" name="quantite[]" class="quantite-input w-20 border rounded px-2 py-1 text-sm">
+        </td>
+        <td class="p-2">
+            <input type="number" min="0" value="0" name="prix_achat[]" class="prix-input w-20 border rounded px-2 py-1 text-sm">
+        </td>
+        <td class="p-2">
+            <button type="button" class="text-red-500 hover:text-red-700 remove-row">
+                <i class="fa-solid fa-trash"></i>
+            </button>
+        </td>
+    `;
+    tbody.appendChild(tr);
+
+    tr.querySelector('.remove-row').addEventListener('click', () => {
+        const rows = tbody.querySelectorAll('tr');
+        if (rows.length === 1) {
+            tr.querySelector('.produit-select').value = "";
+            tr.querySelector('.quantite-input').value = 1;
+            tr.querySelector('.prix-input').value = 0;
+            return;
+        }
+
+        tr.remove();
     });
 
-    // Add event listeners for product selection to auto-fill prix
-    tbody.querySelectorAll('.produit-select').forEach(select => {
-        select.addEventListener('change', (e) => {
-            const selectedOption = e.target.options[e.target.selectedIndex];
-            const prixInput = e.target.closest('tr').querySelector('.prix-input');
-            if (selectedOption.dataset.prix) {
-                prixInput.value = selectedOption.dataset.prix;
-            }
-        });
+    tr.querySelector('.produit-select').addEventListener('change', (e) => {
+        handleApprovisionnementProductChange(e.target, tr);
     });
+}
+
+function resetApprovisionnementForm() {
+    if (formAppro) {
+        formAppro.reset();
+    }
+
+    renderApprovisionnementProducts();
 }
 
 // Add new product row to approvisionnement
 const btnAddRow = document.getElementById('btnAddRow');
 if (btnAddRow) {
     btnAddRow.addEventListener('click', () => {
-        const tbody = document.getElementById("produitBody");
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-            <td class="p-2">
-                <select class="produit-select w-full border rounded px-2 py-1 text-sm" name="produit[]">
-                    <option value="">Choisir</option>
-                    ${approvisionnementProducts.map(prod => `
-                        <option value="${prod.id}" data-prix="${prod.prix_achat}">${prod.nom}</option>
-                    `).join('')}
-                </select>
-            </td>
-            <td class="p-2">
-                <input type="number" min="1" value="1" name="quantite[]" class="quantite-input w-20 border rounded px-2 py-1 text-sm">
-            </td>
-            <td class="p-2">
-                <input type="number" min="0" value="0" name="prix_achat[]" class="prix-input w-20 border rounded px-2 py-1 text-sm">
-            </td>
-            <td class="p-2">
-                <button type="button" class="text-red-500 hover:text-red-700 remove-row">
-                    <i class="fa-solid fa-trash"></i>
-                </button>
-            </td>
-        `;
-        tbody.appendChild(tr);
-        
-        // Add event listeners
-        tr.querySelector('.remove-row').addEventListener('click', () => tr.remove());
-        tr.querySelector('.produit-select').addEventListener('change', (e) => {
-            const selectedOption = e.target.options[e.target.selectedIndex];
-            const prixInput = tr.querySelector('.prix-input');
-            if (selectedOption.dataset.prix) {
-                prixInput.value = selectedOption.dataset.prix;
-            }
-        });
+        addApprovisionnementRow();
     });
 }
 
@@ -331,7 +328,7 @@ if (formAppro) {
             
             if (data.success) {
                 alert("Approvisionnement ajouté avec succès!");
-                formAppro.reset();
+                resetApprovisionnementForm();
                 modalAddStock.classList.add("hidden");
                 modalAddStock.classList.remove("flex");
                 // Reload products and stats
@@ -523,7 +520,7 @@ async function loadProduit(page = 1, search = currentProduitSearch, categorie = 
             pourcentage = Math.round(pourcentage)
             if (pourcentage <= 15) {
 
-                color = "bg-red-500";
+                color = "bg-red-600";
                 text = "text-red-500";
             } 
             else if (pourcentage <= 30) {
@@ -926,4 +923,3 @@ async function loadApprovisionnements() {
 document.addEventListener("DOMContentLoaded", () => {
     loadApprovisionnements();
 });
-

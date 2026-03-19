@@ -444,14 +444,23 @@ class CommandeManager
             ];
         }
     }
-    public function getCommandeVendeur(): int{
+    public function getCommandeVendeur(int $vendeurId = null): int {
         try {
+            if (!$vendeurId) {
+                if (session_status() === PHP_SESSION_NONE) {
+                    session_start();
+                }
+                $vendeurId = $_SESSION['user']['id'] ?? null;
+            }
+            if (!$vendeurId) {
+                return 0;
+            }
             $req = $this->pdo->prepare("SELECT COUNT(*) AS commande_vendeur FROM commandes WHERE id_user = :id");
             $req->execute([
-                ":id" => $_SESSION['user']['id']
+                ":id" => $vendeurId
             ]);
             $nb = $req->fetch(PDO::FETCH_ASSOC)['commande_vendeur'] ?? 0;
-            return $nb;
+            return (int) $nb;
         } catch (PDOException $e) {
             return 0;
         }

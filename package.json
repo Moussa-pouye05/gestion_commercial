@@ -10,6 +10,7 @@
   "version": "3.4.19",
   "description": "Projet de gestion commerciale",
   "dependencies": {
-    "@fortawesome/fontawesome-free": "^7.2.0"
+    "@fortawesome/fontawesome-free": "^7.2.0",
+    "chart.js": "^4.5.1"
   }
 }

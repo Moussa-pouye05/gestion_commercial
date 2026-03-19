@@ -21,11 +21,20 @@
     </div>
 
     <ul class="mt-10">
+      <?php if(!isset($_SESSION['user']) || $_SESSION['user']['role'] === 'admin'):?>
       <li class="px-6 py-3 hover:bg-gray-200 hover:border-slate-500 hover:border-l-4 transition duration-300 cursor-pointer">
         <a href="../view/accueil_view.php" class="flex items-center gap-2 text-slate-600">
           <i class="fa-solid fa-house"></i>Accueil
         </a>
       </li>
+      <?php endif ?>
+      <?php if(!isset($_SESSION['user']) || $_SESSION['user']['role'] === 'vendeur'):?>
+      <li class="px-6 py-3 hover:bg-gray-200 hover:border-slate-500 hover:border-l-4 transition duration-300 cursor-pointer">
+        <a href="../view/accueil_vendeur_view.php" class="flex items-center gap-2 text-slate-600">
+          <i class="fa-solid fa-house"></i>Accueil
+        </a>
+      </li>
+      <?php endif ?>
       <?php if(!isset($_SESSION['user']) || $_SESSION['user']['role'] === 'admin'):?>
       <li class="px-6 py-3 hover:bg-gray-200 hover:border-slate-500 hover:border-l-4 transition duration-300 cursor-pointer">
         <a href="../view/vendeur_view.php" class="flex items-center gap-2 text-slate-600">

@@ -21,13 +21,16 @@ session_start();
   </main>
 
   <script src="../js/script.js"></script>
+
   <script src="../js/commande.js"></script>
+
   <script src="../js/vendeur.js"></script>
   <script src="../js/client.js"></script>
   <script src="../js/gestion_user.js"></script>
   <script src="../js/gestion_client.js"></script>
   <script src="../js/gestion_fourn.js"></script>
   <script src="../js/gestion_produit.js"></script>
+  <script src="../public/js/chart.js"></script>
  
 </body>
 </html>

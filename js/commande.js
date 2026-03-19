@@ -1192,7 +1192,6 @@ async function totalCommandeVendeur(){
     try {
         const response = await fetch("../php/post_commande_vend.php");
         const data = await response.text();
-        console.log(data)
     } catch (error) {
         console.log("Erreur:" + error)
     }

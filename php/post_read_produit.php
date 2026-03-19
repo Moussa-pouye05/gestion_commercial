@@ -4,10 +4,13 @@ require_once "../config/config.php";
 spl_autoload_register(function($class){
     require_once "../classes/".$class.".php";
 });
-$limit = 8;
+$limit = isset($_GET['limit']) ? (int) $_GET['limit'] : 8;
 $page = isset($_GET['page']) ? (int) $_GET['page'] : 1;
 $search = trim($_GET['search'] ?? "");
 $categorieId = isset($_GET['categorie']) ? (int) $_GET['categorie'] : 0;
+if ($limit <= 0) {
+    $limit = 99999;
+}
 if ($page < 1) {
     $page = 1;
 }

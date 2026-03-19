@@ -19,9 +19,9 @@
             <div class="flex items-center justify-center w-10 h-10 rounded-lg bg-blue-100">
                 <i class="fa-solid fa-boxes-stacked text-blue-600 text-sm"></i>
             </div>
-            <span class="text-[10px] bg-green-100 text-green-600 px-2 py-0.5 rounded">
+            <!-- <span class="text-[10px] bg-green-100 text-green-600 px-2 py-0.5 rounded">
                 +12%
-            </span>
+            </span> -->
         </div>
 
         <div class="mt-3">

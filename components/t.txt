@@ -191,3 +191,8 @@ Le résultat doit ressembler à un site professionnel de transport logistique mo
 le chauffeur me demande de lui ajouter une géolocalisation qui lui permet de rejoindre facilement le 
 lieu du client lors de la demande du devis.Il me demande aussi de changer le nom par PouyeTransportExpress et créer un logo.
 Il m'a fournit égalemant le numero de telephone: 771110168 et l'email:modoupouye0168@gmail.com
+
+j'ai demande a copilot de me créer un graphique de type line pour représenter l'évolution des chiffres
+ d'affaires en fonction du date et de type doughnut pour la répartition des catégories et les résultats ne me
+  satisfait pas .D'apres les idées que vous avez envers mon app de gestion commercial et d'autres que vous 
+  connaissez pour une bonne structure d'une app commercial Donnez moi  un bon prompt.

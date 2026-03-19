@@ -100,19 +100,22 @@ async function loadVendeur(page = 1, search = currentSearch) {
             const profileSrc = buildProfileSrc(item.profile);
             const tr = document.createElement("tr");
             tr.innerHTML = `
-                <td class="flex items-center mt-2">
+                <td class="flex items-center">
                     <span><img src="${profileSrc}" class="w-10 h-10 rounded-full object-cover" alt="photo"/></span>
-                    <span class="ml-2">${item.nom}</span>
+                    <span class="ml-2 font-medium">${item.nom}</span>
                 </td>
-                <td class="px-6 py-2 font-medium text-gray-900">${item.email}</td>
-                <td class="px-6 py-2">${item.telephone}</td>
-                <td class="px-6 py-2">
-                    <div class=" text-green-500 float-right text-sm">50%</div>
-                    <div class="w-full bg-gray-100 h-4 rounded-full mt-6">
-                        <div class="bg-green-500 h-4 rounded-full" py-1 style="width:50%"></div>
-                    </div>
+                <td class="font-medium text-gray-900">${item.email}</td>
+                <td>${item.telephone}</td>
+                <td>
+                    ${item.role === 'vendeur' ? `
+                        <div class="space-y-1 text-xs">
+                            <div><span class="font-medium">Cmds:</span> ${formatNumberFR(item.perf_commandes || 0)}</div>
+                            <div class="text-green-600 font-medium">${formatNumberFR(item.perf_montant || 0)} FCFA</div>
+                            <div class="text-sm">(${formatNumberFR(item.perf_avg || 0)} FCFA/cmd)</div>
+                        </div>
+                    ` : '<span class="text-gray-500 italic text-xs">Admin</span>'}
                 </td>
-                <td class="px-6 py-2 flex gap-2">
+                <td class="flex gap-2">
                     <button class="edit w-8 h-8 flex items-center justify-center rounded-md bg-yellow-50 text-yellow-600 hover:bg-yellow-100 transition">
                         <i class="fa-solid fa-pen text-sm"></i>
                     </button>

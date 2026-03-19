@@ -41,6 +41,7 @@
     </div>
 
 </div>
+<?php if($_SESSION['user']['role'] === "admin"):  ?>
 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
 
     <!-- En cours -->
@@ -115,6 +116,83 @@
              </div>
     </div>
 </div>
+<?php endif?>
+<?php if($_SESSION['user']['role'] === "vendeur"):  ?>
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+
+    <!-- En cours -->
+    <div class="bg-white rounded-xl shadow-sm hover:shadow-md transition px-4 py-2 border border-gray-100">
+
+        <div class="flex items-center justify-between">
+            <div class="flex items-center justify-center w-9 h-9 rounded-lg bg-indigo-100">
+                <i class="fa-solid fa-hourglass-half text-indigo-600 text-sm"></i>
+            </div>
+
+            <span class="text-[10px] px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-600 font-medium">
+                En cours
+            </span>
+        </div>
+
+        <div class="mt-3">
+            <p class="text-xs text-gray-500">Commandes</p>
+            <!-- <div>count-xl font-semiboldEnCours</div>  -->
+            <h3 class="text text-gray-800" id="countEnCoursVendeur">0</h3>
+        </div>
+
+    </div>
+
+
+    <!-- Clôturées -->
+    <div class="bg-white rounded-xl shadow-sm hover:shadow-md transition px-4 py-2 border border-gray-100">
+
+        <div class="flex items-center justify-between">
+            <div class="flex items-center justify-center w-9 h-9 rounded-lg bg-green-100">
+                <i class="fa-solid fa-circle-check text-green-600 text-sm"></i>
+            </div>
+
+            <span class="text-[10px] px-2 py-0.5 rounded-full bg-green-50 text-green-600 font-medium">
+                Clôturée
+            </span>
+        </div>
+
+        <div class="mt-3">
+            <p class="text-xs text-gray-500">Commandes</p>
+            <h3 class="text-xl font-semibold text-gray-800" id="countClotureeVendeur">0</h3>
+        </div>
+        
+
+    </div>
+
+
+    <!-- Annulées -->
+    <div class="bg-white rounded-xl shadow-sm hover:shadow-md transition px-4 py-2 border border-gray-100">
+
+        <div class="flex items-center justify-between">
+            <div class="flex items-center justify-center w-9 h-9 rounded-lg bg-red-100">
+                <i class="fa-solid fa-ban text-red-600 text-sm"></i>
+            </div>
+
+            <span class="text-[10px] px-2 py-0.5 rounded-full bg-red-50 text-red-600 font-medium">
+                Annulée
+            </span>
+        </div>
+
+        <div class="mt-3">
+            <p class="text-xs text-gray-500">Commandes</p>
+            <h3 class="text-xl font-semibold text-gray-800" id="countAnnuleeVendeur">0</h3>
+        </div>
+
+    </div>
+    <div class=" flex-1 bg-[#fff] rounded-md flex items-center justify-between gap-4 px-4 
+                         sm:px-6 md:px-8 lg:px-6">
+                    <i class="fa-solid fa-cart-shopping text-orange-500 text-2xl"></i>
+             <div>
+                 <p class="text-sm text-gray-500">Commandes du jours</p>
+                 <p class="total-commande-vendeur text-xl font-bold">0</p>
+             </div>
+    </div>
+</div>
+<?php endif?>
 <div class="absolute top-0 left-0 w-full h-full hidden items-center justify-center bg-black/50 z-50"  id="modalAddCommande">
             <form class="bg-white p-6 rounded-xl shadow-md max-w-5xl mx-auto" id="saveCommande">
 
@@ -207,7 +285,8 @@
     </div>
 
 </form>
-        </div>
+</div>
+<?php if($_SESSION['user']['role'] === "admin"):  ?>
 <div class="bg-white shadow-lg rounded-2xl p-4 mt-4 mb-4">
     
     <!-- Titre -->
@@ -250,44 +329,61 @@
 
             <tbody id="commandesTable">
 
-                <!-- <tr class="border-b hover:bg-gray-50">
-                    <td class="p-3 font-medium">CMD-001</td>
-
-                    <td class="p-3">Moussa Diop</td>
-
-                    <td class="p-3">18/03/2026</td>
-
-                    <td class="p-3 font-semibold text-blue-600">
-                        25 000 FCFA
-                    </td>
-
-                    <td class="p-3">
-                        <span class="bg-green-100 text-green-600 text-xs px-2 py-1 rounded">
-                            Payée
-                        </span>
-                    </td>
-
-                    <td class="p-3 flex justify-center gap-2">
-
-                        <button class="bg-blue-50 text-blue-600 p-2 rounded hover:bg-blue-100">
-                            <i class="fa-solid fa-eye"></i>
-                        </button>
-
-                        <button class="bg-yellow-50 text-yellow-600 p-2 rounded hover:bg-yellow-100">
-                            <i class="fa-solid fa-pen"></i>
-                        </button>
-
-                        <button class="bg-red-50 text-red-600 p-2 rounded hover:bg-red-100">
-                            <i class="fa-solid fa-trash"></i>
-                        </button>
-
-                    </td>
-                </tr> -->
 
             </tbody>
 
         </table>
     </div>
 </div>
-    <!--  -->
+<?php endif?>
+<?php if($_SESSION['user']['role'] === "vendeur"):  ?>
+<div class="bg-white shadow-lg rounded-2xl p-4 mt-4 mb-4">
+    
+    <!-- Titre -->
+    <div class="flex justify-between items-center mb-4">
+            <h2 class="text-xl font-semibold text-gray-700">10 derniers commandes</h2>
+            <select 
+                name="etat" 
+                id="etatFilter"
+                class="bg-gray-50 border border-gray-200 
+                       text-sm px-4 py-2 rounded-xl 
+                       focus:outline-none focus:ring-2 focus:ring-blue-400 transition">
+                <option value="">Toutes Commandes</option>
+                <option value="en_cours">En cours</option>
+            </select>
+            <select 
+                name="days" 
+                id="days"
+                class="bg-gray-50 border border-gray-200 
+                       text-sm px-4 py-2 rounded-xl 
+                       focus:outline-none focus:ring-2 focus:ring-blue-400 transition">
+                <option value="">Derniers 30 jours</option>
+                <option value="">Test</option>
+            </select>
+    </div>
+
+    <!-- Responsive wrapper -->
+    <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+
+            <thead class="bg-gray-100">
+                <tr>
+                    <th class="p-3 text-left">N°</th>
+                    <th class="p-3 text-left">Client</th>
+                    <th class="p-3 text-left">Date</th>
+                    <th class="p-3 text-left">Total</th>
+                    <th class="p-3 text-left">Statut</th>
+                    <th class="p-3 text-center">Actions</th>
+                </tr>
+            </thead>
+
+            <tbody id="commandesTable">
+
+
+            </tbody>
+
+        </table>
+    </div>
+</div>
+<?php endif?>
 </section>

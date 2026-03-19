@@ -16,16 +16,38 @@ $totalVendeurs = $con->countVendeurs($search);
 $totalPages = ceil($totalVendeurs / $limit);
 
 $result = [];
+$whereDate = ""; // Can add date filter later if needed
+$params = []; // For date if added
 
 if (!empty($vendeur["success"]) && isset($vendeur["vendeurs"])) {
     foreach($vendeur["vendeurs"] as $c){
+        // Calculate performance for vendeur role only
+        $perf = ['commandes' => 0, 'montant_total' => 0, 'performance' => 0];
+        if ($c->getRole() === 'vendeur') {
+            $sqlPerf = "SELECT COUNT(c.id) AS commandes, COALESCE(SUM(c.total),0) AS montant_total, 
+                       COALESCE(SUM(c.total)/NULLIF(COUNT(c.id),0),0) AS performance
+                       FROM commandes c WHERE c.id_user = :id " . $whereDate;
+            $stmtPerf = $pdo->prepare($sqlPerf);
+            $stmtPerf->bindValue(':id', $c->getId());
+            foreach($params as $k => $v) $stmtPerf->bindValue($k, $v);
+            $stmtPerf->execute();
+            $perfData = $stmtPerf->fetch(PDO::FETCH_ASSOC);
+            $perf = [
+                'commandes' => (int)($perfData['commandes'] ?? 0),
+                'montant_total' => (float)($perfData['montant_total'] ?? 0),
+                'performance' => (float)($perfData['performance'] ?? 0)
+            ];
+        }
         $result[] = [
             "id" => $c->getId(),
             "profile" => $c->getProfile(),
             "nom" => $c->getNom(),
             "email" => $c->getEmail(),
             "telephone" => $c->getTelephone(),
-            "role" => $c->getRole()
+            "role" => $c->getRole(),
+            "perf_commandes" => $perf['commandes'],
+            "perf_montant" => $perf['montant_total'],
+            "perf_avg" => $perf['performance']
         ];
     }
 }
