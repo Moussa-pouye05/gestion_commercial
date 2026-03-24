@@ -20,10 +20,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' || $_SERVER['REQUEST_METHOD'] === 'GET
     $limit = isset($_GET['limit']) ? (int)$_GET['limit'] : 10;
     $offset = isset($_GET['offset']) ? (int)$_GET['offset'] : 0;
 
-    $result = $commandeManager->loadCommande($limit, $offset, $search, $etat);
+    $userId = $_SESSION['user']['role'] === 'admin' ? null : (int) $_SESSION['user']['id'];
+
+    $result = $commandeManager->loadCommande($limit, $offset, $search, $etat, $userId);
     
     // Get counts by status
-    $counts = $commandeManager->getCountByStatus();
+    $counts = $commandeManager->getCountByStatus($userId);
     //$result['counts'] = $counts;
 
     $commandes = [];

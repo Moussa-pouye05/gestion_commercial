@@ -1,16 +1,11 @@
-# TODO: Fix Mobile/Tablet Scrolling for Commande/Facture Cards
+# Task: Fix accueil_vendeur.js dashboard error
 
-## Status: [IN PROGRESS] ✅ Planned, Editing...
+## Steps:
+- [x] Create SQL script to add `date_commande` column ✅
+- [x] Fix 'poduits' → 'produits' typo in post_dashboard_vendeur.php ✅
+- [ ] Execute SQL: Import fix_dashboard_vendeur.sql in phpMyAdmin → gestion_stock
+- [ ] Reload pages/accueil_vendeur.php 
+- [ ] Verify: F12 console → no "Unknown column 'c.date_commande'" error
+- [ ] Dashboard shows data (commands, revenue, etc.)
 
-### Steps:
-- [x] 1. Create this TODO.md
-- [ ] 2. Edit js/commande.js: Update displayCommandeDetails() modal for responsive scroll
-- [ ] 3. Edit js/commande.js: Update displayFacture() modal for responsive scroll
-- [ ] 4. Test on mobile/tablet (DevTools: iPhone, iPad)
-- [ ] 5. Verify buttons (Fermer/Imprimer) always visible
-- [ ] 6. Complete task
-
-**Files to Edit**: js/commande.js
-
-**Test Command**: Open http://localhost/gestionCommercial1/pages/commandes.php, create commande with 10+ products, view details/facture on mobile viewport.
-
+**Status:** Ready for DB update and test!

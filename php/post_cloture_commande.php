@@ -42,7 +42,8 @@ try {
     $commandeManager = new CommandeManager($pdo);
 
 
-    $result = $commandeManager->clotureCommande((int)$id);
+    $userId = $_SESSION['user']['role'] === 'admin' ? null : (int) $_SESSION['user']['id'];
+    $result = $commandeManager->clotureCommande((int)$id, $userId);
 
     echo json_encode($result);
 

@@ -33,7 +33,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $commandeManager = new CommandeManager($pdo);
 
     // Get existing commande to preserve date_commande and id_user
-    $existingCmd = $commandeManager->getCommande($data['id']);
+    $userId = $_SESSION['user']['role'] === 'admin' ? null : (int) $_SESSION['user']['id'];
+    $existingCmd = $commandeManager->getCommande((int) $data['id'], $userId);
     if (!$existingCmd) {
         echo json_encode(['success' => false, 'message' => 'Commande non trouvée']);
         exit;
@@ -72,7 +73,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         ];
     }
 
-    $result = $commandeManager->updateCommande($commande, $details);
+    $result = $commandeManager->updateCommande($commande, $details, $userId);
     echo json_encode($result);
 } else {
     echo json_encode(['success' => false, 'message' => 'Méthode non autorisée']);

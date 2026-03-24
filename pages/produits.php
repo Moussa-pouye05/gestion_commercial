@@ -8,7 +8,7 @@
     header("Location: ../pages/connexion.php");
   }
   ?>
-<section class="mt-2">
+<section class="mt-2 p-2">
     <h2 class="text-xl font-semibold text-gray-700">Gestion des Produits</h2>
     <div class="text-[10px] text-slate-500">Suivi des produits et de stocks</div>
     
@@ -265,6 +265,7 @@
 <div class="text-sm text-slate-500 mt-4" id="produitCountInfo">Affichage des produits</div>
 
 <!-- Recent Approvisionnements -->
+ <?php if($_SESSION['user']['role'] === "admin"): ?>
 <div class="bg-white shadow-lg rounded-2xl p-4 mt-4 mb-4">
     <div class="flex justify-between items-center mb-4">
         <div>
@@ -290,5 +291,6 @@
         </table>
     </div>
 </div>
+<?php endif ?>
 </section>
 

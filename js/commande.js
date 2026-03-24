@@ -409,6 +409,9 @@ function updateCounts(counts) {
     const enCoursEl = document.getElementById("countEnCours");
     const clotureeEl = document.getElementById("countCloturee");
     const annuleeEl = document.getElementById("countAnnulee");
+    const enCoursVendeurEl = document.getElementById("countEnCoursVendeur");
+    const clotureeVendeurEl = document.getElementById("countClotureeVendeur");
+    const annuleeVendeurEl = document.getElementById("countAnnuleeVendeur");
 
     if (enCoursEl) {
         enCoursEl.textContent = counts.en_cours || 0;
@@ -418,6 +421,15 @@ function updateCounts(counts) {
     }
     if (annuleeEl) {
         annuleeEl.textContent = counts.annulee || 0;
+    }
+    if (enCoursVendeurEl) {
+        enCoursVendeurEl.textContent = counts.en_cours || 0;
+    }
+    if (clotureeVendeurEl) {
+        clotureeVendeurEl.textContent = counts.cloturee || 0;
+    }
+    if (annuleeVendeurEl) {
+        annuleeVendeurEl.textContent = counts.annulee || 0;
     }
 }
 

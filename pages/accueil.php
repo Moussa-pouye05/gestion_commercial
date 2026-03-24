@@ -141,7 +141,7 @@
     <div class="section-card bg-white rounded-xl border border-gray-200 p-4 sm:p-5 shadow-[0_4px_15px_-3px_rgba(0,0,0,0.1)]">
       <p class="section-title text-gray-800 font-semibold mb-4 flex items-center gap-2">
         <i class="fas fa-crown text-amber-500"></i>
-        Top 10 Produits les Plus Vendus
+        Top 8 Produits les Plus Vendus
       </p>
       <div class="overflow-x-auto">
         <table class="w-full text-sm">
@@ -254,7 +254,7 @@
   font-size: 0.875rem;
 }
 table td, table th {
-  @apply px-2 py-2 sm:px-4 sm:py-3 max-w-[120px] sm:max-w-[150px] truncate;
+  @apply px-2 py-1 sm:px-4 sm:py-3 max-w-[120px] sm:max-w-[150px] truncate;
 }
 @media (max-width: 640px) {
   table td, table th { max-width: 80px; font-size: 0.75rem; }

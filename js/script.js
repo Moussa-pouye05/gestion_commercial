@@ -223,61 +223,98 @@ async function loadDashboard() {
           }
         }
 
-        if (categoryChart) categoryChart.destroy();
+const ctxCategory = document.getElementById('categoryChart');
+  const legendEl = document.getElementById('category-legend');
 
-        if (categoryChart) categoryChart.destroy();
-        const ctxCategory = document.getElementById('categoryChart');
-        if (ctxCategory) {
-          const ctx2d = ctxCategory.getContext('2d');
-          if (result.category_ca && result.category_ca.length > 0) {
-            const colors = ['#3B82F6','#10B981','#F59E0B','#EF4444','#8B5CF6','#EC4899','#14B8A6','#F97316','#6366F1','#84CC16'];
-categoryChart = new Chart(ctx2d, {
-              type: 'doughnut',
-              data: {
-                labels: result.category_ca.map(c => c.category_name),
-                datasets: [{ 
-                  data: result.category_ca.map(c => parseFloat(c.ca || 0)),
-                  backgroundColor: colors.slice(0, result.category_ca.length),
-                  borderWidth: 2,
-                  borderColor: '#fff',
-                  borderAlign: 'inner',
-                  hoverOffset: 4
-                }]
-              },
-              options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                cutout: '70%',
-                plugins: { 
-                  legend: { display: false },
-                  tooltip: {
-                    backgroundColor: 'rgba(0,0,0,0.8)',
-                    titleColor: '#fff',
-                    bodyColor: '#fff',
-                    callbacks: {
-                      label: function(ctx) {
-                        const total = ctx.dataset.data.reduce((a, b) => a + b, 0);
-                        const percent = ((ctx.parsed / total) * 100).toFixed(1);
-                        return `${ctx.label}: ${formatNumberFR(ctx.parsed)} FCFA (${percent}%)`;
-                      }
-                    }
-                  }
-                }
-              }
-            });
+  if (!ctxCategory || !result.category_ca) return;
 
-            // Legend
-            const legendEl = document.getElementById('category-legend');
-            if (legendEl) {
-              legendEl.innerHTML = result.category_ca.map((c, i) => 
-                `<div class="flex items-center gap-2 py-1">
-                  <div class="w-3 h-3 rounded-full" style="background-color: ${colors[i % colors.length]}"></div>
-                  <span>${c.category_name}: <span class="font-bold text-green-600">${formatNumberFR(c.ca)}</span> FCFA</span>
-                </div>`
-              ).join('');
+  // 🎨 Couleurs
+  const colors = [
+    '#3B82F6','#10B981','#F59E0B','#EF4444',
+    '#8B5CF6','#EC4899','#14B8A6','#F97316',
+    '#6366F1','#84CC16'
+  ];
+
+  // 🔄 Détruire ancien graphique
+  if (categoryChart) {
+    categoryChart.destroy();
+  }
+
+  // 📊 Données
+  const labels = result.category_ca.map(c => c.category_name);
+  const dataValues = result.category_ca.map(c => parseFloat(c.ca || 0));
+
+  // =========================
+  // 📈 GRAPH DOUGHNUT
+  // =========================
+  categoryChart = new Chart(ctxCategory, {
+    type: 'doughnut',
+    data: {
+      labels: labels,
+      datasets: [{
+        data: dataValues,
+        backgroundColor: colors.slice(0, dataValues.length),
+        borderWidth: 2,
+        borderColor: '#fff',
+        hoverOffset: 6
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      cutout: '70%',
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: 'rgba(0,0,0,0.8)',
+          callbacks: {
+            label: function(ctx) {
+              const total = ctx.dataset.data.reduce((a, b) => a + b, 0);
+              const percent = total ? ((ctx.parsed / total) * 100).toFixed(1) : 0;
+              return `${ctx.label}: ${formatNumberFR(ctx.parsed)} FCFA (${percent}%)`;
             }
           }
         }
+      }
+    },
+    plugins: [{
+      id: 'centerText',
+      beforeDraw(chart) {
+        const { width, height, ctx } = chart;
+        const total = chart.data.datasets[0].data.reduce((a,b)=>a+b,0);
+
+        ctx.save();
+        ctx.font = "bold 16px sans-serif";
+        ctx.fillStyle = "#111";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText(formatNumberFR(total) + " FCFA", width / 2, height / 2);
+        ctx.restore();
+      }
+    }]
+  });
+
+  // =========================
+  // 📌 LEGEND PERSONNALISÉE
+  // =========================
+  if (legendEl) {
+    legendEl.innerHTML = result.category_ca.map((c, i) => `
+      <div class="flex items-center justify-between gap-3 py-1 px-3 rounded-lg hover:bg-gray-50 transition">
+
+        <div class="flex items-center gap-2">
+          <div class="w-3 h-3 rounded-full"
+               style="background-color: ${colors[i % colors.length]}"></div>
+          <span class="text-sm text-gray-700">${c.category_name}</span>
+        </div>
+
+        <span class="text-sm font-bold text-green-600">
+          ${formatNumberFR(c.ca)} FCFA
+        </span>
+
+      </div>
+    `).join('');
+  }
+
     } catch (err) {
         console.error('Erreur dashboard: ', err);
     }

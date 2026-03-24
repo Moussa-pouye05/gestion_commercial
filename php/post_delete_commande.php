@@ -21,7 +21,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $pdo = new PDO("mysql:host=localhost;dbname=gestion_stock;charset=utf8", "root", "12345");
     $commandeManager = new CommandeManager($pdo);
 
-    $result = $commandeManager->deleteCommande((int) $data['id']);
+    $userId = $_SESSION['user']['role'] === 'admin' ? null : (int) $_SESSION['user']['id'];
+    $result = $commandeManager->deleteCommande((int) $data['id'], $userId);
     echo json_encode($result);
 } else {
     echo json_encode(['success' => false, 'message' => 'Méthode non autorisée']);

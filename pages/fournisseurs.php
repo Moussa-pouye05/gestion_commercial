@@ -6,7 +6,7 @@
     header("Location: ../pages/connexion.php");
   }
   ?>
-<section class="mt-2">
+<section class="mt-2 p-2">
         <h2 class="text-xl font-semibold text-gray-700">Fournisseurs</h2>
         <div class="text-[10px] text-slate-500">Gerez vos relations fournisseurs</div>
  <div class="bg-white p-4 rounded-2xl shadow-sm mb-6 mt-2">

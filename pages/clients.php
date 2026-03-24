@@ -8,7 +8,7 @@
     header("Location: ../pages/connexion.php");
   }
   ?>
-<section class="mt-2">
+<section class="mt-2 p-2">
         <div class="text-2xl font-bold text-slate-600 my-2">Clients/</div>
         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-8 ">
              <div class="h-20 flex-1 rounded-md flex items-center justify-between px-4 

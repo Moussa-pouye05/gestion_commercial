@@ -8,7 +8,7 @@
     header("Location: ../pages/connexion.php");
   }
   ?>
-<section class="mt-2">
+<section class="mt-2 p-2">
         <h2 class="text-xl font-semibold text-gray-700">Gestion des Commandes</h2>
         <div class="text-[10px] text-slate-500">Gerez et Suivez l'etat de toutes les commandes stock</div>
 <div class="bg-white p-4 rounded-2xl shadow-sm mb-6">
@@ -112,13 +112,13 @@
                     <i class="fa-solid fa-cart-shopping text-orange-500 text-2xl"></i>
              <div>
                  <p class="text-sm text-gray-500">Commandes du jours</p>
-                 <p class="total-commande text-xl font-bold">456</p>
+                 <p class="total-commande text-xl font-bold">0</p>
              </div>
     </div>
 </div>
 <?php endif?>
 <?php if($_SESSION['user']['role'] === "vendeur"):  ?>
-<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
 
     <!-- En cours -->
     <div class="bg-white rounded-xl shadow-sm hover:shadow-md transition px-4 py-2 border border-gray-100">
@@ -183,14 +183,7 @@
         </div>
 
     </div>
-    <div class=" flex-1 bg-[#fff] rounded-md flex items-center justify-between gap-4 px-4 
-                         sm:px-6 md:px-8 lg:px-6">
-                    <i class="fa-solid fa-cart-shopping text-orange-500 text-2xl"></i>
-             <div>
-                 <p class="text-sm text-gray-500">Commandes du jours</p>
-                 <p class="total-commande-vendeur text-xl font-bold">0</p>
-             </div>
-    </div>
+    
 </div>
 <?php endif?>
 <div class="absolute top-0 left-0 w-full h-full hidden items-center justify-center bg-black/50 z-50"  id="modalAddCommande">

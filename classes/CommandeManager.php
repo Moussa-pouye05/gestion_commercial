@@ -66,7 +66,7 @@ class CommandeManager
     /**
      * Load commandes with optional filters
      */
-    public function loadCommande(int $limit, int $offset = 0, string $search = "", string $etat = ""): array
+    public function loadCommande(int $limit, int $offset = 0, string $search = "", string $etat = "", ?int $userId = null): array
     {
         try {
             $sql = "SELECT c.*, cl.nom as client_nom, cl.telephone as client_telephone, cl.adresse as client_adresse,
@@ -86,6 +86,11 @@ class CommandeManager
             if ($etat !== "") {
                 $where[] = "c.etat = :etat";
                 $params[":etat"] = $etat;
+            }
+
+            if ($userId !== null) {
+                $where[] = "c.id_user = :user_id";
+                $params[":user_id"] = $userId;
             }
 
             if (!empty($where)) {
@@ -168,7 +173,7 @@ class CommandeManager
     /**
      * Count total commandes
      */
-    public function countCommandes(string $search = "", string $etat = ""): int
+    public function countCommandes(string $search = "", string $etat = "", ?int $userId = null): int
     {
         try {
             $sql = "SELECT COUNT(*) FROM commandes c
@@ -185,6 +190,11 @@ class CommandeManager
             if ($etat !== "") {
                 $where[] = "c.etat = :etat";
                 $params[":etat"] = $etat;
+            }
+
+            if ($userId !== null) {
+                $where[] = "c.id_user = :user_id";
+                $params[":user_id"] = $userId;
             }
 
             if (!empty($where)) {
@@ -206,12 +216,23 @@ class CommandeManager
     /**
      * Get counts by status
      */
-    public function getCountByStatus(): array
+    public function getCountByStatus(?int $userId = null): array
     {
         try {
-            $req = $this->pdo->query("SELECT etat, COUNT(*) as count FROM commandes GROUP BY etat");
             $result = ['en_cours' => 0, 'cloturee' => 0, 'annulee' => 0];
-            
+
+            $sql = "SELECT etat, COUNT(*) as count FROM commandes";
+            if ($userId !== null) {
+                $sql .= " WHERE id_user = :user_id";
+            }
+            $sql .= " GROUP BY etat";
+
+            $req = $this->pdo->prepare($sql);
+            if ($userId !== null) {
+                $req->bindValue(':user_id', $userId, PDO::PARAM_INT);
+            }
+            $req->execute();
+
             while ($datas = $req->fetch(PDO::FETCH_ASSOC)) {
                 if ($datas['etat'] === 'en_cours') {
                     $result['en_cours'] = (int) $datas['count'];
@@ -231,11 +252,20 @@ class CommandeManager
     /**
      * Get a single commande by ID
      */
-    public function getCommande(int $id): ?Commande
+    public function getCommande(int $id, ?int $userId = null): ?Commande
     {
         try {
-            $req = $this->pdo->prepare("SELECT * FROM commandes WHERE id = :id");
-            $req->execute([":id" => $id]);
+            $sql = "SELECT * FROM commandes WHERE id = :id";
+            if ($userId !== null) {
+                $sql .= " AND id_user = :user_id";
+            }
+
+            $req = $this->pdo->prepare($sql);
+            $req->bindValue(':id', $id, PDO::PARAM_INT);
+            if ($userId !== null) {
+                $req->bindValue(':user_id', $userId, PDO::PARAM_INT);
+            }
+            $req->execute();
             $datas = $req->fetch(PDO::FETCH_ASSOC);
 
             if ($datas) {
@@ -257,11 +287,11 @@ class CommandeManager
     /**
      * Update commande (only if etat is 'en_cours')
      */
-    public function updateCommande(Commande $commande, array $details): array
+    public function updateCommande(Commande $commande, array $details, ?int $userId = null): array
     {
         try {
             // Check if commande is in 'en_cours' status
-            $currentCmd = $this->getCommande($commande->getId());
+            $currentCmd = $this->getCommande($commande->getId(), $userId);
             if (!$currentCmd || $currentCmd->getEtat() !== 'en_cours') {
                 return [
                     'success' => false,
@@ -317,11 +347,11 @@ class CommandeManager
     /**
      * Close commande (cloture) - decreases stock and generates invoice
      */
-    public function clotureCommande(int $id_commande): array
+    public function clotureCommande(int $id_commande, ?int $userId = null): array
     {
         try {
             // Check if commande is in 'en_cours' status
-            $currentCmd = $this->getCommande($id_commande);
+            $currentCmd = $this->getCommande($id_commande, $userId);
             if (!$currentCmd || $currentCmd->getEtat() !== 'en_cours') {
                 return [
                     'success' => false,
@@ -377,11 +407,11 @@ class CommandeManager
     /**
      * Cancel commande (annule)
      */
-    public function annuleCommande(int $id_commande): array
+    public function annuleCommande(int $id_commande, ?int $userId = null): array
     {
         try {
             // Check if commande is in 'en_cours' status
-            $currentCmd = $this->getCommande($id_commande);
+            $currentCmd = $this->getCommande($id_commande, $userId);
             if (!$currentCmd || $currentCmd->getEtat() !== 'en_cours') {
                 return [
                     'success' => false,
@@ -408,11 +438,11 @@ class CommandeManager
     /**
      * Delete commande
      */
-    public function deleteCommande(int $id_commande): array
+    public function deleteCommande(int $id_commande, ?int $userId = null): array
     {
         try {
             // Only allow deletion if status is 'en_cours' or 'annulee'
-            $currentCmd = $this->getCommande($id_commande);
+            $currentCmd = $this->getCommande($id_commande, $userId);
             if ($currentCmd && $currentCmd->getEtat() === 'cloturee') {
                 return [
                     'success' => false,
