@@ -5,16 +5,16 @@
 ?>
 <!-- header.php -->
 <header>
-  <div class="fixed top-0 z-20 right-0 left-0 md:left-[280px] h-16 bg-white shadow-lg flex items-center justify-between px-4 transition-all duration-300">
+  <div class="fixed top-0 z-20 right-0 left-0 flex h-16 items-center justify-between border-b border-slate-200/80 bg-white px-4 shadow-lg transition-all duration-300 dark:border-slate-600/80 dark:bg-slate-700 dark:shadow-slate-950/20 md:left-[280px]">
     
     <!-- Menu Toggle Mobile -->
-    <button id="menu-toggle" class="md:hidden w-10 h-10 rounded-lg hover:bg-gray-100 transition flex items-center justify-center">
-      <i class="fa-solid fa-bars text-xl text-gray-600"></i>
+    <button id="menu-toggle" type="button" class="flex h-10 w-10 items-center justify-center rounded-lg transition hover:bg-gray-100 dark:hover:bg-slate-600 md:hidden">
+      <i class="fa-solid fa-bars text-xl text-gray-600 dark:text-slate-300"></i>
     </button>
     
     <!-- Titre dynamique -->
     <div class="hidden md:block">
-      <h1 class="text-lg font-semibold text-gray-800">
+      <h1 class="text-lg font-semibold text-gray-800 dark:text-slate-100">
         <?php 
           $page = basename($_SERVER['PHP_SELF'], '.php');
           $titles = [
@@ -32,47 +32,51 @@
     </div>
     
     <!-- Barre de recherche (optionnelle) -->
-    <div class="hidden md:flex items-center bg-gray-50 rounded-lg px-3 py-2 w-80">
-      <i class="fa-solid fa-search text-gray-400"></i>
-      <input type="text" placeholder="Rechercher..." class="bg-transparent border-none outline-none text-sm ml-2 w-full text-gray-600">
-    </div>
+    <!-- <div class="hidden w-80 items-center rounded-lg bg-gray-50 px-3 py-2 dark:bg-slate-600/40 md:flex">
+      <i class="fa-solid fa-search text-gray-400 dark:text-slate-400"></i>
+      <input type="text" placeholder="Rechercher..." class="ml-2 w-full border-none bg-transparent text-sm text-gray-600 outline-none placeholder:text-slate-500 dark:text-slate-200">
+    </div> -->
     
     <!-- Actions Utilisateur -->
     <div class="flex items-center gap-3">
       
       <!-- Bouton Mode Sombre/Clair -->
-      <button id="theme-toggle" class="w-10 h-10 rounded-lg hover:bg-gray-100 transition flex items-center justify-center relative">
-        <i class="fa-solid fa-sun text-yellow-500 text-xl hidden dark:block"></i>
-        <i class="fa-solid fa-moon text-gray-600 text-xl block dark:hidden"></i>
+      <button id="theme-toggle" type="button" title="Thème clair / sombre" class="relative flex h-10 w-10 items-center justify-center rounded-lg transition hover:bg-gray-100 dark:hover:bg-slate-600">
+        <span class="absolute inset-0 flex items-center justify-center dark:hidden" aria-hidden="true">
+          <i class="fa-solid fa-moon text-xl text-slate-600"></i>
+        </span>
+        <span class="absolute inset-0 hidden items-center justify-center dark:flex" aria-hidden="true">
+          <i class="fa-solid fa-sun text-xl text-amber-400"></i>
+        </span>
       </button>
       
       <!-- Notifications -->
       <div class="relative">
-        <button id="notif-btn" class="w-10 h-10 rounded-lg hover:bg-gray-100 transition flex items-center justify-center relative">
-          <i class="fa-solid fa-bell text-gray-600 text-xl"></i>
+        <button id="notif-btn" type="button" class="relative flex h-10 w-10 items-center justify-center rounded-lg transition hover:bg-gray-100 dark:hover:bg-slate-600">
+          <i class="fa-solid fa-bell text-xl text-gray-600 dark:text-slate-300"></i>
           <span class="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full animate-pulse"></span>
         </button>
         
         <!-- Dropdown Notifications -->
-        <div id="notif-dropdown" class="absolute right-0 mt-2 w-80 bg-white rounded-xl shadow-2xl border border-gray-100 hidden z-30">
-          <div class="p-3 border-b border-gray-100">
-            <h3 class="font-semibold text-gray-800">Notifications</h3>
+        <div id="notif-dropdown" class="absolute right-0 z-30 mt-2 hidden w-80 rounded-xl border border-gray-100 bg-white shadow-2xl dark:border-slate-600 dark:bg-slate-700">
+          <div class="border-b border-gray-100 p-3 dark:border-slate-600">
+            <h3 class="font-semibold text-gray-800 dark:text-slate-100">Notifications</h3>
           </div>
           <div class="max-h-80 overflow-y-auto">
-            <div class="p-3 hover:bg-gray-50 transition cursor-pointer">
-              <p class="text-sm text-gray-600">Nouvelle commande #CMD-015</p>
-              <p class="text-xs text-gray-400 mt-1">Il y a 5 minutes</p>
+            <div class="cursor-pointer p-3 transition hover:bg-gray-50 dark:hover:bg-slate-600/50">
+              <p class="text-sm text-gray-600 dark:text-slate-300">Nouvelle commande #CMD-015</p>
+              <p class="mt-1 text-xs text-gray-400 dark:text-slate-500">Il y a 5 minutes</p>
             </div>
-            <div class="p-3 hover:bg-gray-50 transition cursor-pointer">
-              <p class="text-sm text-gray-600">Stock faible: iPhone 13</p>
-              <p class="text-xs text-gray-400 mt-1">Il y a 1 heure</p>
+            <div class="cursor-pointer p-3 transition hover:bg-gray-50 dark:hover:bg-slate-600/50">
+              <p class="text-sm text-gray-600 dark:text-slate-300">Stock faible: iPhone 13</p>
+              <p class="mt-1 text-xs text-gray-400 dark:text-slate-500">Il y a 1 heure</p>
             </div>
           </div>
         </div>
       </div>
       
       <!-- Séparateur -->
-      <div class="h-8 w-px bg-gray-200 mx-1"></div>
+      <div class="mx-1 h-8 w-px bg-gray-200 dark:bg-slate-600"></div>
       
       <!-- Profil -->
       <div class="relative">
@@ -81,37 +85,37 @@
             <img src="<?= htmlspecialchars($_SESSION['user']['photo_profil'] ?? 'https://ui-avatars.com/api/?background=3B82F6&color=fff&name=' . urlencode($_SESSION['user']['nom'] ?? 'User')) ?>" 
                  alt="profil" 
                  class="w-10 h-10 rounded-full object-cover border-2 border-blue-500 group-hover:scale-105 transition-transform">
-            <div class="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-white"></div>
+            <div class="absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-white bg-green-500 dark:border-slate-700"></div>
           </div>
           <div class="hidden sm:block">
-            <p class="text-sm font-semibold text-gray-700"><?= htmlspecialchars($_SESSION['user']['nom'] ?? 'Utilisateur') ?></p>
-            <p class="text-xs text-gray-400"><?= ($_SESSION['user']['role'] ?? 'vendeur') === 'admin' ? 'Administrateur' : 'Vendeur' ?></p>
+            <p class="text-sm font-semibold text-gray-700 dark:text-slate-200"><?= htmlspecialchars($_SESSION['user']['nom'] ?? 'Utilisateur') ?></p>
+            <p class="text-xs text-gray-400 dark:text-slate-400"><?= ($_SESSION['user']['role'] ?? 'vendeur') === 'admin' ? 'Administrateur' : 'Vendeur' ?></p>
           </div>
-          <i class="fa-solid fa-chevron-down text-xs text-gray-400 hidden sm:block"></i>
+          <i class="fa-solid fa-chevron-down hidden text-xs text-gray-400 dark:text-slate-500 sm:block"></i>
         </div>
         
         <!-- Dropdown Profil -->
-        <div id="profile-dropdown" class="absolute right-0 mt-2 w-64 bg-white rounded-xl shadow-2xl border border-gray-100 hidden z-30">
-          <div class="p-4 border-b border-gray-100">
+        <div id="profile-dropdown" class="absolute right-0 z-30 mt-2 hidden w-64 rounded-xl border border-gray-100 bg-white shadow-2xl dark:border-slate-600 dark:bg-slate-700">
+          <div class="border-b border-gray-100 p-4 dark:border-slate-600">
             <div class="flex items-center gap-3">
               <img src="<?= htmlspecialchars($_SESSION['user']['photo_profil'] ?? 'https://ui-avatars.com/api/?background=3B82F6&color=fff&name=' . urlencode($_SESSION['user']['nom'] ?? 'User')) ?>" 
-                   class="w-12 h-12 rounded-full object-cover">
+                   class="h-12 w-12 rounded-full object-cover">
               <div>
-                <p class="font-semibold text-gray-800"><?= htmlspecialchars($_SESSION['user']['nom'] ?? 'Utilisateur') ?></p>
-                <p class="text-xs text-gray-500"><?= $_SESSION['user']['email'] ?? '' ?></p>
+                <p class="font-semibold text-gray-800 dark:text-slate-100"><?= htmlspecialchars($_SESSION['user']['nom'] ?? 'Utilisateur') ?></p>
+                <p class="text-xs text-gray-500 dark:text-slate-400"><?= $_SESSION['user']['email'] ?? '' ?></p>
               </div>
             </div>
           </div>
           <div class="py-2">
-            <a href="#" class="flex items-center gap-3 px-4 py-2 text-sm text-gray-600 hover:bg-gray-50 transition">
+            <a href="#" class="flex items-center gap-3 px-4 py-2 text-sm text-gray-600 transition hover:bg-gray-50 dark:text-slate-300 dark:hover:bg-slate-600/50">
               <i class="fa-solid fa-user"></i> Mon profil
             </a>
-            <a href="#" class="flex items-center gap-3 px-4 py-2 text-sm text-gray-600 hover:bg-gray-50 transition">
+            <a href="#" class="flex items-center gap-3 px-4 py-2 text-sm text-gray-600 transition hover:bg-gray-50 dark:text-slate-300 dark:hover:bg-slate-600/50">
               <i class="fa-solid fa-gear"></i> Paramètres
             </a>
           </div>
-          <div class="border-t border-gray-100 py-2">
-            <a href="../pages/deconnection.php" class="flex items-center gap-3 px-4 py-2 text-sm text-red-500 hover:bg-red-50 transition">
+          <div class="border-t border-gray-100 py-2 dark:border-slate-600">
+            <a href="../pages/deconnection.php" class="flex items-center gap-3 px-4 py-2 text-sm text-red-500 transition hover:bg-red-50 dark:hover:bg-red-950/30">
               <i class="fa-solid fa-right-from-bracket"></i> Déconnexion
             </a>
           </div>
@@ -120,27 +124,6 @@
     </div>
   </div>
 </header>
-
-<style>
-  /* Mode sombre pour le header (si nécessaire) */
-  body.dark-mode header .bg-white {
-    background-color: #1e293b;
-  }
-  body.dark-mode header .text-gray-800,
-  body.dark-mode header .text-gray-700,
-  body.dark-mode header .text-gray-600 {
-    color: #e2e8f0;
-  }
-  body.dark-mode header .bg-gray-50 {
-    background-color: #0f172a;
-  }
-  body.dark-mode header .border-gray-100 {
-    border-color: #334155;
-  }
-  body.dark-mode header .hover\:bg-gray-100:hover {
-    background-color: #334155;
-  }
-</style>
 
 <script>
   // Toggle menu mobile
@@ -191,34 +174,4 @@
     }
   });
   
-  // Mode sombre/clair
-  function setTheme(theme) {
-    if (theme === 'dark') {
-      document.body.classList.add('dark-mode');
-      localStorage.setItem('theme', 'dark');
-    } else {
-      document.body.classList.remove('dark-mode');
-      localStorage.setItem('theme', 'light');
-    }
-  }
-  
-  function toggleTheme() {
-    if (document.body.classList.contains('dark-mode')) {
-      setTheme('light');
-    } else {
-      setTheme('dark');
-    }
-  }
-  
-  const themeToggle = document.getElementById('theme-toggle');
-  if (themeToggle) {
-    themeToggle.addEventListener('click', toggleTheme);
-  }
-  
-  const savedTheme = localStorage.getItem('theme');
-  if (savedTheme === 'dark') {
-    setTheme('dark');
-  } else if (savedTheme === 'light') {
-    setTheme('light');
-  }
 </script>

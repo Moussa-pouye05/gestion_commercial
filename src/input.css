@@ -1,3 +1,60 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Thème sombre « pro » : ardoise (slate), pas de noir pur */
+@layer base {
+  html.dark {
+    color-scheme: dark;
+  }
+}
+
+/*
+  Pages métier (incluses dans <main>) : beaucoup de cartes en bg-white / gris.
+  On les adapte automatiquement quand html a la classe .dark
+*/
+@layer components {
+  .dark main .bg-white {
+    @apply bg-slate-700/95 text-slate-100;
+  }
+
+  .dark main .bg-gray-50 {
+    @apply bg-slate-600/25;
+  }
+
+  .dark main .bg-gray-100 {
+    @apply bg-slate-600 text-slate-200;
+  }
+
+  .dark main .text-gray-800,
+  .dark main .text-gray-700 {
+    @apply text-slate-200;
+  }
+
+  .dark main .text-gray-600 {
+    @apply text-slate-300;
+  }
+
+  .dark main .text-gray-500 {
+    @apply text-slate-400;
+  }
+
+  .dark main .border-gray-100,
+  .dark main .border-gray-200 {
+    @apply border-slate-600;
+  }
+
+  .dark main .divide-gray-200 {
+    @apply divide-slate-600;
+  }
+
+  .dark main .ring-slate-300 {
+    --tw-ring-color: rgb(71 85 105);
+  }
+
+  .dark main input:not([type='file']),
+  .dark main select,
+  .dark main textarea {
+    @apply border-slate-600 bg-slate-800/40 text-slate-100 placeholder:text-slate-500;
+  }
+}

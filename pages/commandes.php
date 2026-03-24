@@ -107,14 +107,32 @@
         </div>
 
     </div>
-    <div class=" flex-1 bg-[#fff] rounded-md flex items-center justify-between gap-4 px-4 
+    <div class="bg-white rounded-xl shadow-sm hover:shadow-md transition px-4 py-2 border border-gray-100">
+
+        <div class="flex items-center justify-between">
+            <div class="flex items-center justify-center w-9 h-9 rounded-lg bg-red-100">
+                <i class="fa-solid fa-cart-shopping text-orange-500 text-2xl"></i>
+            </div>
+
+            <span class="text-[10px] px-2 py-0.5 rounded-full bg-red-50 text-red-600 font-medium">
+                <!-- Annulée -->
+            </span>
+        </div>
+
+        <div class="mt-3">
+            <p class="text-xs text-gray-500">Commandes du jour</p>
+            <h3 class="text-xl font-semibold text-gray-800 total-commande">0</h3>
+        </div>
+
+    </div>
+    <!-- <div class=" flex-1 bg-[#fff] rounded-md flex items-center justify-between gap-4 px-4 
                          sm:px-6 md:px-8 lg:px-6">
                     <i class="fa-solid fa-cart-shopping text-orange-500 text-2xl"></i>
              <div>
                  <p class="text-sm text-gray-500">Commandes du jours</p>
-                 <p class="total-commande text-xl font-bold">0</p>
+                 <p class=" text-xl font-bold">0</p>
              </div>
-    </div>
+    </div> -->
 </div>
 <?php endif?>
 <?php if($_SESSION['user']['role'] === "vendeur"):  ?>
