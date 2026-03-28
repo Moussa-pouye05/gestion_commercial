@@ -222,9 +222,12 @@
             <!-- Fournisseur -->
             <div class="mb-4">
                 <label class="text-sm text-gray-600">Fournisseur</label>
-                <select name="fournisseur" class="w-full rounded-md border border-slate-300 px-4 py-2">
-                    <option value="">Choisir fournisseur</option>
-                </select>
+                <div class="space-y-1">
+                    <input type="text" name="fournisseur_search" class="w-full rounded-md border border-slate-300 px-4 py-2 fournisseur-search" placeholder="Rechercher un fournisseur..." autocomplete="off" list="fournisseurOptions">
+                    <input type="hidden" name="fournisseur" class="fournisseur-id-input">
+                    <datalist id="fournisseurOptions" class="fournisseur-datalist"></datalist>
+                    <div class="text-[11px] text-gray-500 fournisseur-meta">Saisissez au moins 2 caracteres</div>
+                </div>
             </div>
 
             <!-- Tableau produits -->
@@ -267,12 +270,17 @@
 <!-- Recent Approvisionnements -->
  <?php if($_SESSION['user']['role'] === "admin"): ?>
 <div class="bg-white shadow-lg rounded-2xl p-4 mt-4 mb-4">
-    <div class="flex justify-between items-center mb-4">
+    <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-4">
+        <div class="flex items-center bg-gray-50 border border-gray-200 rounded-xl px-4 py-2 lg:w-1/3 focus-within:ring-2 focus-within:ring-blue-400 transition dark:bg-slate-700/50 dark:border-slate-600">
+            <i class="fa-solid fa-magnifying-glass text-gray-400 mr-3 dark:text-slate-400"></i>
+            <input type="text" id="searchApproFournisseur" placeholder="Rechercher par fournisseur..." class="bg-transparent w-full text-sm focus:outline-none dark:text-slate-200">
+        </div>
         <div>
-            <h2 class="text-xl font-semibold text-gray-700">Approvisionnement Récent</h2>
-            <div class="text-[10px] text-slate-500">Suivi des commandes fournisseurs et livraisons</div>
+            <h2 class="text-xl font-semibold text-gray-700 dark:text-slate-200">Approvisionnements</h2>
+            <div class="text-[10px] text-slate-500 dark:text-slate-400">Suivi des commandes fournisseurs et livraisons</div>
         </div>
     </div>
+    <div id="paginationApprovisionnement" class="flex gap-2 justify-center mb-4"></div>
 
     <div class="overflow-x-auto">
         <table class="min-w-full text-sm text-left text-gray-600">

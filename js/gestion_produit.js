@@ -12,6 +12,11 @@ const cancelAddStock = document.getElementById("cancelAddStock");
 
 const addCategorieForm = document.getElementById("addCategorieForm");
 let formAddProduit = null;
+let approRowCounter = 0;
+const approProduitCache = new Map();
+const fournisseurCache = new Map();
+let defaultApprovisionnementProduits = [];
+let defaultApprovisionnementFournisseurs = [];
 
 const card = document.getElementById("card");
 const paginationProduit = document.getElementById("paginationProduit");
@@ -140,10 +145,15 @@ if (modalAddProduit && addProduit) {
 //modal add stock
 if (modalAddStock && addStock && cancelAddStock) {
     addStock.addEventListener("click", async () => {
-        // Load suppliers
-        await loadFournisseursForApprovisionnement();
-        // Load products
-        await loadProductsForApprovisionnement();
+        try {
+            defaultApprovisionnementFournisseurs = await searchApprovisionnementFournisseurs("");
+            defaultApprovisionnementProduits = await searchApprovisionnementProduits("");
+        } catch (error) {
+            console.log("Erreur préparation approvisionnement:", error);
+        }
+
+        resetApprovisionnementForm();
+        updateFournisseurDatalist(defaultApprovisionnementFournisseurs);
         modalAddStock.classList.add("flex");
         modalAddStock.classList.remove("hidden");
     });
@@ -154,41 +164,6 @@ if (modalAddStock && addStock && cancelAddStock) {
     });
 }
 
-// Load fournisseurs for approvisionnement modal
-async function loadFournisseursForApprovisionnement() {
-    try {
-        const response = await fetch("../php/post_read_fournisseur.php");
-        const data = await response.json();
-        const select = document.querySelector('select[name="fournisseur"]');
-        if (select && data.fournisseurs) {
-            select.innerHTML = '<option value="">Choisir fournisseur</option>';
-            data.fournisseurs.forEach(f => {
-                const option = document.createElement("option");
-                option.value = f.id;
-                option.textContent = f.nom;
-                select.appendChild(option);
-            });
-        }
-    } catch (error) {
-        console.log("Erreur chargement fournisseurs:", error);
-    }
-}
-
-// Load products for approvisionnement modal
-let approvisionnementProducts = [];
-async function loadProductsForApprovisionnement() {
-    try {
-        const response = await fetch("../php/post_read_produit.php?page=1&search=&categorie=&limit=0");
-        const data = await response.json();
-        if (data.produits) {
-            approvisionnementProducts = data.produits;
-            renderApprovisionnementProducts();
-        }
-    } catch (error) {
-        console.log("Erreur chargement produits:", error);
-    }
-}
-
 function renderApprovisionnementProducts() {
     const tbody = document.getElementById("produitBody");
     if (!tbody) return;
@@ -197,35 +172,268 @@ function renderApprovisionnementProducts() {
     addApprovisionnementRow();
 }
 
-function buildApprovisionnementProductOptions() {
-    return approvisionnementProducts.map(prod => `
-        <option value="${prod.id}" data-prix="${prod.prix_achat}">${prod.nom}</option>
-    `).join('');
+async function searchApprovisionnementProduits(term = "") {
+    const params = new URLSearchParams({
+        page: "1",
+        limit: "20",
+        search: term
+    });
+
+    const response = await fetch(`../php/post_read_produit.php?${params.toString()}`);
+    const data = await response.json();
+    return data.produits || [];
 }
 
-function handleApprovisionnementProductChange(select, row) {
-    const selectedOption = select.options[select.selectedIndex];
-    const prixInput = row.querySelector('.prix-input');
+async function searchApprovisionnementFournisseurs(term = "") {
+    const params = new URLSearchParams({
+        page: "1",
+        limit: "20",
+        search: term
+    });
 
-    if (selectedOption?.dataset.prix) {
-        prixInput.value = selectedOption.dataset.prix;
+    const response = await fetch(`../php/post_read_fournisseur.php?${params.toString()}`);
+    const data = await response.json();
+    return data.fournisseurs || [];
+}
+
+function updateFournisseurDatalist(fournisseurs = []) {
+    const datalist = document.querySelector(".fournisseur-datalist");
+    if (!datalist) return;
+
+    datalist.innerHTML = "";
+    fournisseurs.forEach((fournisseur) => {
+        fournisseurCache.set(String(fournisseur.id), fournisseur);
+        const option = document.createElement("option");
+        option.value = `${fournisseur.nom} - ${fournisseur.telephone || "Sans telephone"}`;
+        option.label = fournisseur.adresse || "";
+        option.dataset.id = fournisseur.id;
+        option.dataset.nom = fournisseur.nom;
+        option.dataset.telephone = fournisseur.telephone || "";
+        option.dataset.adresse = fournisseur.adresse || "";
+        datalist.appendChild(option);
+    });
+}
+
+function getSelectedFournisseur() {
+    const input = document.querySelector(".fournisseur-search");
+    const datalist = document.querySelector(".fournisseur-datalist");
+    const hiddenInput = document.querySelector(".fournisseur-id-input");
+    if (!input || !datalist || !hiddenInput) return null;
+
+    const selectedOption = Array.from(datalist.options).find(
+        (option) => option.value.trim().toLowerCase() === input.value.trim().toLowerCase()
+    );
+
+    if (selectedOption) {
+        return {
+            id: selectedOption.dataset.id,
+            nom: selectedOption.dataset.nom || "",
+            telephone: selectedOption.dataset.telephone || "",
+            adresse: selectedOption.dataset.adresse || ""
+        };
+    }
+
+    if (hiddenInput.value && fournisseurCache.has(hiddenInput.value)) {
+        const cached = fournisseurCache.get(hiddenInput.value);
+        const cachedLabel = `${cached.nom} - ${cached.telephone || "Sans telephone"}`.trim().toLowerCase();
+        if (cachedLabel === input.value.trim().toLowerCase()) {
+            return cached;
+        }
+    }
+
+    return null;
+}
+
+function setSelectedFournisseur(fournisseur) {
+    const input = document.querySelector(".fournisseur-search");
+    const hiddenInput = document.querySelector(".fournisseur-id-input");
+    const meta = document.querySelector(".fournisseur-meta");
+    if (!input || !hiddenInput || !meta) return;
+
+    if (!fournisseur) {
+        hiddenInput.value = "";
+        meta.textContent = "Aucun fournisseur valide selectionne";
         return;
     }
 
-    prixInput.value = 0;
+    fournisseurCache.set(String(fournisseur.id), fournisseur);
+    input.value = `${fournisseur.nom} - ${fournisseur.telephone || "Sans telephone"}`;
+    hiddenInput.value = fournisseur.id;
+    meta.textContent = fournisseur.adresse
+        ? `Fournisseur: ${fournisseur.nom} | ${fournisseur.adresse}`
+        : `Fournisseur: ${fournisseur.nom}`;
+}
+
+async function handleFournisseurSearchInput(input) {
+    const hiddenInput = document.querySelector(".fournisseur-id-input");
+    const meta = document.querySelector(".fournisseur-meta");
+    const matched = getSelectedFournisseur();
+    if (matched) {
+        setSelectedFournisseur(matched);
+        return;
+    }
+
+    if (hiddenInput) {
+        hiddenInput.value = "";
+    }
+
+    const term = input.value.trim();
+    if (term.length < 2) {
+        updateFournisseurDatalist(defaultApprovisionnementFournisseurs);
+        if (meta) meta.textContent = "Saisissez au moins 2 caracteres";
+        return;
+    }
+
+    if (meta) meta.textContent = "Recherche en cours...";
+
+    clearTimeout(input._fournisseurSearchTimer);
+    input._fournisseurSearchTimer = setTimeout(async () => {
+        try {
+            const fournisseurs = await searchApprovisionnementFournisseurs(term);
+            updateFournisseurDatalist(fournisseurs);
+            if (meta) {
+                meta.textContent = fournisseurs.length
+                    ? `${fournisseurs.length} suggestion(s) disponibles`
+                    : "Aucun fournisseur correspondant";
+            }
+        } catch (error) {
+            console.log("Erreur chargement fournisseurs:", error);
+            if (meta) meta.textContent = "Erreur lors de la recherche";
+        }
+    }, 250);
+}
+
+function applyFournisseurSelection() {
+    setSelectedFournisseur(getSelectedFournisseur());
+}
+
+function updateApprovisionnementProduitDatalist(row, produits = []) {
+    const datalist = row.querySelector(".appro-produit-datalist");
+    if (!datalist) return;
+
+    datalist.innerHTML = "";
+    produits.forEach((produit) => {
+        approProduitCache.set(String(produit.id), produit);
+        const option = document.createElement("option");
+        option.value = produit.nom;
+        option.label = `${produit.code_barre || "Sans code"} | ${Number(produit.prix_achat || 0)} FCFA`;
+        option.dataset.id = produit.id;
+        option.dataset.nom = produit.nom;
+        option.dataset.prix = produit.prix_achat;
+        option.dataset.codeBarre = produit.code_barre || "";
+        datalist.appendChild(option);
+    });
+}
+
+function getSelectedApprovisionnementProduit(row) {
+    const input = row.querySelector(".appro-produit-search");
+    const datalist = row.querySelector(".appro-produit-datalist");
+    const hiddenInput = row.querySelector(".appro-produit-id");
+    if (!input || !datalist || !hiddenInput) return null;
+
+    const selectedOption = Array.from(datalist.options).find(
+        (option) => option.value.trim().toLowerCase() === input.value.trim().toLowerCase()
+    );
+
+    if (selectedOption) {
+        return {
+            id: selectedOption.dataset.id,
+            nom: selectedOption.dataset.nom || selectedOption.value,
+            prix_achat: Number(selectedOption.dataset.prix) || 0,
+            code_barre: selectedOption.dataset.codeBarre || ""
+        };
+    }
+
+    if (hiddenInput.value && approProduitCache.has(hiddenInput.value)) {
+        const cached = approProduitCache.get(hiddenInput.value);
+        if ((cached.nom || "").trim().toLowerCase() === input.value.trim().toLowerCase()) {
+            return cached;
+        }
+    }
+
+    return null;
+}
+
+function setApprovisionnementProduit(row, produit) {
+    const input = row.querySelector(".appro-produit-search");
+    const hiddenInput = row.querySelector(".appro-produit-id");
+    const prixInput = row.querySelector('.prix-input');
+    const meta = row.querySelector('.appro-produit-meta');
+
+    if (!input || !hiddenInput || !prixInput || !meta) {
+        return;
+    }
+
+    if (!produit) {
+        hiddenInput.value = "";
+        prixInput.value = 0;
+        meta.textContent = "Aucun produit valide selectionne";
+        return;
+    }
+
+    approProduitCache.set(String(produit.id), produit);
+    input.value = produit.nom || "";
+    hiddenInput.value = produit.id;
+    prixInput.value = Number(produit.prix_achat) || 0;
+    meta.textContent = `Produit: ${produit.nom} | Prix achat: ${Number(produit.prix_achat || 0)} FCFA`;
+}
+
+async function handleApprovisionnementProductInput(input) {
+    const row = input.closest('tr');
+    if (!row) return;
+
+    const hiddenInput = row.querySelector('.appro-produit-id');
+    const meta = row.querySelector('.appro-produit-meta');
+    const prixInput = row.querySelector('.prix-input');
+    const matched = getSelectedApprovisionnementProduit(row);
+    if (matched) {
+        setApprovisionnementProduit(row, matched);
+        return;
+    }
+
+    if (hiddenInput) hiddenInput.value = "";
+    if (prixInput) prixInput.value = 0;
+
+    const term = input.value.trim();
+    if (term.length < 2) {
+        updateApprovisionnementProduitDatalist(row, defaultApprovisionnementProduits);
+        if (meta) meta.textContent = "Saisissez au moins 2 caracteres";
+        return;
+    }
+
+    if (meta) meta.textContent = "Recherche en cours...";
+
+    clearTimeout(input._approProduitTimer);
+    input._approProduitTimer = setTimeout(async () => {
+        try {
+            const produits = await searchApprovisionnementProduits(term);
+            updateApprovisionnementProduitDatalist(row, produits);
+            if (meta) {
+                meta.textContent = produits.length
+                    ? `${produits.length} suggestion(s) disponibles`
+                    : "Aucun produit correspondant";
+            }
+        } catch (error) {
+            console.log("Erreur chargement produits:", error);
+            if (meta) meta.textContent = "Erreur lors de la recherche";
+        }
+    }, 250);
 }
 
 function addApprovisionnementRow() {
     const tbody = document.getElementById("produitBody");
     if (!tbody) return;
 
+    const datalistId = `appro-produit-options-${++approRowCounter}`;
     const tr = document.createElement('tr');
     tr.innerHTML = `
         <td class="p-2">
-            <select class="produit-select w-full border rounded px-2 py-1 text-sm" name="produit[]">
-                <option value="">Choisir</option>
-                ${buildApprovisionnementProductOptions()}
-            </select>
+            <div class="space-y-1">
+                <input type="text" class="appro-produit-search w-full border rounded px-2 py-1 text-sm" placeholder="Rechercher un produit..." autocomplete="off" list="${datalistId}">
+                <input type="hidden" class="appro-produit-id">
+                <datalist id="${datalistId}" class="appro-produit-datalist"></datalist>
+                <div class="text-[11px] text-gray-500 appro-produit-meta">Saisissez au moins 2 caracteres</div>
+            </div>
         </td>
         <td class="p-2">
             <input type="number" min="1" value="1" name="quantite[]" class="quantite-input w-20 border rounded px-2 py-1 text-sm">
@@ -240,21 +448,39 @@ function addApprovisionnementRow() {
         </td>
     `;
     tbody.appendChild(tr);
+    updateApprovisionnementProduitDatalist(tr, defaultApprovisionnementProduits);
 
     tr.querySelector('.remove-row').addEventListener('click', () => {
         const rows = tbody.querySelectorAll('tr');
         if (rows.length === 1) {
-            tr.querySelector('.produit-select').value = "";
+            tr.querySelector('.appro-produit-search').value = "";
+            tr.querySelector('.appro-produit-id').value = "";
             tr.querySelector('.quantite-input').value = 1;
             tr.querySelector('.prix-input').value = 0;
+            tr.querySelector('.appro-produit-meta').textContent = "Saisissez au moins 2 caracteres";
             return;
         }
 
         tr.remove();
     });
 
-    tr.querySelector('.produit-select').addEventListener('change', (e) => {
-        handleApprovisionnementProductChange(e.target, tr);
+    tr.querySelector('.appro-produit-search').addEventListener('input', (e) => {
+        handleApprovisionnementProductInput(e.target);
+    });
+
+    tr.querySelector('.appro-produit-search').addEventListener('focus', () => {
+        const datalist = tr.querySelector('.appro-produit-datalist');
+        if (datalist && !datalist.options.length) {
+            updateApprovisionnementProduitDatalist(tr, defaultApprovisionnementProduits);
+        }
+    });
+
+    tr.querySelector('.appro-produit-search').addEventListener('change', () => {
+        setApprovisionnementProduit(tr, getSelectedApprovisionnementProduit(tr));
+    });
+
+    tr.querySelector('.appro-produit-search').addEventListener('blur', () => {
+        setApprovisionnementProduit(tr, getSelectedApprovisionnementProduit(tr));
     });
 }
 
@@ -262,6 +488,18 @@ function resetApprovisionnementForm() {
     if (formAppro) {
         formAppro.reset();
     }
+
+    const fournisseurMeta = document.querySelector('.fournisseur-meta');
+    if (fournisseurMeta) {
+        fournisseurMeta.textContent = "Saisissez au moins 2 caracteres";
+    }
+
+    const fournisseurHidden = document.querySelector('.fournisseur-id-input');
+    if (fournisseurHidden) {
+        fournisseurHidden.value = "";
+    }
+
+    updateFournisseurDatalist([]);
 
     renderApprovisionnementProducts();
 }
@@ -277,10 +515,29 @@ if (btnAddRow) {
 // Handle approvisionnement form submission
 const formAppro = document.getElementById("formAppro");
 if (formAppro) {
+    const fournisseurInput = document.querySelector('.fournisseur-search');
+    if (fournisseurInput) {
+        fournisseurInput.addEventListener('input', (e) => {
+            handleFournisseurSearchInput(e.target);
+        });
+        fournisseurInput.addEventListener('focus', () => {
+            const datalist = document.querySelector('.fournisseur-datalist');
+            if (datalist && !datalist.options.length) {
+                updateFournisseurDatalist(defaultApprovisionnementFournisseurs);
+            }
+        });
+        fournisseurInput.addEventListener('change', () => {
+            applyFournisseurSelection();
+        });
+        fournisseurInput.addEventListener('blur', () => {
+            applyFournisseurSelection();
+        });
+    }
+
     formAppro.addEventListener("submit", async (e) => {
         e.preventDefault();
         
-        const fournisseur = document.querySelector('select[name="fournisseur"]')?.value;
+        const fournisseur = document.querySelector('.fournisseur-id-input')?.value;
         if (!fournisseur) {
             alert("Veuillez sélectionner un fournisseur");
             return;
@@ -292,11 +549,11 @@ if (formAppro) {
         const rows = tbody.querySelectorAll('tr');
         
         rows.forEach(row => {
-            const produitSelect = row.querySelector('.produit-select');
+            const produitIdInput = row.querySelector('.appro-produit-id');
             const quantiteInput = row.querySelector('.quantite-input');
             const prixInput = row.querySelector('.prix-input');
             
-            const produitId = produitSelect?.value;
+            const produitId = produitIdInput?.value;
             const quantite = parseInt(quantiteInput?.value || 0);
             const prixAchat = parseFloat(prixInput?.value || 0);
             
@@ -867,59 +1124,155 @@ async function deleteProduit(id) {
 }
 
 // Charger les approvisionnements récents
-async function loadApprovisionnements() {
+let currentApproPage = 1;
+let currentApproSearch = '';
+
+async function loadApprovisionnements(page = 1, search = '') {
     const tableBody = document.getElementById("approvisionnementTable");
+    const paginationEl = document.getElementById("paginationApprovisionnement");
     if (!tableBody) return;
     
+    currentApproPage = page;
+    currentApproSearch = search || '';
+    
     try {
-        const response = await fetch("../php/post_read_approvisionnement.php");
+        const params = new URLSearchParams({
+            page: page,
+            search_fournisseur: currentApproSearch,
+            limit: 10
+        });
+        const response = await fetch(`../php/post_read_approvisionnement.php?${params}`);
         const data = await response.json();
         
-        if (data.success && data.approvisionnements.length > 0) {
-            tableBody.innerHTML = data.approvisionnements.map(app => {
-                const date = new Date(app.date_approvisionnement);
-                const dateStr = date.toLocaleDateString('fr-FR');
-                const etatClass = app.status === 'recu' ? 'bg-green-500' : (app.status === 'annule' ? 'bg-red-500' : 'bg-gray-500');
-                const etatText = app.status === 'recu' ? 'Validé' : (app.status === 'annule' ? 'Annulé' : 'En cours');
-                
-                return `
-                    <tr class="hover:bg-gray-50 transition duration-200">
-                        <td class="px-6 py-2">
-                            #${app.id}<br>
-                            <span class="text-xs text-gray-400">${dateStr}</span>
-                        </td>
-                        <td class="px-6 py-2 font-medium text-gray-900">
-                            ${app.produits || 'Aucun'}
-                        </td>
-                        <td class="px-6 py-2">
-                            ${app.fournisseur_nom || '-'}
-                        </td>
-                        <td class="px-6 py-2">
-                            ${app.total_quantite || 0}
-                        </td>
-                        <td class="px-6 py-2">
-                            <button class="${etatClass} hover:opacity-80 text-white px-3 py-1 rounded-lg font-semibold transition text-xs">
-                                ${etatText}
-                            </button>
+        
+        if (data.success) {
+            if (data.approvisionnements && data.approvisionnements.length > 0) {
+                tableBody.innerHTML = data.approvisionnements.map(app => {
+                    const date = new Date(app.date_approvisionnement);
+                    const dateStr = date.toLocaleDateString('fr-FR');
+                    const etatClass = app.status === 'recu' ? 'bg-green-500' : (app.status === 'annule' ? 'bg-red-500' : 'bg-gray-500');
+                    const etatText = app.status === 'recu' ? 'Validé' : (app.status === 'annule' ? 'Annulé' : 'En cours');
+                    
+                    return `
+                        <tr class="hover:bg-gray-50 dark:hover:bg-slate-700 transition duration-200">
+                            <td class="px-6 py-2 dark:text-slate-300">
+                                #${app.id}<br>
+                                <span class="text-xs text-gray-400 dark:text-slate-500">${dateStr}</span>
+                            </td>
+                            <td class="px-6 py-2 font-medium text-gray-900 dark:text-slate-200">
+                                ${app.produits || 'Aucun'}
+                            </td>
+                            <td class="px-6 py-2 dark:text-slate-300">
+                                ${app.fournisseur_nom || '-'}
+                            </td>
+                            <td class="px-6 py-2 dark:text-slate-300">
+                                ${app.total_quantite || 0}
+                            </td>
+                            <td class="px-6 py-2">
+                                <span class="${etatClass} hover:opacity-80 text-white px-3 py-1 rounded-lg font-semibold transition text-xs inline-block">
+                                    ${etatText}
+                                </span>
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
+            } else {
+                tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="5" class="px-6 py-4 text-center text-gray-500 dark:text-slate-400">
+                            Aucun approvisionnement trouvé
                         </td>
                     </tr>
                 `;
-            }).join('');
-        } else {
-            tableBody.innerHTML = `
-                <tr>
-                    <td colspan="5" class="px-6 py-4 text-center text-gray-500">
-                        Aucun approvisionnement récent
-                    </td>
-                </tr>
-            `;
+            }
+            
+            // Render pagination
+            if (paginationEl && data.total_pages > 1) {
+                renderApproPagination(data.total_pages, data.current_page);
+            } else if (paginationEl) {
+                paginationEl.innerHTML = '';
+            }
         }
     } catch (error) {
         console.log("Erreur chargement approvisionnements:", error);
+        tableBody.innerHTML = '<tr><td colspan="5" class="px-6 py-4 text-center text-red-500">Erreur de chargement</td></tr>';
     }
 }
 
+function renderApproPagination(totalPages, currentPage) {
+    const paginationEl = document.getElementById("paginationApprovisionnement");
+    if (!paginationEl) return;
+    
+    paginationEl.innerHTML = '';
+    
+    // Previous button
+    const prevBtn = document.createElement('button');
+    prevBtn.textContent = '‹';
+    prevBtn.className = 'px-3 py-1 text-sm font-medium rounded dark:bg-slate-600/50 dark:text-slate-200 dark:hover:bg-slate-500 bg-gray-200 hover:bg-gray-300';
+    prevBtn.disabled = currentPage <= 1;
+    prevBtn.onclick = () => loadApprovisionnements(currentPage - 1, currentApproSearch);
+    paginationEl.appendChild(prevBtn);
+    
+    // Page numbers
+    const maxVisible = 5;
+    const startPage = Math.max(1, currentPage - Math.floor(maxVisible / 2));
+    const endPage = Math.min(totalPages, startPage + maxVisible - 1);
+    
+    if (startPage > 1) {
+        const firstBtn = document.createElement('button');
+        firstBtn.textContent = '1';
+        firstBtn.className = 'px-3 py-1 text-sm font-medium rounded dark:bg-slate-600/50 dark:text-slate-200 dark:hover:bg-slate-500 bg-gray-200 hover:bg-gray-300';
+        firstBtn.onclick = () => loadApprovisionnements(1, currentApproSearch);
+        paginationEl.appendChild(firstBtn);
+        
+        if (startPage > 2) {
+            paginationEl.appendChild(document.createTextNode('...'));
+        }
+    }
+    
+    for (let i = startPage; i <= endPage; i++) {
+        const btn = document.createElement('button');
+        btn.textContent = i;
+        btn.className = `px-3 py-1 text-sm font-medium rounded ${i === currentPage ? 'bg-blue-600 text-white dark:bg-slate-500' : 'dark:bg-slate-600/50 dark:text-slate-200 dark:hover:bg-slate-500 bg-gray-200 hover:bg-gray-300'}`;
+        btn.onclick = () => loadApprovisionnements(i, currentApproSearch);
+        paginationEl.appendChild(btn);
+    }
+    
+    if (endPage < totalPages) {
+        if (endPage < totalPages - 1) {
+            paginationEl.appendChild(document.createTextNode('...'));
+        }
+        
+        const lastBtn = document.createElement('button');
+        lastBtn.textContent = totalPages;
+        lastBtn.className = 'px-3 py-1 text-sm font-medium rounded dark:bg-slate-600/50 dark:text-slate-200 dark:hover:bg-slate-500 bg-gray-200 hover:bg-gray-300';
+        lastBtn.onclick = () => loadApprovisionnements(totalPages, currentApproSearch);
+        paginationEl.appendChild(lastBtn);
+    }
+    
+    // Next button
+    const nextBtn = document.createElement('button');
+    nextBtn.textContent = '›';
+    nextBtn.className = 'px-3 py-1 text-sm font-medium rounded dark:bg-slate-600/50 dark:text-slate-200 dark:hover:bg-slate-500 bg-gray-200 hover:bg-gray-300';
+    nextBtn.disabled = currentPage >= totalPages;
+    nextBtn.onclick = () => loadApprovisionnements(currentPage + 1, currentApproSearch);
+    paginationEl.appendChild(nextBtn);
+}
+
 // Charger les approvisionnements au chargement de la page
+let searchApproTimer;
+
 document.addEventListener("DOMContentLoaded", () => {
     loadApprovisionnements();
+    
+    const searchInput = document.getElementById("searchApproFournisseur");
+    if (searchInput) {
+        searchInput.addEventListener("input", (e) => {
+            const value = e.target.value.trim();
+            clearTimeout(searchApproTimer);
+            searchApproTimer = setTimeout(() => {
+                loadApprovisionnements(1, value);
+            }, 300);
+        });
+    }
 });

@@ -5,9 +5,10 @@ spl_autoload_register(function($class){
     require_once "../classes/".$class.".php";
 });
 $con = new ClientManager($pdo);
-$limit = 5;
+$limit = isset($_GET['limit']) ? (int) $_GET['limit'] : 5;
 $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
 $search = trim($_GET['search'] ?? "");
+if ($limit <= 0) $limit = 5;
 if($page < 1) $page = 1;
 $offset = ($page - 1) * $limit;
 $vendeur = $con->loadClient($limit, $offset, $search);

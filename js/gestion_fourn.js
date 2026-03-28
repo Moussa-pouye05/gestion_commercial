@@ -84,7 +84,7 @@ document.addEventListener("DOMContentLoaded", () => {
             searchDebounceTimerFourn = setTimeout(() => {
                 loadFournisseur(1, value);
             }, 300);
-        }); 
+        });
     }
 });
 
@@ -96,14 +96,13 @@ async function loadFournisseur(page = 1, search = currentSearchFourn) {
         const datas = await response.json();
         const tbody = document.querySelector("tbody");
         const noFoundFourn = document.querySelector(".no_found_fourn");
-       // console.log(noFoundFourn)
         if (!tbody) return;
 
         tbody.innerHTML = "";
         if (noFoundFourn) noFoundFourn.textContent = "";
 
         if (!Array.isArray(datas.fournisseurs) || datas.fournisseurs.length === 0) {
-            if (noFoundFourn) noFoundFourn.textContent = "Aucun client trouve.";
+            if (noFoundFourn) noFoundFourn.textContent = "Aucun fournisseur trouve.";
             generatePaginationFourn(0, 1);
             return;
         }
@@ -115,7 +114,7 @@ async function loadFournisseur(page = 1, search = currentSearchFourn) {
                     ${item.nom}
                 </td>
                 <td class="px-6 py-2">${item.adresse}</td>
-                <td class="px-6 py-2 font-medium text-gray-900">${item.telephone}</td>
+                <td class="px-6 py-2 font-medium ">${item.telephone}</td>
                 <td class="px-6 py-2 flex gap-2">
                     <button class="editFourn w-8 h-8 flex items-center justify-center rounded-md bg-yellow-50 text-yellow-600 hover:bg-yellow-100 transition">
                         <i class="fa-solid fa-pen text-sm"></i>

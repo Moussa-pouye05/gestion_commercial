@@ -13,11 +13,74 @@ class CommandeManager
     }
 
     /**
+     * Validate if enough stock for all details
+     */
+    private function validateStock(array $details): array
+    {
+        $errors = [];
+        $stmt = $this->pdo->prepare("SELECT nom, quantite FROM poduits WHERE id = :id");
+        
+        foreach ($details as $detail) {
+            $id_produit = $detail['id_produit'];
+            $quantite_demande = $detail['quantite'];
+            
+            $stmt->execute([':id' => $id_produit]);
+            $product = $stmt->fetch(PDO::FETCH_ASSOC);
+            
+            if (!$product || $product['quantite'] < $quantite_demande) {
+                $dispo = $product ? $product['quantite'] : 0;
+                $nom = $product ? $product['nom'] : 'Inconnu (ID ' . $id_produit . ')';
+                $errors[] = "$nom: disponible $dispo, demandé $quantite_demande";
+            }
+        }
+        
+        if (empty($errors)) {
+            return ['success' => true];
+        }
+        
+        return [
+            'success' => false, 
+            'message' => 'Stock insuffisant: ' . implode('; ', $errors)
+        ];
+    }
+
+    private function getLowStockProducts(array $produitIds): array
+    {
+        $produitIds = array_values(array_unique(array_map('intval', $produitIds)));
+        if (empty($produitIds)) {
+            return [];
+        }
+
+        $placeholders = implode(',', array_fill(0, count($produitIds), '?'));
+        $sql = "SELECT id, nom, quantite, seuilCritique, stock_min
+                FROM poduits
+                WHERE id IN ($placeholders)
+                AND quantite <= CASE
+                    WHEN seuilCritique IS NOT NULL AND seuilCritique > 0 THEN seuilCritique
+                    WHEN stock_min IS NOT NULL AND stock_min > 0 THEN stock_min
+                    ELSE 5
+                END";
+
+        $stmt = $this->pdo->prepare($sql);
+        foreach ($produitIds as $index => $id) {
+            $stmt->bindValue($index + 1, $id, PDO::PARAM_INT);
+        }
+        $stmt->execute();
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+    }
+
+    /**
      * Create a new commande with details
      */
     public function createCommande(Commande $commande, array $details): array
     {
         try {
+            $stockCheck = $this->validateStock($details);
+            if (!$stockCheck['success']) {
+                return $stockCheck;
+            }
+
             $this->pdo->beginTransaction();
 
             // Insert commande
@@ -299,6 +362,11 @@ class CommandeManager
                 ];
             }
 
+            $stockCheck = $this->validateStock($details);
+            if (!$stockCheck['success']) {
+                return $stockCheck;
+            }
+
             $this->pdo->beginTransaction();
 
             // Update commande
@@ -359,6 +427,23 @@ class CommandeManager
                 ];
             }
 
+            // Stock validation before processing
+            $detailsData = $this->getCommandeDetails($id_commande);
+            if (!$detailsData['success']) {
+                return $detailsData;
+            }
+            $detailsForCheck = [];
+            foreach ($detailsData['details'] as $d) {
+                $detailsForCheck[] = [
+                    'id_produit' => $d['id_produit'], 
+                    'quantite' => $d['quantite']
+                ];
+            }
+            $stockCheck = $this->validateStock($detailsForCheck);
+            if (!$stockCheck['success']) {
+                return $stockCheck;
+            }
+
             $this->pdo->beginTransaction();
 
             // Get details to decrease stock
@@ -372,6 +457,8 @@ class CommandeManager
                     ":id" => $detail['id_produit']
                 ]);
             }
+
+            $lowStockProducts = $this->getLowStockProducts(array_column($details['details'], 'id_produit'));
 
             // Update commande status to 'cloturee'
             $req = $this->pdo->prepare("UPDATE commandes SET etat = 'cloturee' WHERE id = :id AND etat = 'en_cours'");
@@ -391,7 +478,15 @@ class CommandeManager
             return [
                 'success' => true,
                 'message' => "Commande clôturée et facture générée avec succès",
-                'facture_id' => $factureResult['facture_id']
+                'facture_id' => $factureResult['facture_id'],
+                'low_stock_products' => array_map(function ($produit) {
+                    return [
+                        'id' => (int) $produit['id'],
+                        'nom' => $produit['nom'],
+                        'quantite' => (int) $produit['quantite'],
+                        'seuil' => (int) ($produit['seuilCritique'] ?: ($produit['stock_min'] ?: 5))
+                    ];
+                }, $lowStockProducts)
             ];
         } catch (PDOException $e) {
             if ($this->pdo->inTransaction()) {

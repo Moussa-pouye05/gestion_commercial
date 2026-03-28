@@ -1,7 +1,10 @@
 // Variables
-let produits = [];
-let clients = [];
 let currentEditId = null;
+let produitRowCounter = 0;
+const produitCache = new Map();
+const clientCache = new Map();
+let defaultCommandeProduits = [];
+let defaultCommandeClients = [];
 
 // Modal elements
 const modalAddCommande = document.getElementById("modalAddCommande");
@@ -12,6 +15,12 @@ const saveCommandeBtn = document.getElementById("saveCommande");
 const searchInputCommande = document.getElementById("searchCommande");
 const commandeBody = document.getElementById("commandeBody");
 const totalDisplay = document.querySelector(".total-display");
+const pendingCommandeId = (() => {
+    const params = new URLSearchParams(window.location.search);
+    const value = params.get("commande");
+    return value ? parseInt(value, 10) : null;
+})();
+let pendingCommandeHandled = false;
 
 // Initialize
 document.addEventListener("DOMContentLoaded", function() {
@@ -20,11 +29,16 @@ document.addEventListener("DOMContentLoaded", function() {
 
 // Modal handlers
 if (modalAddCommande && addCommande && cancelAddCommande) {
-    addCommande.addEventListener("click", () => {
+    addCommande.addEventListener("click", async () => {
         currentEditId = null;
+        try {
+            defaultCommandeClients = await searchClients("");
+            defaultCommandeProduits = await searchProduits("");
+        } catch (error) {
+            console.error("Error preparing commande form:", error);
+        }
         resetForm();
         loadClientsForSelect();
-        loadProduitsForSelect();
         modalAddCommande.classList.add("flex");
         modalAddCommande.classList.remove("hidden");
     });
@@ -44,9 +58,21 @@ if (addProduitBtn) {
 
 // Search functionality
 if (searchInputCommande) {
-    searchInputCommande.addEventListener("input", debounce(() => {
-        loadCommandes(searchInputCommande.value);
-    }, 300));
+    let searchTimer;
+    searchInputCommande.addEventListener("input", (e) => {
+        const value = e.target.value;
+        clearTimeout(searchTimer);
+        searchTimer = setTimeout(() => {
+            loadCommandes(value, currentCommandeEtat, 1);
+        }, 300);
+    });
+}
+
+const etatFilter = document.getElementById("etatFilter");
+if (etatFilter) {
+    etatFilter.addEventListener("change", (e) => {
+        loadCommandes(currentCommandeSearch, e.target.value, 1);
+    });
 }
 
 // Save commande
@@ -63,62 +89,32 @@ function resetForm() {
     if (form) {
         form.reset();
     }
+
+    const clientMeta = document.querySelector(".client-meta");
+    if (clientMeta) {
+        clientMeta.textContent = "Saisissez au moins 2 caracteres";
+    }
+
+    const clientIdInput = document.querySelector(".client-id-input");
+    if (clientIdInput) {
+        clientIdInput.value = "";
+    }
     
     // Reset table to one empty row
-    commandeBody.innerHTML = `
-        <tr>
-            <td class="p-2">
-                <select class="w-full border rounded-md px-2 py-1 produit-select">
-                    <option value="">Sélectionner un produit</option>
-                </select>
-            </td>
-            <td class="p-2">
-                <input type="number" class="w-full border rounded-md px-2 py-1 prix-input" value="0" min="0">
-            </td>
-            <td class="p-2">
-                <input type="number" class="w-full border rounded-md px-2 py-1 quantite-input" value="1" min="1">
-            </td>
-            <td class="p-2 text-center font-medium sous-total">
-                0 FCFA
-            </td>
-            <td class="p-2 text-center">
-                <button type="button" class="text-red-500" onclick="removeRow(this)">
-                    <i class="fa-solid fa-trash"></i>
-                </button>
-            </td>
-        </tr>
-    `;
-    
-    loadProduitsForSelect();
+    commandeBody.innerHTML = buildProductRow();
+    const firstRow = commandeBody.querySelector("tr");
+    if (firstRow) {
+        updateProduitDatalist(firstRow, defaultCommandeProduits);
+    }
     updateTotal();
 }
 
 function addProductRow() {
-    const row = `
-        <tr>
-            <td class="p-2">
-                <select class="w-full border rounded-md px-2 py-1 produit-select">
-                    <option value="">Sélectionner un produit</option>
-                </select>
-            </td>
-            <td class="p-2">
-                <input type="number" class="w-full border rounded-md px-2 py-1 prix-input" value="0" min="0">
-            </td>
-            <td class="p-2">
-                <input type="number" class="w-full border rounded-md px-2 py-1 quantite-input" value="1" min="1">
-            </td>
-            <td class="p-2 text-center font-medium sous-total">
-                0 FCFA
-            </td>
-            <td class="p-2 text-center">
-                <button type="button" class="text-red-500" onclick="removeRow(this)">
-                    <i class="fa-solid fa-trash"></i>
-                </button>
-            </td>
-        </tr>
-    `;
-    commandeBody.insertAdjacentHTML("beforeend", row);
-    loadProduitsForSelect();
+    commandeBody.insertAdjacentHTML("beforeend", buildProductRow());
+    const row = commandeBody.lastElementChild;
+    if (row) {
+        updateProduitDatalist(row, defaultCommandeProduits);
+    }
 }
 
 function removeRow(btn) {
@@ -131,99 +127,423 @@ function removeRow(btn) {
 }
 
 async function loadClientsForSelect() {
-    try {
-const response = await fetch("../php/post_get_clients_fixed.php", {
-            method: "POST"
-        });
-        const result = await response.json();
-        
-        //if (result.success) {
-            clients = result.clients || [];
-            updateClientSelects();
-        //}
-    } catch (error) {
-        console.error("Error loading clients:", error);
-    }
+    updateClientDatalist(defaultCommandeClients);
 }
 
-async function loadProduitsForSelect() {
-    try {
-        const response = await fetch("../php/post_get_produits_fixed.php")
+async function searchClients(term = "") {
+    const params = new URLSearchParams({
+        page: "1",
+        limit: "20",
+        search: term
+    });
 
-        const result = await response.json();
-        
-        // if (result.success) {
-            produits = result.produits || [];
-            updateProduitSelects();
-        //}
-    } catch (error) {
-        console.error("Error loading produits:", error);
-    }
+    const response = await fetch(`../php/post_read_client.php?${params.toString()}`);
+    const result = await response.json();
+    return result.clients || [];
 }
 
-function updateClientSelects() {
-    const selects = document.querySelectorAll(".client-select");
-    selects.forEach(select => {
-        const currentValue = select.value;
-        select.innerHTML = '<option value="">Sélectionner un client</option>';
-        clients.forEach(client => {
-            const option = document.createElement("option");
-            option.value = client.id;
-            option.textContent = `${client.nom} - ${client.telephone}`;
-            select.appendChild(option);
-        });
-        if (currentValue) {
-            select.value = currentValue;
-        }
+function updateClientDatalist(clients = []) {
+    const datalist = document.querySelector(".client-datalist");
+    if (!datalist) {
+        return;
+    }
+
+    datalist.innerHTML = "";
+    clients.forEach((client) => {
+        clientCache.set(String(client.id), client);
+        const option = document.createElement("option");
+        option.value = `${client.nom} - ${client.telephone || "Sans telephone"}`;
+        option.label = client.adresse || "";
+        option.dataset.id = client.id;
+        option.dataset.nom = client.nom;
+        option.dataset.telephone = client.telephone || "";
+        option.dataset.adresse = client.adresse || "";
+        datalist.appendChild(option);
     });
 }
 
-function updateProduitSelects() {
-    const selects = document.querySelectorAll(".produit-select");
-    selects.forEach(select => {
-        const currentValue = select.value;
-        const row = select.closest("tr");
-        const prixInput = row.querySelector(".prix-input");
-        
-        select.innerHTML = '<option value="">Sélectionner un produit</option>';
-        produits.forEach(produit => {
-            const option = document.createElement("option");
-            option.value = produit.id;
-            option.textContent = produit.nom;
-            option.dataset.prix = produit.prix_vente;
-            select.appendChild(option);
-        });
-        
-        if (currentValue) {
-            select.value = currentValue;
-            const selectedOption = select.options[select.selectedIndex];
-            if (selectedOption && selectedOption.dataset.prix) {
-                prixInput.value = selectedOption.dataset.prix;
+function getSelectedClient() {
+    const input = document.querySelector(".client-search");
+    const datalist = document.querySelector(".client-datalist");
+    const hiddenInput = document.querySelector(".client-id-input");
+
+    if (!input || !datalist || !hiddenInput) {
+        return null;
+    }
+
+    const selectedOption = Array.from(datalist.options).find(
+        (option) => option.value.trim().toLowerCase() === input.value.trim().toLowerCase()
+    );
+
+    if (selectedOption) {
+        return {
+            id: selectedOption.dataset.id,
+            nom: selectedOption.dataset.nom || "",
+            telephone: selectedOption.dataset.telephone || "",
+            adresse: selectedOption.dataset.adresse || ""
+        };
+    }
+
+    if (hiddenInput.value && clientCache.has(hiddenInput.value)) {
+        const cached = clientCache.get(hiddenInput.value);
+        const cachedLabel = `${cached.nom} - ${cached.telephone || "Sans telephone"}`.trim().toLowerCase();
+        if (cachedLabel === input.value.trim().toLowerCase()) {
+            return cached;
+        }
+    }
+
+    return null;
+}
+
+function setSelectedClient(client) {
+    const input = document.querySelector(".client-search");
+    const hiddenInput = document.querySelector(".client-id-input");
+    const meta = document.querySelector(".client-meta");
+
+    if (!input || !hiddenInput || !meta) {
+        return;
+    }
+
+    if (!client) {
+        hiddenInput.value = "";
+        meta.textContent = "Aucun client valide selectionne";
+        return;
+    }
+
+    clientCache.set(String(client.id), client);
+    input.value = `${client.nom} - ${client.telephone || "Sans telephone"}`;
+    hiddenInput.value = client.id;
+    meta.textContent = client.adresse
+        ? `Client: ${client.nom} | ${client.adresse}`
+        : `Client: ${client.nom}`;
+}
+
+async function handleClientSearchInput(input) {
+    const hiddenInput = document.querySelector(".client-id-input");
+    const meta = document.querySelector(".client-meta");
+    const matchedClient = getSelectedClient();
+    if (matchedClient) {
+        setSelectedClient(matchedClient);
+        return;
+    }
+
+    if (hiddenInput) {
+        hiddenInput.value = "";
+    }
+
+    const term = input.value.trim();
+    if (term.length < 2) {
+        updateClientDatalist(defaultCommandeClients);
+        if (meta) {
+            meta.textContent = "Saisissez au moins 2 caracteres";
+        }
+        return;
+    }
+
+    if (meta) {
+        meta.textContent = "Recherche en cours...";
+    }
+
+    clearTimeout(input._clientSearchTimer);
+    input._clientSearchTimer = setTimeout(async () => {
+        try {
+            const clients = await searchClients(term);
+            updateClientDatalist(clients);
+            if (meta) {
+                meta.textContent = clients.length
+                    ? `${clients.length} suggestion(s) disponibles`
+                    : "Aucun client correspondant";
+            }
+        } catch (error) {
+            console.error("Error searching clients:", error);
+            if (meta) {
+                meta.textContent = "Erreur lors de la recherche";
             }
         }
+    }, 250);
+}
+
+function applyClientSelection() {
+    const client = getSelectedClient();
+    setSelectedClient(client);
+}
+
+function buildProductRow(detail = {}) {
+    const datalistId = `produit-options-${++produitRowCounter}`;
+    const produitNom = escapeHtml(detail.nom || "");
+    const produitId = detail.id || "";
+    const prix = detail.prix ?? 0;
+    const quantite = detail.quantite ?? 1;
+    const sousTotal = (Number(prix) || 0) * (Number(quantite) || 0);
+    const metaText = detail.nom
+        ? `Selectionne: ${escapeHtml(detail.nom)} | Prix catalogue: ${formatNumber(Number(prix) || 0)} FCFA`
+        : "Saisissez au moins 2 caracteres";
+
+    return `
+        <tr>
+            <td class="p-2">
+                <div class="space-y-1">
+                    <input
+                        type="text"
+                        class="w-full border rounded-md px-2 py-1 produit-search"
+                        placeholder="Rechercher un produit..."
+                        autocomplete="off"
+                        list="${datalistId}"
+                        value="${produitNom}"
+                    >
+                    <input type="hidden" class="produit-id-input" value="${produitId}">
+                    <datalist id="${datalistId}" class="produit-datalist"></datalist>
+                    <div class="text-[11px] text-gray-500 produit-meta">${metaText}</div>
+                </div>
+            </td>
+            <td class="p-2">
+                <input type="number" class="w-full border rounded-md px-2 py-1 prix-input" value="${prix}" min="0">
+            </td>
+            <td class="p-2">
+                <input type="number" class="w-full border rounded-md px-2 py-1 quantite-input" value="${quantite}" min="1">
+            </td>
+            <td class="p-2 text-center font-medium sous-total">
+                ${formatNumber(sousTotal)} FCFA
+            </td>
+            <td class="p-2 text-center">
+                <button type="button" class="text-red-500" onclick="removeRow(this)">
+                    <i class="fa-solid fa-trash"></i>
+                </button>
+            </td>
+        </tr>
+    `;
+}
+
+function escapeHtml(value) {
+    return String(value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+
+async function searchProduits(term = "") {
+    const params = new URLSearchParams({
+        limit: "20",
+        page: "1",
+        search: term
+    });
+
+    const response = await fetch(`../php/post_read_produit.php?${params.toString()}`);
+    const result = await response.json();
+    return result.produits || [];
+}
+
+function updateProduitDatalist(row, produits = []) {
+    const datalist = row.querySelector(".produit-datalist");
+    if (!datalist) {
+        return;
+    }
+
+    datalist.innerHTML = "";
+
+    produits.forEach((produit) => {
+        produitCache.set(String(produit.id), produit);
+
+        const option = document.createElement("option");
+        option.value = produit.nom;
+        option.label = `${produit.code_barre || "Sans code"} | ${formatNumber(Number(produit.prix_vente) || 0)} FCFA`;
+        option.dataset.id = produit.id;
+        option.dataset.nom = produit.nom;
+        option.dataset.prix = produit.prix_vente;
+        option.dataset.codeBarre = produit.code_barre || "";
+        datalist.appendChild(option);
     });
 }
 
-// Event delegation for dynamic elements
-document.addEventListener("change", function(e) {
-    if (e.target.classList.contains("produit-select")) {
-        const row = e.target.closest("tr");
-        const selectedOption = e.target.options[e.target.selectedIndex];
-        const prixInput = row.querySelector(".prix-input");
-        
-        if (selectedOption.dataset.prix) {
-            prixInput.value = selectedOption.dataset.prix;
+function getProduitFromRowSelection(row) {
+    const produitInput = row.querySelector(".produit-search");
+    const datalist = row.querySelector(".produit-datalist");
+    const produitIdInput = row.querySelector(".produit-id-input");
+
+    if (!produitInput || !datalist || !produitIdInput) {
+        return null;
+    }
+
+    const selectedOption = Array.from(datalist.options).find(
+        (option) => option.value.trim().toLowerCase() === produitInput.value.trim().toLowerCase()
+    );
+
+    if (selectedOption) {
+        return {
+            id: selectedOption.dataset.id,
+            nom: selectedOption.dataset.nom || selectedOption.value,
+            prix_vente: Number(selectedOption.dataset.prix) || 0,
+            code_barre: selectedOption.dataset.codeBarre || ""
+        };
+    }
+
+    if (produitIdInput.value && produitCache.has(produitIdInput.value)) {
+        const cached = produitCache.get(produitIdInput.value);
+        if (cached.nom.trim().toLowerCase() === produitInput.value.trim().toLowerCase()) {
+            return cached;
         }
+    }
+
+    return null;
+}
+
+function setProduitOnRow(row, produit) {
+    const produitInput = row.querySelector(".produit-search");
+    const produitIdInput = row.querySelector(".produit-id-input");
+    const prixInput = row.querySelector(".prix-input");
+    const produitMeta = row.querySelector(".produit-meta");
+
+    if (!produitInput || !produitIdInput || !prixInput || !produitMeta) {
+        return;
+    }
+
+    if (!produit) {
+        produitIdInput.value = "";
+        prixInput.value = 0;
+        produitMeta.textContent = "Aucun produit valide selectionne";
+        updateSousTotal(row);
+        updateTotal();
+        return;
+    }
+
+    produitCache.set(String(produit.id), produit);
+    produitInput.value = produit.nom || "";
+    produitIdInput.value = produit.id;
+    prixInput.value = Number(produit.prix_vente) || 0;
+    produitMeta.textContent = `Selectionne: ${produit.nom} | Prix catalogue: ${formatNumber(Number(produit.prix_vente) || 0)} FCFA`;
+    updateSousTotal(row);
+    updateTotal();
+}
+
+async function handleProduitSearchInput(input) {
+    const row = input.closest("tr");
+    if (!row) {
+        return;
+    }
+
+    const matchedProduit = getProduitFromRowSelection(row);
+    if (matchedProduit) {
+        setProduitOnRow(row, matchedProduit);
+        return;
+    }
+
+    const produitIdInput = row.querySelector(".produit-id-input");
+    const produitMeta = row.querySelector(".produit-meta");
+    const prixInput = row.querySelector(".prix-input");
+    const term = input.value.trim();
+
+    if (produitIdInput) {
+        produitIdInput.value = "";
+    }
+
+    if (prixInput) {
+        prixInput.value = 0;
         updateSousTotal(row);
         updateTotal();
     }
-    
+
+    if (term.length < 2) {
+        updateProduitDatalist(row, defaultCommandeProduits);
+        if (produitMeta) {
+            produitMeta.textContent = "Saisissez au moins 2 caracteres";
+        }
+        return;
+    }
+
+    if (produitMeta) {
+        produitMeta.textContent = "Recherche en cours...";
+    }
+
+    clearTimeout(input._produitSearchTimer);
+    input._produitSearchTimer = setTimeout(async () => {
+        try {
+            const produits = await searchProduits(term);
+            updateProduitDatalist(row, produits);
+            if (produitMeta) {
+                produitMeta.textContent = produits.length
+                    ? `${produits.length} suggestion(s) disponibles`
+                    : "Aucun produit correspondant";
+            }
+        } catch (error) {
+            console.error("Error searching produits:", error);
+            if (produitMeta) {
+                produitMeta.textContent = "Erreur lors de la recherche";
+            }
+        }
+    }, 250);
+}
+
+function applyProduitSelection(input) {
+    const row = input.closest("tr");
+    if (!row) {
+        return;
+    }
+
+    const produit = getProduitFromRowSelection(row);
+    setProduitOnRow(row, produit);
+}
+
+// Event delegation for dynamic elements
+document.addEventListener("input", function(e) {
+    if (e.target.classList.contains("client-search")) {
+        handleClientSearchInput(e.target);
+    }
+
+    if (e.target.classList.contains("produit-search")) {
+        handleProduitSearchInput(e.target);
+    }
+
     if (e.target.classList.contains("prix-input") || e.target.classList.contains("quantite-input")) {
         const row = e.target.closest("tr");
         updateSousTotal(row);
         updateTotal();
     }
 });
+
+document.addEventListener("change", function(e) {
+    if (e.target.classList.contains("client-search")) {
+        applyClientSelection();
+    }
+
+    if (e.target.classList.contains("produit-search")) {
+        applyProduitSelection(e.target);
+    }
+
+    if (e.target.classList.contains("prix-input") || e.target.classList.contains("quantite-input")) {
+        const row = e.target.closest("tr");
+        updateSousTotal(row);
+        updateTotal();
+    }
+});
+
+document.addEventListener("focus", function(e) {
+    if (e.target.classList.contains("client-search")) {
+        const datalist = document.querySelector(".client-datalist");
+        if (datalist && !datalist.options.length) {
+            updateClientDatalist(defaultCommandeClients);
+        }
+    }
+
+    if (e.target.classList.contains("produit-search")) {
+        const row = e.target.closest("tr");
+        const datalist = row?.querySelector(".produit-datalist");
+        if (row && datalist && !datalist.options.length) {
+            updateProduitDatalist(row, defaultCommandeProduits);
+        }
+    }
+}, true);
+
+document.addEventListener("blur", function(e) {
+    if (e.target.classList.contains("client-search")) {
+        applyClientSelection();
+    }
+
+    if (e.target.classList.contains("produit-search")) {
+        applyProduitSelection(e.target);
+    }
+}, true);
 
 function updateSousTotal(row) {
     const prix = parseFloat(row.querySelector(".prix-input").value) || 0;
@@ -254,8 +574,8 @@ function updateTotal() {
 }
 
 async function saveCommande() {
-    const clientSelect = document.querySelector(".client-select");
-    const id_client = clientSelect ? clientSelect.value : null;
+    const clientIdInput = document.querySelector(".client-id-input");
+    const id_client = clientIdInput ? clientIdInput.value : null;
     
     if (!id_client) {
         alert("Veuillez sélectionner un client");
@@ -267,8 +587,8 @@ async function saveCommande() {
     const produitsData = [];
     
     rows.forEach(row => {
-        const produitSelect = row.querySelector(".produit-select");
-        const id_produit = produitSelect ? produitSelect.value : null;
+        const produitIdInput = row.querySelector(".produit-id-input");
+        const id_produit = produitIdInput ? produitIdInput.value : null;
         const prix = parseFloat(row.querySelector(".prix-input").value) || 0;
         const quantite = parseInt(row.querySelector(".quantite-input").value) || 0;
         
@@ -324,27 +644,127 @@ async function saveCommande() {
     }
 }
 
-async function loadCommandes(search = "", etat = "") {
+let currentCommandePage = 1;
+let currentCommandeSearch = '';
+let currentCommandeEtat = '';
+
+async function loadCommandes(search = '', etat = '', page = 1) {
+    const paginationEl = document.getElementById("paginationCommandes");
+    
+    currentCommandePage = page;
+    currentCommandeSearch = search || '';
+    currentCommandeEtat = etat || '';
+    
     try {
-        const params = new URLSearchParams();
-        params.append("search", search);
-        if (etat) params.append("etat", etat);
-        
-        const response = await fetch("../php/post_read_commande.php?" + params.toString(), {
-            method: "GET"
+        const params = new URLSearchParams({
+            page: page,
+            limit: 10,
+            search: currentCommandeSearch,
+            etat: currentCommandeEtat
         });
         
+        const response = await fetch("../php/post_read_commande.php?" + params.toString());
         const result = await response.json();
         
         if (result.success) {
-       
             displayCommandes(result.commandes || []);
+            handlePendingCommandeFocus(result.commandes || []);
             updateCounts(result.counts || { en_cours: 0, cloturee: 0, annulee: 0 });
+            
+            // Render pagination
+            if (paginationEl && result.total_pages > 1) {
+                renderCommandesPagination(result.total_pages, result.current_page);
+            } else if (paginationEl) {
+                paginationEl.innerHTML = '';
+            }
+            
             totalCommande();
         }
     } catch (error) {
         console.error("Error loading commandes:", error);
     }
+}
+
+function handlePendingCommandeFocus(commandes = []) {
+    if (!pendingCommandeId || pendingCommandeHandled) {
+        return;
+    }
+
+    const targetCommande = commandes.find((commande) => Number(commande.id) === Number(pendingCommandeId));
+    if (!targetCommande) {
+        return;
+    }
+
+    pendingCommandeHandled = true;
+
+    setTimeout(() => {
+        const row = document.querySelector(`[data-commande-id="${pendingCommandeId}"]`);
+        if (row) {
+            row.classList.add("bg-blue-50");
+            row.scrollIntoView({ behavior: "smooth", block: "center" });
+        }
+        viewCommande(pendingCommandeId);
+    }, 150);
+
+    const url = new URL(window.location.href);
+    url.searchParams.delete("commande");
+    window.history.replaceState({}, "", url.toString());
+}
+
+function renderCommandesPagination(totalPages, currentPage) {
+    const paginationEl = document.getElementById("paginationCommandes");
+    if (!paginationEl) return;
+    
+    paginationEl.innerHTML = '';
+    
+    // Previous
+    const prevBtn = document.createElement('button');
+    prevBtn.innerHTML = '&laquo; Préc';
+    prevBtn.className = 'px-3 py-2 text-sm font-medium rounded-lg dark:bg-slate-600/50 dark:hover:bg-slate-500 bg-gray-200 hover:bg-gray-300 transition';
+    prevBtn.disabled = currentPage <= 1;
+    prevBtn.onclick = () => loadCommandes(currentCommandeSearch, currentCommandeEtat, currentPage - 1);
+    paginationEl.appendChild(prevBtn);
+    
+    // Pages
+    const delta = 2;
+    const range = [];
+    for (let i = Math.max(2, currentPage - delta); i <= Math.min(totalPages - 1, currentPage + delta); i++) {
+        range.push(i);
+    }
+    
+    if (currentPage - delta > 2) {
+        const firstBtn = document.createElement('button');
+        firstBtn.textContent = '1';
+        firstBtn.className = 'px-3 py-2 text-sm font-medium rounded-lg dark:bg-slate-600/50 dark:hover:bg-slate-500 bg-gray-200 hover:bg-gray-300';
+        firstBtn.onclick = () => loadCommandes(currentCommandeSearch, currentCommandeEtat, 1);
+        paginationEl.appendChild(firstBtn);
+        if (currentPage - delta > 3) paginationEl.appendChild(document.createTextNode('...'));
+    }
+    
+    range.forEach(i => {
+        const btn = document.createElement('button');
+        btn.textContent = i;
+        btn.className = `px-3 py-2 text-sm font-medium rounded-lg ${i === currentPage ? 'bg-blue-600 text-white dark:bg-slate-500 shadow-md' : 'dark:bg-slate-600/50 dark:hover:bg-slate-500 bg-gray-200 hover:bg-gray-300'}`;
+        btn.onclick = () => loadCommandes(currentCommandeSearch, currentCommandeEtat, i);
+        paginationEl.appendChild(btn);
+    });
+    
+    if (currentPage + delta < totalPages - 1) {
+        if (currentPage + delta < totalPages - 2) paginationEl.appendChild(document.createTextNode('...'));
+        const lastBtn = document.createElement('button');
+        lastBtn.textContent = totalPages;
+        lastBtn.className = 'px-3 py-2 text-sm font-medium rounded-lg dark:bg-slate-600/50 dark:hover:bg-slate-500 bg-gray-200 hover:bg-gray-300';
+        lastBtn.onclick = () => loadCommandes(currentCommandeSearch, currentCommandeEtat, totalPages);
+        paginationEl.appendChild(lastBtn);
+    }
+    
+    // Next
+    const nextBtn = document.createElement('button');
+    nextBtn.innerHTML = 'Suiv &raquo;';
+    nextBtn.className = 'px-3 py-2 text-sm font-medium rounded-lg dark:bg-slate-600/50 dark:hover:bg-slate-500 bg-gray-200 hover:bg-gray-300 transition';
+    nextBtn.disabled = currentPage >= totalPages;
+    nextBtn.onclick = () => loadCommandes(currentCommandeSearch, currentCommandeEtat, currentPage + 1);
+    paginationEl.appendChild(nextBtn);
 }
 
 function displayCommandes(commandes) {
@@ -359,6 +779,7 @@ function displayCommandes(commandes) {
         
         const tr = document.createElement("tr");
         tr.className = "border-b hover:bg-gray-50";
+        tr.dataset.commandeId = cmd.id;
         tr.innerHTML = `
             <td class="p-3 font-medium">CMD-${String(cmd.id).padStart(3, '0')}</td>
             <td class="p-3">${cmd.client_nom || 'N/A'}</td>
@@ -513,64 +934,40 @@ async function editCommande(id) {
             const cmd = result.commande;
             
             // Load form data
+            defaultCommandeClients = await searchClients("");
+            defaultCommandeProduits = await searchProduits("");
             await loadClientsForSelect();
-            await loadProduitsForSelect();
             
             // Set client
-            const clientSelect = document.querySelector(".client-select");
-            if (clientSelect) {
-                clientSelect.value = cmd.id_client;
-            }
+            setSelectedClient({
+                id: cmd.id_client,
+                nom: cmd.client?.nom || "",
+                telephone: cmd.client?.telephone || "",
+                adresse: cmd.client?.adresse || ""
+            });
             
             // Clear and populate products
             commandeBody.innerHTML = "";
             
             if (cmd.details && cmd.details.length > 0) {
-                cmd.details.forEach((detail, index) => {
-                    const row = `
-                        <tr>
-                            <td class="p-2">
-                                <select class="w-full border rounded-md px-2 py-1 produit-select" data-selected="${detail.id_produit}">
-                                    <option value="">Sélectionner un produit</option>
-                                </select>
-                            </td>
-                            <td class="p-2">
-                                <input type="number" class="w-full border rounded-md px-2 py-1 prix-input" value="${detail.prix}" min="0">
-                            </td>
-                            <td class="p-2">
-                                <input type="number" class="w-full border rounded-md px-2 py-1 quantite-input" value="${detail.quantite}" min="1">
-                            </td>
-                            <td class="p-2 text-center font-medium sous-total">
-                                ${formatNumber(detail.sous_total)} FCFA
-                            </td>
-                            <td class="p-2 text-center">
-                                <button type="button" class="text-red-500" onclick="removeRow(this)">
-                                    <i class="fa-solid fa-trash"></i>
-                                </button>
-                            </td>
-                        </tr>
-                    `;
-                    commandeBody.insertAdjacentHTML("beforeend", row);
+                cmd.details.forEach((detail) => {
+                    const produit = {
+                        id: detail.id_produit,
+                        nom: detail.produit_nom || "",
+                        prix_vente: detail.prix,
+                        code_barre: detail.code_barre || ""
+                    };
+                    produitCache.set(String(detail.id_produit), produit);
+                    commandeBody.insertAdjacentHTML("beforeend", buildProductRow({
+                        id: detail.id_produit,
+                        nom: detail.produit_nom || "",
+                        prix: detail.prix,
+                        quantite: detail.quantite
+                    }));
                 });
-                
-                // Update selects with products and set selected values
-                setTimeout(() => {
-                    const selects = document.querySelectorAll(".produit-select");
-                    selects.forEach((select, idx) => {
-                        const detail = cmd.details[idx];
-                        // Populate products
-                        produits.forEach(produit => {
-                            const option = document.createElement("option");
-                            option.value = produit.id;
-                            option.textContent = produit.nom;
-                            option.dataset.prix = produit.prix_vente;
-                            select.appendChild(option);
-                        });
-                        // Set selected
-                        select.value = detail.id_produit;
-                    });
-                    updateTotal();
-                }, 100);
+                updateTotal();
+            } else {
+                commandeBody.innerHTML = buildProductRow();
             }
             
             // Show modal
@@ -601,7 +998,14 @@ async function clotureCommande(id) {
         const result = await response.json();
         
         if (result.success) {
-            alert("Commande clôturée avec succès! Facture générée.");
+            let successMessage = "Commande clôturée avec succès! Facture générée.";
+            if (Array.isArray(result.low_stock_products) && result.low_stock_products.length > 0) {
+                const produitsAlert = result.low_stock_products
+                    .map((produit) => `${produit.nom} (${produit.quantite} restant(s), seuil ${produit.seuil})`)
+                    .join("\n");
+                successMessage += `\n\nAlerte stock bas:\n${produitsAlert}`;
+            }
+            alert(successMessage);
             loadCommandes();
             totalCommande();
             fidelite()

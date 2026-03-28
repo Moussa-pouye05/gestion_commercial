@@ -38,6 +38,7 @@ session_start();
   </main>
 
   <script src="../js/script.js"></script>
+  <script src="../js/notifications.js"></script>
   <script src="../js/accueil_vendeur.js"></script>
 
   <script src="../js/commande.js"></script>

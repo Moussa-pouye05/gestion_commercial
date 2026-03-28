@@ -66,7 +66,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (isVendeurPage) {
         loadVendeur(currentPage);
     }
-
+    
     if (isVendeurPage && searchInputUser) {
         searchInputUser.addEventListener("input", (e) => {
             const value = e.target.value || "";
@@ -104,7 +104,7 @@ async function loadVendeur(page = 1, search = currentSearch) {
                     <span><img src="${profileSrc}" class="w-10 h-10 rounded-full object-cover" alt="photo"/></span>
                     <span class="ml-2 font-medium">${item.nom}</span>
                 </td>
-                <td class="font-medium text-gray-900">${item.email}</td>
+                <td class="font-medium">${item.email}</td>
                 <td>${item.telephone}</td>
                 <td>
                     ${item.role === 'vendeur' ? `
@@ -219,7 +219,7 @@ async function editVendeur() {
         }
 
         if (data.success) {
-            await loadVendeur(currentPage, currentSearch);
+                await loadVendeur(currentPage, currentSearch);
             setTimeout(() => {
                 if (!modalEditVendeur) return;
                 modalEditVendeur.classList.add("hidden");
@@ -241,6 +241,7 @@ if (cancelEditVendeur && modalEditVendeur) {
         modalEditVendeur.classList.remove("flex", "hide");
     });
 }
+
 
 let vendeurToDelete = null;
 

@@ -213,9 +213,20 @@
     <div class="grid md:grid-cols-1 gap-4 mb-6">
         <div>
             <label class="text-sm text-gray-600">Client</label>
-            <select class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 client-select" id="clientSelect" required>
-                <option value="">Choisir un client</option>
-            </select>
+            <div class="space-y-1">
+                <input
+                    type="text"
+                    id="clientSearch"
+                    class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 client-search"
+                    placeholder="Rechercher un client..."
+                    autocomplete="off"
+                    list="clientOptions"
+                    required
+                >
+                <input type="hidden" class="client-id-input" id="clientIdInput">
+                <datalist id="clientOptions" class="client-datalist"></datalist>
+                <div class="text-[11px] text-gray-500 client-meta">Saisissez au moins 2 caracteres</div>
+            </div>
         </div>
     </div>
 
@@ -237,9 +248,17 @@
 
                 <tr>
                     <td class="p-2">
-                        <select class="w-full border rounded-md px-2 py-1 produit-select">
-                            <option value="">Produit</option>
-                        </select>
+                        <div class="space-y-1">
+                            <input
+                                type="text"
+                                class="w-full border rounded-md px-2 py-1 produit-search"
+                                placeholder="Rechercher un produit..."
+                                autocomplete="off"
+                            >
+                            <input type="hidden" class="produit-id-input">
+                            <datalist class="produit-datalist"></datalist>
+                            <div class="text-[11px] text-gray-500 produit-meta">Saisissez au moins 2 caracteres</div>
+                        </div>
                     </td>
 
                     <td class="p-2">
@@ -301,27 +320,18 @@
 <div class="bg-white shadow-lg rounded-2xl p-4 mt-4 mb-4">
     
     <!-- Titre -->
-    <div class="flex justify-between items-center mb-4">
-            <h2 class="text-xl font-semibold text-gray-700">10 derniers commandes</h2>
-            <select 
-                name="etat" 
-                id="etatFilter"
-                class="bg-gray-50 border border-gray-200 
-                       text-sm px-4 py-2 rounded-xl 
-                       focus:outline-none focus:ring-2 focus:ring-blue-400 transition">
-                <option value="">Toutes Commandes</option>
+    <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-4">
+        <h2 class="text-xl font-semibold text-gray-700 dark:text-slate-200">Liste des commandes</h2>
+        <div class="flex items-center gap-2">
+            <select name="etat" id="etatFilter" class="bg-gray-50 border border-gray-200 text-sm px-4 py-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400 transition dark:bg-slate-700/50 dark:border-slate-600 dark:text-slate-200">
+                <option value="">Toutes</option>
                 <option value="en_cours">En cours</option>
+                <option value="cloturee">Clôturées</option>
+                <option value="annulee">Annulées</option>
             </select>
-            <select 
-                name="days" 
-                id="days"
-                class="bg-gray-50 border border-gray-200 
-                       text-sm px-4 py-2 rounded-xl 
-                       focus:outline-none focus:ring-2 focus:ring-blue-400 transition">
-                <option value="">Derniers 30 jours</option>
-                <option value="">Test</option>
-            </select>
+        </div>
     </div>
+    <div id="paginationCommandes" class="flex gap-2 mt-4 justify-center mb-4"></div>
 
     <!-- Responsive wrapper -->
     <div class="overflow-x-auto">
@@ -347,6 +357,11 @@
     </div>
 </div>
 <?php endif?>
+</xai:function_call >
+
+
+
+
 <?php if($_SESSION['user']['role'] === "vendeur"):  ?>
 <div class="bg-white shadow-lg rounded-2xl p-4 mt-4 mb-4">
     

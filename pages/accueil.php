@@ -91,6 +91,19 @@
 
   <!-- Recent Orders + Stock Alerts -->
   <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <!-- Admin Profile Section -->
+<!-- <div class="lg:col-span-3">
+      <div class="bg-white rounded-xl border border-gray-200 p-6 shadow-[0_4px_15px_-3px_rgba(0,0,0,0.1)]">
+        <div class="flex flex-col lg:flex-row gap-6 lg:items-center justify-between">
+          <div class="flex items-center gap-4">
+            
+            
+          </div>
+          
+        </div>
+      </div>
+    </div> -->
+
     <div class="section-card lg:col-span-2 bg-white rounded-xl border border-gray-200 p-4 sm:p-5 shadow-[0_4px_15px_-3px_rgba(0,0,0,0.1)]">
       <p class="section-title text-gray-800 font-semibold mb-4 flex items-center gap-2">
         <i class="fas fa-clock text-blue-500"></i>

@@ -38,7 +38,6 @@ if (!$id) {
 //$pdo = getConnection();
 
 try {
-
     $commandeManager = new CommandeManager($pdo);
 
 

@@ -3,6 +3,7 @@ session_start();
 require_once "../config/config.php";
 require_once "../classes/Commande.php";
 require_once "../classes/CommandeManager.php";
+require_once "../classes/NotificationManager.php";
 
 header('Content-Type: application/json');
 
@@ -58,6 +59,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     $result = $commandeManager->createCommande($commande, $details);
+
+    if (!empty($result['success']) && (($_SESSION['user']['role'] ?? '') === 'vendeur')) {
+        try {
+            $notificationManager = new NotificationManager($pdo);
+            $notificationManager->ensureTable();
+            $reference = 'CMD-' . str_pad((string) ($result['id'] ?? 0), 3, '0', STR_PAD_LEFT);
+            $notificationManager->createAdminNotification('commande_vendeur', [
+                'title' => 'Nouvelle commande créée',
+                'message' => sprintf(
+                    '%s a créé la commande %s pour un montant de %s FCFA.',
+                    $_SESSION['user']['nom'] ?? 'Un vendeur',
+                    $reference,
+                    number_format($total, 0, ',', ' ')
+                ),
+                'reference' => $reference,
+                'commande_id' => $result['id'] ?? null,
+                'vendeur_nom' => $_SESSION['user']['nom'] ?? 'Vendeur',
+                'total' => $total
+            ], (int) $_SESSION['user']['id']);
+        } catch (Throwable $e) {
+            error_log('Notification commande vendeur: ' . $e->getMessage());
+        }
+    }
+
     echo json_encode($result);
 } else {
     echo json_encode(['success' => false, 'message' => 'Méthode non autorisée']);

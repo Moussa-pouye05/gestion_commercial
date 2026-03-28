@@ -9,31 +9,31 @@
 // });
 //menu
 const menu = document.querySelector(".menu");
-const sidebar = document.querySelector(".sidebar");
+const sidbare = document.querySelector(".sidebar");
 const closeId = document.querySelector("#closeSidebar");
 const section = document.querySelector("section");
 
-if (menu && sidebar && closeId && section) {
+if (menu && sidbare && closeId && section) {
     closeId.addEventListener("click", () => {
-       sidebar.classList.add("w-0");
-       sidebar.classList.add("sm:w-0");
-       sidebar.classList.remove("w-[50%]");
-       sidebar.classList.remove("sm:w-[40%]");
+       sidbare.classList.add("w-0");
+       sidbare.classList.add("sm:w-0");
+       sidbare.classList.remove("w-[50%]");
+       sidbare.classList.remove("sm:w-[40%]");
     });
 
     menu.addEventListener("click", () => {
-       sidebar.classList.remove("w-0");
-       sidebar.classList.remove("sm:w-0");
-       sidebar.classList.add("w-[50%]");
-       sidebar.classList.add("sm:w-[40%]");
+       sidbare.classList.remove("w-0");
+       sidbare.classList.remove("sm:w-0");
+       sidbare.classList.add("w-[50%]");
+       sidbare.classList.add("sm:w-[40%]");
     });
 
     section.addEventListener("click", (e) =>{
-        if(!sidebar.contains(e.target)){
-            sidebar.classList.add("w-0");
-            sidebar.classList.add("sm:w-0");
-            sidebar.classList.remove("w-[50%]");
-            sidebar.classList.remove("sm:w-[40%]");
+        if(!sidbare.contains(e.target)){
+            sidbare.classList.add("w-0");
+            sidbare.classList.add("sm:w-0");
+            sidbare.classList.remove("w-[50%]");
+            sidbare.classList.remove("sm:w-[40%]");
         }
     });
 }
@@ -194,20 +194,31 @@ async function loadDashboard() {
                 maintainAspectRatio: false,
                 interaction: { intersect: false },
                 scales: {
-                  x: { grid: { color: 'rgba(0,0,0,0.05)' } },
+                  x: { 
+                    grid: { 
+                      color: document.documentElement.classList.contains('dark') ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)'
+                    } 
+                  },
                   y: {
                     beginAtZero: true,
-                    grid: { color: 'rgba(0,0,0,0.05)' },
+                    grid: { 
+                      color: document.documentElement.classList.contains('dark') ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)' 
+                    },
                     ticks: { 
                       callback: (v) => formatNumberFR(v) + ' FCFA',
-                      color: '#6B7280'
+                      color: document.documentElement.classList.contains('dark') ? '#9CA3AF' : '#6B7280'
                     }
                   }
                 },
                 plugins: {
-                  legend: { display: false },
+                  legend: { 
+                    display: false,
+                    labels: {
+                      color: document.documentElement.classList.contains('dark') ? '#9CA3AF' : '#6B7280'
+                    }
+                  },
                   tooltip: {
-                    backgroundColor: 'rgba(0,0,0,0.8)',
+                    backgroundColor: document.documentElement.classList.contains('dark') ? 'rgba(51,65,85,0.95)' : 'rgba(0,0,0,0.8)',
                     titleColor: '#fff',
                     bodyColor: '#fff',
                     callbacks: {
@@ -266,7 +277,9 @@ const ctxCategory = document.getElementById('categoryChart');
       plugins: {
         legend: { display: false },
         tooltip: {
-          backgroundColor: 'rgba(0,0,0,0.8)',
+          backgroundColor: document.documentElement.classList.contains('dark') ? 'rgba(51,65,85,0.95)' : 'rgba(0,0,0,0.8)',
+          titleColor: document.documentElement.classList.contains('dark') ? '#F9FAFB' : '#fff',
+          bodyColor: document.documentElement.classList.contains('dark') ? '#F9FAFB' : '#fff',
           callbacks: {
             label: function(ctx) {
               const total = ctx.dataset.data.reduce((a, b) => a + b, 0);
@@ -285,7 +298,7 @@ const ctxCategory = document.getElementById('categoryChart');
 
         ctx.save();
         ctx.font = "bold 16px sans-serif";
-        ctx.fillStyle = "#111";
+        ctx.fillStyle = document.documentElement.classList.contains('dark') ? "#F9FAFB" : "#111";
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
         ctx.fillText(formatNumberFR(total) + " FCFA", width / 2, height / 2);

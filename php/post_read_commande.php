@@ -17,8 +17,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' || $_SERVER['REQUEST_METHOD'] === 'GET
 
     $search = isset($_GET['search']) ? $_GET['search'] : '';
     $etat = isset($_GET['etat']) ? $_GET['etat'] : '';
-    $limit = isset($_GET['limit']) ? (int)$_GET['limit'] : 10;
-    $offset = isset($_GET['offset']) ? (int)$_GET['offset'] : 0;
+$page = isset($_GET['page']) ? max(1, (int)$_GET['page']) : 1;
+$limit = isset($_GET['limit']) ? (int)$_GET['limit'] : 10;
+$offset = ($page - 1) * $limit;
+
 
     $userId = $_SESSION['user']['role'] === 'admin' ? null : (int) $_SESSION['user']['id'];
 

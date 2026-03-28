@@ -5,7 +5,7 @@
 ?>
 <!-- header.php -->
 <header>
-  <div class="fixed top-0 z-20 right-0 left-0 flex h-16 items-center justify-between border-b border-slate-200/80 bg-white px-4 shadow-lg transition-all duration-300 dark:border-slate-600/80 dark:bg-slate-700 dark:shadow-slate-950/20 md:left-[280px]">
+  <div class="fixed top-0 z-20 right-0 left-0 flex  h-16 items-center justify-between border-b border-slate-200/80 bg-white px-4 shadow-lg transition-all duration-300 dark:border-slate-600/80 dark:bg-slate-700 dark:shadow-slate-950/20 md:left-[280px]">
     
     <!-- Menu Toggle Mobile -->
     <button id="menu-toggle" type="button" class="flex h-10 w-10 items-center justify-center rounded-lg transition hover:bg-gray-100 dark:hover:bg-slate-600 md:hidden">
@@ -52,25 +52,21 @@
       
       <!-- Notifications -->
       <div class="relative">
-        <button id="notif-btn" type="button" class="relative flex h-10 w-10 items-center justify-center rounded-lg transition hover:bg-gray-100 dark:hover:bg-slate-600">
+        <button id="notif-btn" type="button" data-role="<?= htmlspecialchars($_SESSION['user']['role'] ?? 'vendeur') ?>" class="relative flex h-10 w-10 items-center justify-center rounded-lg transition hover:bg-gray-100 dark:hover:bg-slate-600">
           <i class="fa-solid fa-bell text-xl text-gray-600 dark:text-slate-300"></i>
-          <span class="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full animate-pulse"></span>
+          <span id="notif-dot" class="absolute top-1 right-1 hidden h-2 w-2 rounded-full bg-red-500 animate-pulse"></span>
+          <span id="notif-count" class="absolute -right-1 -top-1 hidden min-w-[18px] rounded-full bg-red-500 px-1.5 py-0.5 text-[10px] font-bold leading-none text-white"></span>
         </button>
         
         <!-- Dropdown Notifications -->
         <div id="notif-dropdown" class="absolute right-0 z-30 mt-2 hidden w-80 rounded-xl border border-gray-100 bg-white shadow-2xl dark:border-slate-600 dark:bg-slate-700">
-          <div class="border-b border-gray-100 p-3 dark:border-slate-600">
+          <div class="flex items-center justify-between border-b border-gray-100 p-3 dark:border-slate-600">
             <h3 class="font-semibold text-gray-800 dark:text-slate-100">Notifications</h3>
+            <span class="text-[11px] text-slate-400">Admin</span>
           </div>
-          <div class="max-h-80 overflow-y-auto">
-            <div class="cursor-pointer p-3 transition hover:bg-gray-50 dark:hover:bg-slate-600/50">
-              <p class="text-sm text-gray-600 dark:text-slate-300">Nouvelle commande #CMD-015</p>
-              <p class="mt-1 text-xs text-gray-400 dark:text-slate-500">Il y a 5 minutes</p>
-            </div>
-            <div class="cursor-pointer p-3 transition hover:bg-gray-50 dark:hover:bg-slate-600/50">
-              <p class="text-sm text-gray-600 dark:text-slate-300">Stock faible: iPhone 13</p>
-              <p class="mt-1 text-xs text-gray-400 dark:text-slate-500">Il y a 1 heure</p>
-            </div>
+          <div id="notif-list" class="max-h-80 overflow-y-auto"></div>
+          <div id="notif-empty" class="hidden p-4 text-sm text-slate-500">
+            Aucune notification pour le moment.
           </div>
         </div>
       </div>
@@ -107,10 +103,10 @@
             </div>
           </div>
           <div class="py-2">
-            <a href="#" class="flex items-center gap-3 px-4 py-2 text-sm text-gray-600 transition hover:bg-gray-50 dark:text-slate-300 dark:hover:bg-slate-600/50">
+            <a href="#" onclick="alert('Fonctionnalité Mon Profil à implémenter')" class="flex items-center gap-3 px-4 py-2 text-sm text-gray-600 transition hover:bg-gray-50 dark:text-slate-300 dark:hover:bg-slate-600/50">
               <i class="fa-solid fa-user"></i> Mon profil
             </a>
-            <a href="#" class="flex items-center gap-3 px-4 py-2 text-sm text-gray-600 transition hover:bg-gray-50 dark:text-slate-300 dark:hover:bg-slate-600/50">
+            <a href="#" onclick="alert('Fonctionnalité Paramètres à implémenter')" class="flex items-center gap-3 px-4 py-2 text-sm text-gray-600 transition hover:bg-gray-50 dark:text-slate-300 dark:hover:bg-slate-600/50">
               <i class="fa-solid fa-gear"></i> Paramètres
             </a>
           </div>
@@ -128,14 +124,14 @@
 <script>
   // Toggle menu mobile
   const menuToggle = document.getElementById('menu-toggle');
-  const sidbare = document.getElementById('sidebar');
+  const sidebar = document.getElementById('sidebar');
   
   if (menuToggle) {
     menuToggle.addEventListener('click', function() {
-      if (sidbare.style.width === '280px') {
-        sidbare.style.width = '0';
+      if (sidebar.style.width === '280px') {
+        sidebar.style.width = '0';
       } else {
-        sidbare.style.width = '280px';
+        sidebar.style.width = '280px';
       }
     });
   }

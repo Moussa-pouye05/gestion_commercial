@@ -99,7 +99,7 @@ async function loadClient(page = 1, search = currentSearchClient) {
                 <td class="flex items-center mt-2">
                     ${item.nom}
                 </td>
-                <td class="px-6 py-2 font-medium text-gray-900">${item.telephone}</td>
+                <td class="px-6 py-2 font-medium">${item.telephone}</td>
                 <td class="px-6 py-2">${item.adresse}</td>
                 
                 <td class="px-6 py-2 flex gap-2">
