@@ -11,14 +11,14 @@
 <section class="mt-2 p-2">
         <div class="text-2xl font-bold text-slate-600 my-2">Clients/</div>
         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-8 ">
-             <div class="h-20 flex-1 rounded-xl shadow-sm border border-gray-200 dark:bg-slate-800 dark:border-slate-700 flex items-center justify-between px-4 sm:px-6 md:px-8 lg:px-8 gap-4">
+             <div class="h-20 flex-1 rounded-xl shadow-sm bg-white border border-gray-200 dark:bg-slate-500 dark:border-slate-700 flex items-center justify-between px-4 sm:px-6 md:px-8 lg:px-8 gap-4">
                <i class="fa-solid fa-users text-blue-500 text-2xl"></i>
                <div>
                      <p class="text-sm text-gray-500 dark:text-slate-400">Total clients</p>
                      <p class="total-client text-xl font-bold text-gray-900 dark:text-slate-100">0</p>
                </div>
              </div>    
-             <div class="h-20 flex-1 rounded-xl shadow-sm border border-gray-200 dark:bg-slate-800 dark:border-slate-700 flex items-center justify-between gap-4 px-4 sm:px-6 md:px-8 lg:px-6">
+             <div class="h-20 flex-1 rounded-xl shadow-sm bg-white border border-gray-200 dark:bg-slate-800 dark:border-slate-700 flex items-center justify-between gap-4 px-4 sm:px-6 md:px-8 lg:px-6">
                 <i class="fa-solid fa-user-check text-green-500 text-2xl"></i>
                 <div>
                      <p class="text-sm text-gray-500 dark:text-slate-400">Clients actifs</p>
@@ -26,7 +26,7 @@
                 </div>
              </div>    
                  
-             <div class="h-20 flex-1 rounded-xl shadow-sm border border-gray-200 dark:bg-slate-800 dark:border-slate-700 flex items-center justify-between gap-4 px-4 sm:px-6 md:px-8 lg:px-6">
+             <div class="h-20 flex-1 rounded-xl shadow-sm bg-white border border-gray-200 dark:bg-slate-800 dark:border-slate-700 flex items-center justify-between gap-4 px-4 sm:px-6 md:px-8 lg:px-6">
                     <i class="fa-solid fa-star text-yellow-400 text-2xl"></i>
              <div>
                  <p class="text-sm text-gray-500 dark:text-slate-400">Fidélité</p>
@@ -103,7 +103,7 @@
     </div>
 </div>
 <div class="no-found-client text-sm text-slate-500 text-center"></div>
-<div id="paginationClient" class="flex gap-2 mt-4 justify-center [&>*]:px-3 [&>*]:py-2 [&>*]:rounded-lg [&>*]:font-medium [&>button:not(.bg-blue-600)]:bg-gray-200 [&>button:not(.bg-blue-600)]:hover:bg-gray-300 [&>button.bg-blue-600]:bg-blue-600 [&>button.bg-blue-600]:text-white [&>button]:dark:bg-slate-600/50 [&>button]:dark:text-slate-200 [&>button]:dark:hover:bg-slate-500"></div>
+<div id="paginationClient" class="flex gap-2 mt-4 justify-center [&>*]:px-3 [&>*]:py-2 [&>*]:rounded-lg [&>*]:font-medium [&>button:not(.bg-blue-600)]:bg-gray-200 [&>button:not(.bg-blue-600)]:hover:bg-gray-300 [&>button.bg-blue-600]:bg-blue-600 [&>button.bg-blue-600]:text-white [&>button]:dark:bg-slate-600/50 [&>button]:dark:text-slate-500 [&>button]:dark:hover:bg-slate-500 text-slate-500"></div>
 <div class="active fixed h-full w-full left-0 top-0 bg-black/50 items-center z-50 justify-center hidden transition-all duration-300" id="modal">
     <div class="bg-white p-6 rounded-lg w-[400px] transition-all duration-300 scale-95" id="modalContent">
         <h2 class="text-xl font-bold mb-4">Ajouter un client</h2>

@@ -76,4 +76,12 @@ class NotificationManager
     {
         return (bool) $this->pdo->exec("UPDATE admin_notifications SET read_status = 1 WHERE read_status = 0");
     }
+
+    public function deleteNotification(int $notificationId): bool
+    {
+        $stmt = $this->pdo->prepare("DELETE FROM admin_notifications WHERE id = :id LIMIT 1");
+        return $stmt->execute([
+            ':id' => $notificationId
+        ]);
+    }
 }

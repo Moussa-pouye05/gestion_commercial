@@ -120,7 +120,7 @@ try {
         " . ($whereDateAlias ? " " . $whereDateAlias : "") . "
         GROUP BY p.id
         ORDER BY qte_vendue DESC
-        LIMIT 8";
+        LIMIT 10";
     $stmt = $pdo->prepare($sqlTopProducts);
     foreach ($params as $k => $v) { $stmt->bindValue($k, $v); }
     $stmt->execute();

@@ -155,7 +155,7 @@ function generatePaginationFourn(totalPages, currentPageValue) {
     for (let i = 1; i <= totalPages; i++) {
         const btn = document.createElement("button");
         btn.textContent = i;
-        btn.className = `px-3 py-1 rounded ${i === currentPageValue ? "bg-blue-600 text-white" : "bg-gray-200"}`;
+        btn.className = `px-3 py-1 rounded ${i === currentPageValue ? "bg-blue-600 text-white" : "bg-gray-200 text-slate-500"}`;
         btn.addEventListener("click", () => loadFournisseur(i, currentSearchFourn));
         containerFourn.appendChild(btn);
     }

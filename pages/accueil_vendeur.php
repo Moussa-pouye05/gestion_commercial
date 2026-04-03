@@ -5,7 +5,7 @@ if (!isset($_SESSION['user'])) {
 }
 ?>
 <section class="mt-2">
-    <div id="vendeur-dashboard" class="space-y-6 bg-gradient-to-br from-slate-50 to-blue-50/30 p-4 md:p-6 rounded-2xl">
+    <div id="vendeur-dashboard" class="space-y-6 bg-slate-300  p-4 md:p-6 rounded-2xl">
     
     <!-- EN-TÊTE AMÉLIORÉ -->
     <div class="flex flex-col gap-4 rounded-2xl bg-white p-6 shadow-[0_8px_30px_-12px_rgba(0,0,0,0.15)] border border-slate-100 md:flex-row md:items-center md:justify-between hover:shadow-[0_20px_40px_-15px_rgba(59,130,246,0.2)] transition-all duration-300">
@@ -21,7 +21,7 @@ if (!isset($_SESSION['user'])) {
                 Suivez vos ventes, vos clients et vos commandes en temps réel
             </p>
         </div>
-        <div class="rounded-xl bg-gradient-to-br from-slate-50 to-white px-5 py-4 text-sm text-slate-600 border border-slate-200 shadow-sm min-w-[200px]">
+        <div class="rounded-xl bg-slate-300  px-5 py-4 text-sm text-slate-600 border border-slate-200 shadow-sm min-w-[200px]">
             <div class="flex items-center gap-2">
                 <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center text-blue-600">
                     <i class="fas fa-user-circle"></i>
@@ -61,7 +61,7 @@ if (!isset($_SESSION['user'])) {
     <!-- STATS CARTES AVEC DESIGN MODERNE -->
     <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <!-- Carte 1 - Chiffre d'affaires -->
-        <div class="group rounded-2xl bg-white p-6 shadow-[0_8px_30px_-12px_rgba(0,0,0,0.15)] border border-slate-100 hover:shadow-[0_20px_40px_-15px_rgba(34,197,94,0.2)] hover:border-green-200 transition-all duration-300">
+        <div class="group rounded-2xl bg-white px-6 py-2 shadow-[0_8px_30px_-12px_rgba(0,0,0,0.15)] border border-slate-100 hover:shadow-[0_20px_40px_-15px_rgba(34,197,94,0.2)] hover:border-green-200 transition-all duration-300">
             <div class="flex items-start justify-between mb-2">
                 <div class="w-10 h-10 bg-gradient-to-br from-green-500 to-green-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-green-500/20 group-hover:scale-110 transition-transform">
                     <i class="fas fa-chart-line text-lg"></i>
@@ -80,7 +80,7 @@ if (!isset($_SESSION['user'])) {
         </div>
 
         <!-- Carte 2 - Commandes -->
-        <div class="group rounded-2xl bg-white p-6 shadow-[0_8px_30px_-12px_rgba(0,0,0,0.15)] border border-slate-100 hover:shadow-[0_20px_40px_-15px_rgba(59,130,246,0.2)] hover:border-blue-200 transition-all duration-300">
+        <div class="group rounded-2xl bg-white px-6 py-2 shadow-[0_8px_30px_-12px_rgba(0,0,0,0.15)] border border-slate-100 hover:shadow-[0_20px_40px_-15px_rgba(59,130,246,0.2)] hover:border-blue-200 transition-all duration-300">
             <div class="flex items-start justify-between mb-2">
                 <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-blue-500/20 group-hover:scale-110 transition-transform">
                     <i class="fas fa-shopping-cart text-lg"></i>
@@ -102,7 +102,7 @@ if (!isset($_SESSION['user'])) {
         </div>
 
         <!-- Carte 3 - Clients servis -->
-        <div class="group rounded-2xl bg-white p-6 shadow-[0_8px_30px_-12px_rgba(0,0,0,0.15)] border border-slate-100 hover:shadow-[0_20px_40px_-15px_rgba(168,85,247,0.2)] hover:border-purple-200 transition-all duration-300">
+        <div class="group rounded-2xl bg-white px-6 py-2 shadow-[0_8px_30px_-12px_rgba(0,0,0,0.15)] border border-slate-100 hover:shadow-[0_20px_40px_-15px_rgba(168,85,247,0.2)] hover:border-purple-200 transition-all duration-300">
             <div class="flex items-start justify-between mb-2">
                 <div class="w-10 h-10 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-purple-500/20 group-hover:scale-110 transition-transform">
                     <i class="fas fa-users text-lg"></i>
@@ -124,7 +124,7 @@ if (!isset($_SESSION['user'])) {
         </div>
 
         <!-- Carte 4 - Articles vendus -->
-        <div class="group rounded-2xl bg-white p-6 shadow-[0_8px_30px_-12px_rgba(0,0,0,0.15)] border border-slate-100 hover:shadow-[0_20px_40px_-15px_rgba(249,115,22,0.2)] hover:border-orange-200 transition-all duration-300">
+        <div class="group rounded-2xl bg-white px-6 py-2 shadow-[0_8px_30px_-12px_rgba(0,0,0,0.15)] border border-slate-100 hover:shadow-[0_20px_40px_-15px_rgba(249,115,22,0.2)] hover:border-orange-200 transition-all duration-300">
             <div class="flex items-start justify-between mb-2">
                 <div class="w-10 h-10 bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-orange-500/20 group-hover:scale-110 transition-transform">
                     <i class="fas fa-box text-lg"></i>
@@ -155,21 +155,21 @@ if (!isset($_SESSION['user'])) {
                 État des commandes
             </h2>
             <div class="mt-6 space-y-3">
-                <div class="group/item flex items-center justify-between rounded-xl bg-gradient-to-r from-slate-50 to-white px-4 py-3 border border-slate-100 hover:border-indigo-200 hover:shadow-sm transition">
+                <div class="group/item flex items-center justify-between rounded-xl bg-slate-300  px-4 py-3 border border-slate-100 hover:border-indigo-200 hover:shadow-sm transition">
                     <span class="text-sm text-slate-600 flex items-center gap-2">
                         <span class="w-2 h-2 rounded-full bg-indigo-500"></span>
                         En cours
                     </span>
                     <span class="font-semibold text-indigo-600 text-lg" id="vendeur-en-cours">0</span>
                 </div>
-                <div class="group/item flex items-center justify-between rounded-xl bg-gradient-to-r from-slate-50 to-white px-4 py-3 border border-slate-100 hover:border-green-200 hover:shadow-sm transition">
+                <div class="group/item flex items-center justify-between rounded-xl bg-slate-300 px-4 py-3 border border-slate-100 hover:border-green-200 hover:shadow-sm transition">
                     <span class="text-sm text-slate-600 flex items-center gap-2">
                         <span class="w-2 h-2 rounded-full bg-green-500"></span>
                         Clôturées
                     </span>
                     <span class="font-semibold text-green-600 text-lg" id="vendeur-cloturees">0</span>
                 </div>
-                <div class="group/item flex items-center justify-between rounded-xl bg-gradient-to-r from-slate-50 to-white px-4 py-3 border border-slate-100 hover:border-red-200 hover:shadow-sm transition">
+                <div class="group/item flex items-center justify-between rounded-xl bg-slate-300 px-4 py-3 border border-slate-100 hover:border-red-200 hover:shadow-sm transition">
                     <span class="text-sm text-slate-600 flex items-center gap-2">
                         <span class="w-2 h-2 rounded-full bg-red-500"></span>
                         Annulées
@@ -199,7 +199,7 @@ if (!isset($_SESSION['user'])) {
             </div>
             <div class="overflow-x-auto">
                 <table class="w-full text-sm">
-                    <thead class="bg-slate-50 text-slate-500 rounded-lg">
+                    <thead class="bg-slate-700 text-slate-500 rounded-lg">
                         <tr>
                             <th class="px-4 py-3 text-left font-medium">Commande</th>
                             <th class="px-4 py-3 text-left font-medium">Client</th>
@@ -225,12 +225,12 @@ if (!isset($_SESSION['user'])) {
             </h2>
             <div class="flex items-center gap-2">
                 <span class="text-xs bg-amber-50 text-amber-600 px-3 py-1 rounded-full font-medium">Top 5</span>
-                <span class="text-xs text-slate-400">ce mois</span>
+                <span class="text-xs text-slate-400">Aujourd'hui</span>
             </div>
         </div>
         <div class="overflow-x-auto">
             <table class="w-full text-sm">
-                <thead class="bg-slate-50 text-slate-500 rounded-lg">
+                <thead class="bg-slate-500 text-slate-500 rounded-lg">
                     <tr>
                         <th class="px-4 py-3 text-left font-medium">Produit</th>
                         <th class="px-4 py-3 text-left font-medium">Catégorie</th>

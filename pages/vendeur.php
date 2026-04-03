@@ -76,37 +76,64 @@
 <div class="no-found text-sm text-slate-500"></div>
 <div id="pagination" class="flex gap-2 mt-4"></div>
 <div class="fixed top-0 left-0 w-full h-full items-center justify-center hidden bg-black/50 z-50" id="modalAddVendeur">
-            <form action="" id="form_client" method="POST" enctype="multipart/form-data" >
-                <div class="bg-white p-6 rounded-md shadow-lg w-[400px]">
-                    <h2 class="text-xl font-semibold mb-4">Ajouter un vendeur</h2>
-                    <div class="flex gap-2">
-                        <div class="w-full">
-                            <label for="nom" class="block text-gray-700 font-bold mb-2">Nom d'utilisateur</label>
-                            <input type="nom" placeholder="Nom d'utilisateur..." name="nom" class="w-full px-4 py-2 mb-4 rounded-md border border-slate-300 focus:outline-none focus:ring-2 focus:ring-slate-400">
-                            <label for="email" class="block text-gray-700 font-bold mb-2">Email</label>
-                            <input type="email" placeholder="Ex:pouye@gmail.com..." name="email" class="w-full px-4 py-2 mb-4 rounded-md border border-slate-300 focus:outline-none focus:ring-2 focus:ring-slate-400">
-                            <label for="password" class="block text-gray-700 font-bold mb-2">Mot de passe</label>
-                            <input type="password" placeholder=".............." name="password" class="w-full px-4 py-2 mb-4 rounded-md border border-slate-300 focus:outline-none focus:ring-2 focus:ring-slate-400">
+             <form action="" id="form_client" method="POST" enctype="multipart/form-data" class="p-6 bg-white">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    
+                    <!-- Colonne gauche -->
+                    <div class="space-y-3">
+                        <div>
+                            <label class="block text-gray-700 font-medium mb-1 text-sm">Nom d'utilisateur</label>
+                            <input type="text" name="nom" placeholder="Nom d'utilisateur..." 
+                                   class="w-full px-3 py-2 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition">
                         </div>
-                        <div class="w-full">
-                            <label for="profile_picture" class="block text-gray-700 font-bold mb-2">Photo de profil</label>
-                            <input type="file" name="profile_picture" accept="image/*" class="w-full px-4 py-1 mb-4 rounded-md border border-slate-300 focus:outline-none focus:ring-2 focus:ring-slate-400">
-                            <label for="telephone" class="block text-gray-700 font-bold mb-2">Telephone</label>
-                            <input type="text" name="telephone"  placeholder="Ex: 770000000" class="w-full px-4 py-2 mb-4 rounded-md border border-slate-300 focus:outline-none focus:ring-2 focus:ring-slate-400">
-                            <label for="telephone" class="block text-gray-700 font-bold mb-2">Role</label>
-                            <select name="role" id="" class="w-full mb-4 rounded-md border border-slate-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-slate-400">
+                        <div>
+                            <label class="block text-gray-700 font-medium mb-1 text-sm">Email</label>
+                            <input type="email" name="email" placeholder="Ex: pouye@gmail.com..." 
+                                   class="w-full px-3 py-2 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition">
+                        </div>
+                        <div>
+                            <label class="block text-gray-700 font-medium mb-1 text-sm">Mot de passe</label>
+                            <input type="password" name="password" placeholder=".............." 
+                                   class="w-full px-3 py-2 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition">
+                        </div>
+                    </div>
+                    
+                    <!-- Colonne droite -->
+                    <div class="space-y-3">
+                        <div>
+                            <label class="block text-gray-700 font-medium mb-1 text-sm">Photo de profil</label>
+                            <input type="file" name="profile_picture" accept="image/*" 
+                                   class="w-full px-3 py-1 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-gray-700 font-medium mb-1 text-sm">Téléphone</label>
+                            <input type="text" name="telephone" placeholder="Ex: 770000000" 
+                                   class="w-full px-3 py-2 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition">
+                        </div>
+                        <div>
+                            <!-- <label class="block text-gray-700 font-medium mb-1 text-sm">Rôle</label>
+                            <select name="role" class="w-full px-3 py-2 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition">
                                 <option value="admin">Admin</option>
                                 <option value="vendeur">Vendeur</option>
-                            </select>
-                            
+                            </select> -->
                         </div>
                     </div>
-                    <div class="flex justify-end gap-2">
-                        <button type="button" id="cancelAddVendeur" class="px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-md transition">Annuler</button>
-                        <button type="submit" class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-md transition">Ajouter</button>
-                    </div>
-                    <div class="error_connect text-sm text-red-500 font-bold"></div>
-                <div class="succes_connect text-sm text-green-500 font-bold"></div>
+                </div>
+                
+                <!-- Messages -->
+                <div class="error_connect text-sm text-red-500 font-bold mt-3"></div>
+                <div class="succes_connect text-sm text-green-500 font-bold mt-3"></div>
+                
+                <!-- Boutons -->
+                <div class="flex justify-end gap-3 mt-6 pt-4 border-t border-gray-100">
+                    <button type="button" id="cancelAddVendeur" 
+                            class="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg transition font-medium">
+                        Annuler
+                    </button>
+                    <button type="submit" 
+                            class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition font-medium shadow-sm">
+                        Ajouter
+                    </button>
                 </div>
             </form>
         </div>

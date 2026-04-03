@@ -82,7 +82,7 @@
           <p class="section-title">Évolution du Chiffre d'Affaires</p>
           <canvas id="revenueChart"></canvas>
         </div>
-        <div class="section-card">
+        <div class="section-card top10-table-scroll">
           <p class="section-title">Répartition par Catégorie</p>
           <canvas id="categoryChart"></canvas>
           <div id="category-legend" class="mt-3 space-y-1.5 text-xs"></div>
@@ -104,12 +104,12 @@
       </div>
     </div> -->
 
-    <div class="section-card lg:col-span-2 bg-white rounded-xl border border-gray-200 p-4 sm:p-5 shadow-[0_4px_15px_-3px_rgba(0,0,0,0.1)]">
+    <div class="section-card top10-card lg:col-span-2 bg-white rounded-xl border border-gray-200 p-4 sm:p-5 shadow-[0_4px_15px_-3px_rgba(0,0,0,0.1)]">
       <p class="section-title text-gray-800 font-semibold mb-4 flex items-center gap-2">
         <i class="fas fa-clock text-blue-500"></i>
         10 Dernières Commandes
       </p>
-      <div class="overflow-x-auto">
+      <div class="overflow-x-auto top10-table-scroll">
         <table class="w-full text-sm">
           <thead>
             <tr class="border-b border-gray-200 bg-gray-50/50">
@@ -127,12 +127,12 @@
         </table>
       </div>
     </div>
-    <div class="section-card bg-white rounded-xl border border-gray-200 p-4 sm:p-5 shadow-[0_4px_15px_-3px_rgba(0,0,0,0.1)]">
+    <div class="section-card top10-card bg-white rounded-xl border border-gray-200 p-4 sm:p-5 shadow-[0_4px_15px_-3px_rgba(0,0,0,0.1)]">
       <p class="section-title text-gray-800 font-semibold mb-4 flex items-center gap-2">
         <i class="fas fa-exclamation-triangle text-amber-500"></i>
         Produits en Rupture
       </p>
-      <div class="overflow-x-auto">
+      <div class="overflow-x-auto top10-table-scroll">
         <table class="w-full text-sm">
           <thead>
             <tr class="border-b border-gray-200 bg-gray-50/50">
@@ -151,12 +151,12 @@
 
   <!-- Top Products + Top Sellers -->
   <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-    <div class="section-card bg-white rounded-xl border border-gray-200 p-4 sm:p-5 shadow-[0_4px_15px_-3px_rgba(0,0,0,0.1)]">
+    <div class="section-card top10-card bg-white rounded-xl border border-gray-200 p-4 sm:p-5 shadow-[0_4px_15px_-3px_rgba(0,0,0,0.1)]">
       <p class="section-title text-gray-800 font-semibold mb-4 flex items-center gap-2">
         <i class="fas fa-crown text-amber-500"></i>
-        Top 8 Produits les Plus Vendus
+        Top 10 Produits les Plus Vendus
       </p>
-      <div class="overflow-x-auto">
+      <div class="overflow-x-auto top10-table-scroll">
         <table class="w-full text-sm">
           <thead>
             <tr class="border-b border-gray-200 bg-gray-50/50">
@@ -173,12 +173,12 @@
         </table>
       </div>
     </div>
-    <div class="section-card bg-white rounded-xl border border-gray-200 p-4 sm:p-5 shadow-[0_4px_15px_-3px_rgba(0,0,0,0.1)]">
+    <div class="section-card top10-card bg-white rounded-xl border border-gray-200 p-4 sm:p-5 shadow-[0_4px_15px_-3px_rgba(0,0,0,0.1)]">
       <p class="section-title text-gray-800 font-semibold mb-4 flex items-center gap-2">
         <i class="fas fa-star text-amber-500"></i>
         Top 10 Meilleurs Vendeurs
       </p>
-      <div class="overflow-x-auto">
+      <div class="overflow-x-auto top10-table-scroll">
         <table class="w-full text-sm">
           <thead>
             <tr class="border-b border-gray-200 bg-gray-50/50">
@@ -199,12 +199,12 @@
 
   <!-- Top Clients + Top Orders -->
   <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-    <div class="section-card bg-white rounded-xl border border-gray-200 p-4 sm:p-5 shadow-[0_4px_15px_-3px_rgba(0,0,0,0.1)]">
+    <div class="section-card top10-card bg-white rounded-xl border border-gray-200 p-4 sm:p-5 shadow-[0_4px_15px_-3px_rgba(0,0,0,0.1)]">
       <p class="section-title text-gray-800 font-semibold mb-4 flex items-center gap-2">
         <i class="fas fa-trophy text-amber-500"></i>
         Top 10 Meilleurs Clients
       </p>
-      <div class="overflow-x-auto">
+      <div class="overflow-x-auto top10-table-scroll">
         <table class="w-full text-sm">
           <thead>
             <tr class="border-b border-gray-200 bg-gray-50/50">
@@ -220,12 +220,12 @@
         </table>
       </div>
     </div>
-    <div class="section-card bg-white rounded-xl border border-gray-200 p-4 sm:p-5 shadow-[0_4px_15px_-3px_rgba(0,0,0,0.1)]">
+    <div class="section-card top10-card bg-white rounded-xl border border-gray-200 p-4 sm:p-5 shadow-[0_4px_15px_-3px_rgba(0,0,0,0.1)]">
       <p class="section-title text-gray-800 font-semibold mb-4 flex items-center gap-2">
         <i class="fas fa-medal text-amber-500"></i>
         Top 10 Meilleures Commandes
       </p>
-      <div class="overflow-x-auto">
+      <div class="overflow-x-auto top10-table-scroll">
         <table class="w-full text-sm">
           <thead>
             <tr class="border-b border-gray-200 bg-gray-50/50">
@@ -252,6 +252,21 @@
   box-shadow: 0 4px 15px -3px rgba(0,0,0,0.1);
   position: relative;
   height: 600px;
+  overflow: hidden auto;
+}
+.top10-card {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.top10-card::-webkit-scrollbar {
+  display: none;
+}
+.top10-table-scroll {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.top10-table-scroll::-webkit-scrollbar {
+  display: none;
 }
 .section-title {
   font-size: 1.125rem;
@@ -271,6 +286,14 @@ table td, table th {
 }
 @media (max-width: 640px) {
   table td, table th { max-width: 80px; font-size: 0.75rem; }
+  .section-card{
+    height: 750px;
+  }
+}
+@media (max-width: 641px) and (min-width: 974px){
+  .section-card{
+    height: 700px;
+  }
 }
 </style>
 <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.3/chart.umd.min.js"></script> -->

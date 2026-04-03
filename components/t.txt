@@ -191,10 +191,3 @@ Le résultat doit ressembler à un site professionnel de transport logistique mo
 le chauffeur me demande de lui ajouter une géolocalisation qui lui permet de rejoindre facilement le 
 lieu du client lors de la demande du devis.Il me demande aussi de changer le nom par PouyeTransportExpress et créer un logo.
 Il m'a fournit égalemant le numero de telephone: 771110168 et l'email:modoupouye0168@gmail.com
-
-Le theme sombre ne s'applique pas sur les graphiques(line,doughnut) et les card dans
-clients.php et sur les bouton de pagination et aussi au niveau des tableaux , il y a
-certains champs qui s'affichent en couleur noir au lieu de blanc.Je voulais aussi
-afficher les 10 derniers approvisionnement, lui ajouter une pagination et 
-rechercher par fournissaeur. Je voulais egalement ajouter une pagination sur le 
-tableau de commandes.

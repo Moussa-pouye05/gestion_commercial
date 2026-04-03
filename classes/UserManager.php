@@ -28,7 +28,7 @@ class UserManager{
                 ":mot_de_passe" => password_hash($user->getPassword(), PASSWORD_DEFAULT),
                 
                 ":telephone" => $user->getTelephone(),
-                ":role" => $user->getRole()
+                ":role" => "vendeur"
             ]);
             return [
                 'success' => true,

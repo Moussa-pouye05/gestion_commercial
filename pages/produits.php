@@ -135,7 +135,7 @@
 </div>
 
 <!-- Modal Add Categorie -->
-<div class="fixed top-0 left-0 w-full h-full bg-[rgba(0,0,0,0.19)] z-100 flex items-center justify-center hide" id="modalAddCat">
+<div class="fixed top-0 left-0 w-full h-full bg-black/50 z-50 flex items-center justify-center hide" id="modalAddCat">
     <form action="" id="addCategorieForm">
         <div class="bg-white p-6 rounded-md shadow-lg w-[400px]">
             <h2 class="text-xl font-semibold mb-4">Ajouter une categorie</h2>
@@ -215,8 +215,13 @@
 
 <!-- Modal Add Stock (Approvisionnement) -->
 <div class="fixed top-0 left-0 w-full h-full  items-center justify-center hidden bg-black/50 z-50" id="modalAddStock">
-    <form action="" id="formAppro">
-        <div class="bg-white p-6 rounded-md shadow-lg w-[520px]">
+    <form action="" id="formAppro" class="w-full max-h-[95vh] flex justify-center">
+    
+    <div class="bg-white p-4 sm:p-6 rounded-md shadow-lg w-[95%] max-w-[520px] flex flex-col max-h-[95vh]">
+
+        <!-- Contenu scrollable -->
+        <div class="overflow-y-auto flex-1 pr-2">
+
             <h2 class="text-xl font-semibold mb-4">Ajouter un approvisionnement</h2>
 
             <!-- Fournisseur -->
@@ -226,44 +231,49 @@
                     <input type="text" name="fournisseur_search" class="w-full rounded-md border border-slate-300 px-4 py-2 fournisseur-search" placeholder="Rechercher un fournisseur..." autocomplete="off" list="fournisseurOptions">
                     <input type="hidden" name="fournisseur" class="fournisseur-id-input">
                     <datalist id="fournisseurOptions" class="fournisseur-datalist"></datalist>
-                    <div class="text-[11px] text-gray-500 fournisseur-meta">Saisissez au moins 2 caracteres</div>
+                    <div class="text-[11px] text-gray-500 fournisseur-meta">Saisissez au moins 2 caractères</div>
                 </div>
             </div>
 
             <!-- Tableau produits -->
-            <table class="w-full text-sm border rounded-lg overflow-hidden">
-                <thead class="bg-gray-100">
-                    <tr>
-                        <th class="p-2">Produit</th>
-                        <th class="p-2">Quantité</th>
-                        <th class="p-2">Prix achat</th>
-                        <th class="p-2"></th>
-                    </tr>
-                </thead>
-                <tbody id="produitBody"></tbody>
-            </table>
+            <div class="overflow-x-auto">
+                <table class="min-w-[500px] w-full text-sm border rounded-lg overflow-hidden">
+                    <thead class="bg-gray-100">
+                        <tr>
+                            <th class="p-2">Produit</th>
+                            <th class="p-2">Quantité</th>
+                            <th class="p-2">Prix achat</th>
+                            <th class="p-2"></th>
+                        </tr>
+                    </thead>
+                    <tbody id="produitBody"></tbody>
+                </table>
+            </div>
 
             <!-- bouton ajouter produit -->
             <button type="button" id="btnAddRow" class="mt-3 text-blue-600 text-sm hover:underline">
                 + Ajouter produit
             </button>
 
-            <!-- boutons -->
-            <div class="flex justify-end gap-2 mt-6">
-                <button type="button" id="cancelAddStock" class="px-4 py-2 bg-gray-500 text-white rounded-md">
-                Annuler
-                </button>
-                <button type="submit" class="px-4 py-2 bg-blue-500 text-white rounded-md">
-                Enregistrer
-                </button>
-            </div>
         </div>
-    </form>
+
+        <!-- boutons FIXES (toujours visibles) -->
+        <div class="flex justify-end gap-2 mt-4 pt-3 border-t bg-white">
+            <button type="button" id="cancelAddStock" class="px-4 py-2 bg-gray-500 text-white rounded-md">
+                Annuler
+            </button>
+            <button type="submit" class="px-4 py-2 bg-blue-500 text-white rounded-md">
+                Enregistrer
+            </button>
+        </div>
+
+    </div>
+</form>
 </div>
 
 <!-- Products Grid -->
 <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 mt-4" id="card"></div>
-<div class="mt-4 flex flex-wrap items-center justify-end gap-2" id="paginationProduit"></div>
+<div class="mt-4 flex flex-wrap items-center justify-end gap-2 text-slate-500" id="paginationProduit"></div>
 <hr class="mt-6">
 <div class="text-sm text-slate-500 mt-4" id="produitCountInfo">Affichage des produits</div>
 
@@ -293,7 +303,7 @@
                     <th class="px-6 py-3">Etat</th>
                 </tr>
             </thead>
-            <tbody class="divide-y divide-gray-200" id="approvisionnementTable">
+            <tbody class="divide-y divide-gray-200 approvisionnementTable" id="approvisionnementTable">
                 <!-- Dynamic content will be loaded here -->
             </tbody>
         </table>

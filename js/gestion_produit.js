@@ -731,7 +731,7 @@ function renderProduitPagination(totalPages, currentPage) {
         const btn = document.createElement("button");
         btn.type = "button";
         btn.textContent = i;
-        btn.className = `px-3 py-1 rounded ${i === currentPage ? "bg-blue-600 text-white" : "bg-gray-200 text-gray-700"}`;
+        btn.className = `px-3 py-1 rounded ${i === currentPage ? "bg-blue-600 text-white" : "bg-gray-200 text-slate-500"}`;
         btn.addEventListener("click", () => loadProduit(i, currentProduitSearch, currentProduitCategorie));
         paginationProduit.appendChild(btn);
     }
@@ -1276,3 +1276,32 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 });
+// rechercher par fournisseur dans liste approvisionnement
+const searchApproFournisseur = document.getElementById("searchApproFournisseur")
+const tableBodyAppro = document.querySelector(".approvisionnementTable")
+if(searchApproFournisseur){
+    searchApproFournisseur.addEventListener("keyup", (e) =>{
+    const inputSearch = searchApproFournisseur.value.toLowerCase()
+    let visible = 0
+    const searchValue = tableBodyAppro.querySelectorAll("tr"); 
+    for(let valueTr of searchValue){
+        const t = valueTr.children[2].textContent.toLowerCase()
+        if(t.includes(inputSearch)){
+            valueTr.style.display = ""
+            visible++
+        }else{
+            valueTr.style.display = "none"
+        }
+    }
+    if(inputSearch !== "" && visible===0){
+        tableBodyAppro.innerHTML = `
+                    <tr>
+                        <td colspan="5" class="px-6 py-4 text-center text-gray-500 dark:text-slate-400">
+                            Aucun approvisionnement trouvé
+                        </td>
+                    </tr>
+                `;
+    }
+
+})
+}

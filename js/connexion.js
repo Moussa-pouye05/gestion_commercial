@@ -4,10 +4,12 @@ if(form_connect){
 form_connect.addEventListener("submit", (e) =>{
     e.preventDefault()
     connexion();
+    
 })
 }
 
 async function connexion(){
+    
     try {
         const email = document.getElementById("email").value;
         const password = document.getElementById("password").value;
@@ -21,13 +23,14 @@ async function connexion(){
         btn.disabled = true;
         btn.innerHTML = "Connexion...";
         error_connect.textContent = "";
-
+        console.log("nif")
         const response = await fetch("../php/post_connexion.php",{
             method: 'POST',
             body: formData
         });
         const data = await response.json();
-
+        
+        console.log(data)
         if (!data.success) {
             error_connect.textContent = data.message || "Email ou mot de passe incorrect";
             return;

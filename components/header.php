@@ -5,7 +5,7 @@
 ?>
 <!-- header.php -->
 <header>
-  <div class="fixed top-0 z-20 right-0 left-0 flex  h-16 items-center justify-between border-b border-slate-200/80 bg-white px-4 shadow-lg transition-all duration-300 dark:border-slate-600/80 dark:bg-slate-700 dark:shadow-slate-950/20 md:left-[280px]">
+  <div class="fixed top-0 z-20 right-0 left-0 flex  h-16 items-center justify-between border-b border-slate-200/80 bg-white px-4 shadow-lg transition-all duration-300 dark:border-slate-600/80 dark:bg-slate-700 dark:shadow-slate-950/20 md:left-[280px] md:w-[calc(100%-280px)]">
     
     <!-- Menu Toggle Mobile -->
     <button id="menu-toggle" type="button" class="flex h-10 w-10 items-center justify-center rounded-lg transition hover:bg-gray-100 dark:hover:bg-slate-600 md:hidden">
@@ -121,7 +121,7 @@
   </div>
 </header>
 
-<script>
+<script>   
   // Toggle menu mobile
   const menuToggle = document.getElementById('menu-toggle');
   const sidebar = document.getElementById('sidebar');

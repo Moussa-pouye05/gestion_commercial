@@ -204,7 +204,7 @@
     
 </div>
 <?php endif?>
-<div class="absolute top-0 left-0 w-full h-full hidden items-center justify-center bg-black/50 z-50"  id="modalAddCommande">
+<div class="fixed top-0 left-0 w-full h-full hidden items-center justify-center bg-black/50 z-50"  id="modalAddCommande">
             <form class="bg-white p-6 rounded-xl shadow-md max-w-5xl mx-auto" id="saveCommande">
 
     <h2 class="text-xl font-semibold mb-6" id="formTitle">Nouvelle commande</h2>
@@ -376,8 +376,10 @@
                        focus:outline-none focus:ring-2 focus:ring-blue-400 transition">
                 <option value="">Toutes Commandes</option>
                 <option value="en_cours">En cours</option>
+                <option value="cloturee">Clôturées</option>
+                <option value="annulee">Annulées</option>
             </select>
-            <select 
+            <!-- <select 
                 name="days" 
                 id="days"
                 class="bg-gray-50 border border-gray-200 
@@ -385,7 +387,7 @@
                        focus:outline-none focus:ring-2 focus:ring-blue-400 transition">
                 <option value="">Derniers 30 jours</option>
                 <option value="">Test</option>
-            </select>
+            </select> -->
     </div>
 
     <!-- Responsive wrapper -->
