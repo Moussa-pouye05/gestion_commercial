@@ -50,14 +50,6 @@ try {
         exit;
     }
 
-    if (($_SESSION['user']['role'] ?? '') === 'admin' && (int) $currentCommande->getIdUser() !== (int) ($_SESSION['user']['id'] ?? 0)) {
-        echo json_encode([
-            'success' => false,
-            'message' => 'Vous ne pouvez pas valider une commande créée par un autre utilisateur'
-        ]);
-        exit;
-    }
-
     $result = $commandeManager->clotureCommande((int)$id, $userId);
 
     if (!empty($result['success']) && (($_SESSION['user']['role'] ?? '') === 'vendeur')) {

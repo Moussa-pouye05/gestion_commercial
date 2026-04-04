@@ -548,18 +548,40 @@ document.addEventListener("blur", function(e) {
 }, true);
 
 function updateSousTotal(row) {
-    const prix = parseFloat(row.querySelector(".prix-input").value) || 0;
-    const quantite = parseInt(row.querySelector(".quantite-input").value) || 0;
+    if (!row) {
+        return;
+    }
+
+    const prixInput = row.querySelector(".prix-input");
+    const quantiteInput = row.querySelector(".quantite-input");
+    const sousTotalNode = row.querySelector(".sous-total");
+
+    if (!prixInput || !quantiteInput || !sousTotalNode) {
+        return;
+    }
+
+    const prix = parseFloat(prixInput.value) || 0;
+    const quantite = parseInt(quantiteInput.value) || 0;
     const sousTotal = prix * quantite;
-    row.querySelector(".sous-total").textContent = formatNumber(sousTotal) + " FCFA";
+    sousTotalNode.textContent = formatNumber(sousTotal) + " FCFA";
 }
 
 function updateTotal() {
+    if (!commandeBody) {
+        return;
+    }
+
     const rows = commandeBody.querySelectorAll("tr");
     let total = 0;
     rows.forEach(row => {
-        const prix = parseFloat(row.querySelector(".prix-input").value) || 0;
-        const quantite = parseInt(row.querySelector(".quantite-input").value) || 0;
+        const prixInput = row.querySelector(".prix-input");
+        const quantiteInput = row.querySelector(".quantite-input");
+        if (!prixInput || !quantiteInput) {
+            return;
+        }
+
+        const prix = parseFloat(prixInput.value) || 0;
+        const quantite = parseInt(quantiteInput.value) || 0;
         total += prix * quantite;
     });
     
@@ -778,15 +800,13 @@ function displayCommandes(commandes) {
     commandes.forEach((cmd, index) => {
         const etatClass = getEtatClass(cmd.etat);
         const etatLabel = getEtatLabel(cmd.etat);
-        const isOwner = Number(cmd.id_user) === currentUserId;
-        const canCloture = cmd.etat === 'en_cours' && (currentUserRole !== 'admin' || isOwner);
-        
         const tr = document.createElement("tr");
         tr.className = "border-b hover:bg-gray-50";
         tr.dataset.commandeId = cmd.id;
         tr.innerHTML = `
             <td class="p-3 font-medium">CMD-${String(cmd.id).padStart(3, '0')}</td>
             <td class="p-3">${cmd.client_nom || 'N/A'}</td>
+            ${currentUserRole === 'admin' ? `<td class="p-3">${cmd.user_nom || 'N/A'}</td>` : ''}
             <td class="p-3">${formatDate(cmd.date_commande)}</td>
             <td class="p-3 font-semibold text-blue-600">${formatNumber(cmd.total)} FCFA</td>
             <td class="p-3">
@@ -802,9 +822,9 @@ function displayCommandes(commandes) {
                     <button class="bg-yellow-50 text-yellow-600 p-2 rounded hover:bg-yellow-100" onclick="editCommande(${cmd.id})">
                         <i class="fa-solid fa-pen"></i>
                     </button>
-                    ${canCloture ? `<button class="bg-green-50 text-green-600 p-2 rounded hover:bg-green-100" onclick="clotureCommande(${cmd.id})" title="Clôturer">
+                    <button class="bg-green-50 text-green-600 p-2 rounded hover:bg-green-100" onclick="clotureCommande(${cmd.id})" title="Clôturer">
                         <i class="fa-solid fa-check"></i>
-                    </button>` : ''}
+                    </button>
                     <button class="bg-red-50 text-red-600 p-2 rounded hover:bg-red-100" onclick="annuleCommande(${cmd.id})" title="Annuler">
                         <i class="fa-solid fa-ban"></i>
                     </button>
@@ -825,7 +845,7 @@ function displayCommandes(commandes) {
     });
     
     if (commandes.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="6" class="p-4 text-center text-gray-500">Aucune commande trouvée</td></tr>';
+        tbody.innerHTML = `<tr><td colspan="${currentUserRole === 'admin' ? '7' : '6'}" class="p-4 text-center text-gray-500">Aucune commande trouvée</td></tr>`;
     }
 }
 

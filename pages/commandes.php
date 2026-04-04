@@ -341,6 +341,7 @@
                 <tr>
                     <th class="p-3 text-left">N°</th>
                     <th class="p-3 text-left">Client</th>
+                    <th class="p-3 text-left">Vendeur</th>
                     <th class="p-3 text-left">Date</th>
                     <th class="p-3 text-left">Total</th>
                     <th class="p-3 text-left">Statut</th>
