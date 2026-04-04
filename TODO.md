@@ -1,43 +1,33 @@
-# Stock Validation for Commands - Implementation Plan
+# Layout Fix - Header + Sidebar Adaptation (Tailwind CSS)
 
-## Current Status: Planning approved ✅
+## Status: 🚀 In Progress
 
-### Steps to Complete:
+### ✅ 1. Planning Complete
+- [x] Analyzed files (header.php, nav.php, layout.php, script.js)
+- [x] Created comprehensive edit plan
+- [x] User approved plan
 
-#### 1. ✅ Add `validateStock(array $details): array` private method to `classes/CommandeManager.php`
-   - For each detail: SELECT quantite FROM poduits WHERE id = :id
-   - If detail.quantite > product.quantite → collect error "Produit {nom} (ID {id}): stock disponible {stock}, demandé {quantite}"
-   - Return ['success' => true] or ['success' => false, 'errors' => array]
+### ✅ 2. File Edits (Complete)
+- [x] pages/layout.php - Confirm CSS vars/classes
+- [x] components/header.php - Remove conflicting positioning/JS
+- [x] components/nav.php - Add dynamic class, remove inline styles/JS
+- [x] js/script.js - Clean old conflicting toggle code
 
-#### 2. ✅ Update `createCommande()` in CommandeManager
-   - Before `$this->pdo->beginTransaction()`
-   - `$stockCheck = $this->validateStock($details);`
-   - `if (!$stockCheck['success']) return ['success' => false, 'message' => 'Stock insuffisant pour certains produits: ' . implode(', ', $stockCheck['errors'])];`
+### ⏳ 3. Testing & Validation
+- [ ] Test desktop toggle (header shifts 280px)
+- [ ] Test mobile overlay
+- [ ] Verify smooth transitions
+- [ ] Check no regressions (dropdowns, charts)
 
-#### 3. ✅ Update `updateCommande()` in CommandeManager  
-   - After status check (`if (!$currentCmd || $currentCmd->getEtat() !== 'en_cours')`)
-   - Before `$this->pdo->beginTransaction()`
-   - Same validation as step 2
+**Next step: Test layout**
+- [ ] Test desktop toggle (header shifts 280px)
+- [ ] Test mobile overlay
+- [ ] Verify smooth transitions
+- [ ] Check no regressions (dropdowns, charts)
+- [ ] Responsive breakpoints
 
-#### 4. ✅ Update `clotureCommande()` in CommandeManager
-   - After status check
-   - `$detailsData = $this->getCommandeDetails($id_commande)['details'];`
-   - Format $details = [['quantite' => $d['quantite'], 'id_produit' => $d['id_produit']] ...]
-   - `$stockCheck = $this->validateStock($details);`
-   - If fail → return error as above
-   - Only proceed with stock decrease if OK
+### ⏳ 4. Finalization
+- [ ] Update TODO.md ✅
+- [ ] Attempt completion
 
-#### 5. [ ] Testing
-   - Create product with stock=5
-   - Create command with quantite=10 → should BLOCK with message
-   - Edit command to increase quantite>stock → BLOCK
-   - Create OK command (quant<=stock), try cloture with another product quant>current stock → BLOCK
-   - Verify stock never goes negative
-
-### Notes:
-- Table: poduits (note typo)
-- Error messages shown via frontend alert(result.message)
-- No frontend/backend changes needed beyond manager logic
-
-**Next: Implement step 1 → check off → step 2 → etc.**
-
+**Next step: Edit pages/layout.php**

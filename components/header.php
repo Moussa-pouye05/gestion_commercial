@@ -50,6 +50,7 @@
         </span>
       </button>
       
+      <?php if (($_SESSION['user']['role'] ?? '') === 'admin'): ?>
       <!-- Notifications -->
       <div class="relative">
         <button id="notif-btn" type="button" data-role="<?= htmlspecialchars($_SESSION['user']['role'] ?? 'vendeur') ?>" class="relative flex h-10 w-10 items-center justify-center rounded-lg transition hover:bg-gray-100 dark:hover:bg-slate-600">
@@ -70,6 +71,7 @@
           </div>
         </div>
       </div>
+      <?php endif; ?>
       
       <!-- Séparateur -->
       <div class="mx-1 h-8 w-px bg-gray-200 dark:bg-slate-600"></div>

@@ -5,6 +5,8 @@ const produitCache = new Map();
 const clientCache = new Map();
 let defaultCommandeProduits = [];
 let defaultCommandeClients = [];
+const currentUserRole = document.body?.dataset.userRole || '';
+const currentUserId = Number(document.body?.dataset.userId || 0);
 
 // Modal elements
 const modalAddCommande = document.getElementById("modalAddCommande");
@@ -776,6 +778,8 @@ function displayCommandes(commandes) {
     commandes.forEach((cmd, index) => {
         const etatClass = getEtatClass(cmd.etat);
         const etatLabel = getEtatLabel(cmd.etat);
+        const isOwner = Number(cmd.id_user) === currentUserId;
+        const canCloture = cmd.etat === 'en_cours' && (currentUserRole !== 'admin' || isOwner);
         
         const tr = document.createElement("tr");
         tr.className = "border-b hover:bg-gray-50";
@@ -798,9 +802,9 @@ function displayCommandes(commandes) {
                     <button class="bg-yellow-50 text-yellow-600 p-2 rounded hover:bg-yellow-100" onclick="editCommande(${cmd.id})">
                         <i class="fa-solid fa-pen"></i>
                     </button>
-                    <button class="bg-green-50 text-green-600 p-2 rounded hover:bg-green-100" onclick="clotureCommande(${cmd.id})" title="Clôturer">
+                    ${canCloture ? `<button class="bg-green-50 text-green-600 p-2 rounded hover:bg-green-100" onclick="clotureCommande(${cmd.id})" title="Clôturer">
                         <i class="fa-solid fa-check"></i>
-                    </button>
+                    </button>` : ''}
                     <button class="bg-red-50 text-red-600 p-2 rounded hover:bg-red-100" onclick="annuleCommande(${cmd.id})" title="Annuler">
                         <i class="fa-solid fa-ban"></i>
                     </button>

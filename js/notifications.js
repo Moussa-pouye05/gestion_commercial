@@ -113,6 +113,7 @@ async function loadAdminNotifications() {
             const summary = buildNotificationMessage(notification);
             const item = document.createElement('div');
             item.className = `w-full p-3 transition hover:bg-gray-50 dark:hover:bg-slate-600/50 ${notification.read_status ? '' : 'bg-blue-50/60 dark:bg-slate-600/20'}`;
+            const canDelete = notifBtn.dataset.role === 'admin';
             item.innerHTML = `
                 <div class="flex items-start gap-3">
                     <span class="mt-1 inline-block h-2.5 w-2.5 rounded-full ${notification.read_status ? 'bg-slate-300' : 'bg-blue-500'}"></span>
@@ -121,9 +122,9 @@ async function loadAdminNotifications() {
                         <p class="mt-1 text-sm text-gray-600 dark:text-slate-300">${summary.message}</p>
                         <p class="mt-1 text-xs text-gray-400 dark:text-slate-500">${formatNotificationTime(notification.created_at)}</p>
                     </div>
-                    <button type="button" class="notif-delete-btn flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-950/30" data-id="${notification.id}" title="Supprimer la notification" aria-label="Supprimer la notification">
+                    ${canDelete ? `<button type="button" class="notif-delete-btn flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-950/30" data-id="${notification.id}" title="Supprimer la notification" aria-label="Supprimer la notification">
                         <i class="fa-solid fa-trash"></i>
-                    </button>
+                    </button>` : ''}
                 </div>
             `;
 

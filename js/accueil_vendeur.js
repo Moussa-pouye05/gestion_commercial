@@ -97,13 +97,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const filterButton = document.getElementById('filter-dashboard');
     const resetButton = document.getElementById('reset-dashboard');
 
-    const today = new Date().toISOString().split('T')[0];
-    if (startDateInput) startDateInput.value = today;
-    if (endDateInput) endDateInput.value = today;
-
     const loadSelected = () => {
-        const start = startDateInput ? startDateInput.value : null;
-        const end = endDateInput ? endDateInput.value : null;
+        const start = startDateInput && startDateInput.value ? startDateInput.value : null;
+        const end = endDateInput && endDateInput.value ? endDateInput.value : null;
         loadVendeurDashboard(start, end);
     };
 
@@ -114,8 +110,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     if (resetButton) {
         resetButton.addEventListener('click', () => {
-            if (startDateInput) startDateInput.value = today;
-            if (endDateInput) endDateInput.value = today;
+            if (startDateInput) startDateInput.value = '';
+            if (endDateInput) endDateInput.value = '';
             loadSelected();
         });
     }

@@ -24,13 +24,17 @@ if ($to) {
 $whereDate = count($whereClauses) > 0 ? "WHERE " . implode(" AND ", $whereClauses) : "";
 $whereDateAlias = count($whereClauses) > 0 ? "WHERE " . str_replace("date_commande", "c.date_commande", implode(" AND ", $whereClauses)) : "";
 $whereDateAnd = count($whereClauses) > 0 ? "AND " . str_replace("date_commande", "c.date_commande", implode(" AND ", $whereClauses)) : "";
+$whereClosedAlias = $whereDateAlias ? $whereDateAlias . " AND c.etat = 'cloturee'" : "WHERE c.etat = 'cloturee'";
 
 try {
     $pdo = new PDO("mysql:host=localhost;dbname=gestion_stock;charset=utf8", "root", "12345");
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-    // Totaux (seulement commandes clôturées)
-    $sqlTotal = "SELECT COALESCE(SUM(total),0) AS total_revenue, COUNT(*) AS total_commands FROM commandes " . ($whereDate ? $whereDate . " AND etat = 'cloturee'" : "WHERE etat = 'cloturee'");
+    // Totaux
+    $sqlTotal = "SELECT 
+        COALESCE(SUM(CASE WHEN etat = 'cloturee' THEN total ELSE 0 END),0) AS total_revenue,
+        COUNT(*) AS total_commands
+        FROM commandes " . $whereDate;
     $stmt = $pdo->prepare($sqlTotal);
     foreach ($params as $k => $v) { $stmt->bindValue($k, $v); }
     $stmt->execute();
@@ -41,18 +45,18 @@ try {
         FROM commandes c
         LEFT JOIN clients cl ON c.id_client = cl.id
         LEFT JOIN users u ON c.id_user = u.id
-        " . ($whereDateAlias ? $whereDateAlias . " AND c.etat = 'cloturee'" : "WHERE c.etat = 'cloturee'") . "
+        " . ($whereDateAlias ?: "") . "
         ORDER BY c.date_commande DESC LIMIT 10";
     $stmt = $pdo->prepare($sqlRecent);
     foreach ($params as $k => $v) { $stmt->bindValue($k, $v); }
     $stmt->execute();
     $recent = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-    // Top 10 meilleures commandes clôturées
+    // Top 10 meilleures commandes
     $sqlTopCmd = "SELECT c.id, c.date_commande, c.total, c.etat, cl.nom AS client_nom
         FROM commandes c
         LEFT JOIN clients cl ON c.id_client = cl.id
-        " . ($whereDateAlias ? $whereDateAlias . " AND c.etat = 'cloturee'" : "WHERE c.etat = 'cloturee'") . "
+        " . ($whereDateAlias ?: "") . "
         ORDER BY c.total DESC LIMIT 10";
     $stmt = $pdo->prepare($sqlTopCmd);
     foreach ($params as $k => $v) { $stmt->bindValue($k, $v); }
@@ -62,7 +66,7 @@ try {
     // CA par jour (clôturées)
     $sqlCaByDay = "SELECT DATE(c.date_commande) AS jour, COALESCE(SUM(c.total),0) AS total_ca
         FROM commandes c
-        " . ($whereDateAlias ? $whereDateAlias . " AND c.etat = 'cloturee'" : "WHERE c.etat = 'cloturee'") . "
+        " . $whereClosedAlias . "
         GROUP BY DATE(c.date_commande) ORDER BY DATE(c.date_commande) ASC";
     $stmt = $pdo->prepare($sqlCaByDay);
     foreach ($params as $k => $v) { $stmt->bindValue($k, $v); }
@@ -74,7 +78,7 @@ try {
         COALESCE(SUM(c.total)/NULLIF(COUNT(c.id),0),0) AS performance
         FROM commandes c
         LEFT JOIN users u ON c.id_user = u.id
-        WHERE u.role = 'vendeur' " . ($whereDateAnd ? " " . $whereDateAnd : "") . "
+        WHERE u.role = 'vendeur' AND c.etat = 'cloturee' " . ($whereDateAnd ? " " . $whereDateAnd : "") . "
         GROUP BY u.id
         ORDER BY montant_total DESC
         LIMIT 10";
@@ -89,7 +93,7 @@ try {
         LEFT JOIN poduits p ON dc.id_produit = p.id
         LEFT JOIN categorie cat ON p.id_categorie = cat.id
         LEFT JOIN commandes c ON dc.id_commande = c.id
-        " . ($whereDateAlias ? " " . $whereDateAlias : "") . "
+        " . $whereClosedAlias . "
         GROUP BY cat.id
         ORDER BY ca DESC
         LIMIT 10";
@@ -102,7 +106,7 @@ try {
     $sqlTopClients = "SELECT cl.id, cl.nom, cl.telephone, COUNT(c.id) AS commandes, COALESCE(SUM(c.total),0) AS montant_total
         FROM commandes c
         LEFT JOIN clients cl ON c.id_client = cl.id
-        " . ($whereDateAlias ? $whereDateAlias : "") . "
+        " . $whereClosedAlias . "
         GROUP BY cl.id
         ORDER BY montant_total DESC
         LIMIT 10";
@@ -117,7 +121,7 @@ try {
         LEFT JOIN poduits p ON dc.id_produit = p.id
         LEFT JOIN categorie cat ON p.id_categorie = cat.id
         LEFT JOIN commandes c ON dc.id_commande = c.id
-        " . ($whereDateAlias ? " " . $whereDateAlias : "") . "
+        " . $whereClosedAlias . "
         GROUP BY p.id
         ORDER BY qte_vendue DESC
         LIMIT 10";

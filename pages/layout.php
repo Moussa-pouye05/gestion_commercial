@@ -29,7 +29,11 @@ session_start();
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css">
   <title><?= $title ?? "Dashboard" ?></title>
 </head>
-<body class="min-h-full bg-slate-100 text-slate-900 antialiased transition-colors duration-200 dark:bg-slate-800 dark:text-slate-100">
+<body
+  class="min-h-full bg-slate-100 text-slate-900 antialiased transition-colors duration-200 dark:bg-slate-800 dark:text-slate-100"
+  data-user-role="<?= htmlspecialchars($_SESSION['user']['role'] ?? '') ?>"
+  data-user-id="<?= (int) ($_SESSION['user']['id'] ?? 0) ?>"
+>
   <?php include "../components/nav.php"; ?>
   <?php include "../components/header.php"; ?>
 
