@@ -1,6 +1,6 @@
 <?php
 if (!isset($_SESSION['user'])) {
-    header("Location: ../pages/connexion.php");
+    header("Location: ../index.php");
     exit;
 }
 ?>

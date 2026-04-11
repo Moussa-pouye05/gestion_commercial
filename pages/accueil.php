@@ -1,3 +1,8 @@
+<?php
+  if(!$_SESSION['user']){
+    header("Location: ../index.php");
+  }
+  ?>
 <section class="mt-2">
 <div id="tab-dashboard" class="p-4 sm:p-6 space-y-6 bg-gray-50 min-h-screen">
   

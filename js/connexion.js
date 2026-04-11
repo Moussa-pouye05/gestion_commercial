@@ -1,3 +1,25 @@
+function getProjectBaseUrl() {
+    const pathname = window.location.pathname;
+
+    if (pathname.includes("/pages/")) {
+        return `${window.location.origin}${pathname.split("/pages/")[0]}/`;
+    }
+
+    if (pathname.endsWith("/")) {
+        return `${window.location.origin}${pathname}`;
+    }
+
+    const lastSlashIndex = pathname.lastIndexOf("/");
+    const basePath = pathname.slice(0, lastSlashIndex + 1);
+    return `${window.location.origin}${basePath}`;
+}
+
+const projectBaseUrl = getProjectBaseUrl();
+
+function appUrl(path) {
+    return new URL(path.replace(/^\/+/, ""), projectBaseUrl).href;
+}
+
 //Connexion
 const form_connect = document.getElementById("form_connexion")
 if(form_connect){
@@ -24,10 +46,14 @@ async function connexion(){
         btn.innerHTML = "Connexion...";
         error_connect.textContent = "";
         console.log("nif")
-        const response = await fetch("../php/post_connexion.php",{
+        const response = await fetch(appUrl("php/post_connexion.php"),{
             method: 'POST',
+            credentials: 'same-origin',
             body: formData
         });
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}`);
+        }
         const data = await response.json();
         
         console.log(data)
@@ -38,14 +64,14 @@ async function connexion(){
 
         if (data.role === "admin") {
             setTimeout(() => {
-                window.location.href = "../view/accueil_view.php";
+                window.location.href = appUrl("view/accueil_view.php");
             }, 500);
             return;
         }
 
         if (data.role === "vendeur") {
             setTimeout(() => {
-                window.location.href = "../view/accueil_vendeur_view.php";
+                window.location.href = appUrl("view/accueil_vendeur_view.php");
             }, 500);
             return;
         }
@@ -84,10 +110,14 @@ async function inscription(){
         const succes_connect = document.querySelector(".succes_connect")
         const error_connect = document.querySelector(".error_connect")
        // console.log(error_connect,succes_connect)
-        let response = await fetch("../php/post_inscription.php", {
+        let response = await fetch(appUrl("php/post_inscription.php"), {
             method: "POST",
+            credentials: 'same-origin',
             body: formData
         })
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}`);
+        }
         let datas = await response.json();
         
         if(datas.success){

@@ -5,7 +5,7 @@
 </style>
 <?php
   if(!$_SESSION['user']){
-    header("Location: ../pages/connexion.php");
+    header("Location: ../index.php");
   }
   ?>
 <section class="mt-2 p-2">

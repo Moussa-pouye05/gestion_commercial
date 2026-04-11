@@ -39,7 +39,7 @@
                 <option value="vendeur">Vendeur</option>
             </select>
         <button type="submit" class="w-full bg-blue-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-600 transition-colors">S'inscrire</button>
-        <a href="connexion.php" class="my-2">Se connecter</a>
+        <a href="../index.php" class="my-2">Se connecter</a>
         <div class="error_connect text-sm text-red-500 font-bold"></div>
                 <div class="succes_connect text-sm  font-bold"></div>
     </form>
