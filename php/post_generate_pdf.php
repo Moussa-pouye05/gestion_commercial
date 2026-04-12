@@ -1,8 +1,6 @@
 <?php
 require_once "../config/config.php";
-
 require_once "../vendor/autoload.php";
-require_once "../config/config.php";
 require_once "../classes/FactureManager.php";
 require_once "../classes/CommandeManager.php";
 require_once "../classes/ClientManager.php";
@@ -49,8 +47,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // Générer le HTML de la facture
         $html = generateFactureHTML($facture, $commande, $client);
 
-        // Créer le PDF
+        // Créer le PDF avec marges réduits pour économiser l'espace
         $html2pdf = new Html2Pdf('P', 'A4', 'fr');
+        $html2pdf->setDefaultFont('Arial', '9');
+        $html2pdf->margins(5, 5, 5, 5);
         $html2pdf->writeHTML($html);
         
         // Sortie du PDF
@@ -60,6 +60,80 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         http_response_code(500);
         echo json_encode(['error' => 'Erreur lors de la génération du PDF: ' . $e->getMessage()]);
     }
+}
+
+function generateFactureHTML($facture, $commande, $client) {
+    $html = '<html><head><style>
+body { font-family: Arial, sans-serif; font-size: 10px; margin: 0; padding: 0; color: #111; }
+.header { background-color: #059669; color: white; padding: 10px; }
+.header h1 { margin: 0; font-size: 16px; }
+.header p { margin: 4px 0 0; font-size: 10px; }
+.section-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+.section-table td { vertical-align: top; padding: 6px; }
+.card { border: 1px solid #d1d5db; padding: 8px; background: #ffffff; }
+.card h4 { margin: 0 0 4px 0; font-size: 10px; color: #059669; }
+.card p { margin: 2px 0; font-size: 9px; }
+.product-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+.product-table th, .product-table td { border: 1px solid #d1d5db; padding: 6px; }
+.product-table th { background: #f8fafc; font-size: 9px; text-align: left; }
+.product-table td { font-size: 9px; }
+.text-right { text-align: right; }
+.carre { width: 100%; margin-top: 10px; border-collapse: collapse; }
+.carre td { padding: 6px; font-size: 9px; }
+.carre .label { text-align: right; font-weight: bold; }
+.carre .value { text-align: right; background: #059669; color: white; font-weight: bold; }
+</style></head><body>
+
+<div class="header">
+  <h1>FACTURE</h1>
+  <p>N° ' . htmlspecialchars($facture->numero_facture) . '</p>
+  <p>Date: ' . date('d/m/Y H:i', strtotime($facture->date_facture)) . ' · CMD-' . str_pad($commande->id ?? 0, 3, '0', STR_PAD_LEFT) . '</p>
+</div>
+
+<table class="section-table">
+  <tr>
+    <td style="width: 50%;"><div class="card"><h4>Facturé à</h4><p><strong>Nom:</strong> ' . htmlspecialchars($client->nom ?? 'N/A') . '</p><p><strong>Tél:</strong> ' . htmlspecialchars($client->telephone ?? 'N/A') . '</p><p><strong>Adresse:</strong> ' . htmlspecialchars($client->adresse ?? 'N/A') . '</p></div></td>
+    <td style="width: 50%;"><div class="card"><h4>Détails commande</h4><p><strong>N° commande:</strong> CMD-' . str_pad($commande->id ?? 0, 3, '0', STR_PAD_LEFT) . '</p><p><strong>Date:</strong> ' . date('d/m/Y', strtotime($commande->date_commande)) . '</p><p><strong>Statut:</strong> ' . ($facture->statut === 'payee' ? 'Payée' : ucfirst($facture->statut)) . '</p></div></td>
+  </tr>
+</table>
+
+<table class="product-table">
+  <thead>
+    <tr>
+      <th style="width: 45%;">Désignation</th>
+      <th style="width: 15%; text-align:center;">Qté</th>
+      <th style="width: 20%; text-align:right;">Prix unit.</th>
+      <th style="width: 20%; text-align:right;">Montant</th>
+    </tr>
+  </thead>
+  <tbody>';
+
+    if ($facture->details && count($facture->details) > 0) {
+        foreach ($facture->details as $detail) {
+            $html .= '<tr>' .
+                '<td>' . htmlspecialchars($detail['produit_nom'] ?? 'N/A') . '</td>' .
+                '<td class="text-right">' . intval($detail['quantite'] ?? 0) . '</td>' .
+                '<td class="text-right">' . number_format($detail['montant'] ?? 0, 0, ',', ' ') . ' FCFA</td>' .
+                '<td class="text-right">' . number_format($detail['sous_total'] ?? 0, 0, ',', ' ') . ' FCFA</td>' .
+            '</tr>';
+        }
+    } else {
+        $html .= '<tr><td colspan="4" style="text-align:center; padding:10px;">Aucun produit</td></tr>';
+    }
+
+    $html .= '</tbody>
+</table>
+
+<table class="carre">
+  <tr>
+    <td class="label" style="width: 80%;">Total facture</td>
+    <td class="value">' . number_format($facture->total ?? 0, 0, ',', ' ') . ' FCFA</td>
+  </tr>
+</table>
+
+</body></html>';
+
+    return $html;
 }
 </xai:function_call
 

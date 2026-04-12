@@ -4,7 +4,7 @@
   }
 ?>
 <!-- header.php -->
-<header>
+<header class="no-print">
   <div class="fixed top-0 z-20 right-0 left-0 flex  h-16 items-center justify-between border-b border-slate-200/80 bg-white px-4 shadow-lg transition-all duration-300 dark:border-slate-600/80 dark:bg-slate-700 dark:shadow-slate-950/20 md:left-[280px] md:w-[calc(100%-280px)]">
     
     <!-- Menu Toggle Mobile -->
@@ -60,7 +60,7 @@
         </button>
         
         <!-- Dropdown Notifications -->
-        <div id="notif-dropdown" class="absolute right-0 z-30 mt-2 hidden w-80 rounded-xl border border-gray-100 bg-white shadow-2xl dark:border-slate-600 dark:bg-slate-700">
+        <div id="notif-dropdown" class="fixed left-4 right-4 top-20 z-30 mt-0 hidden max-h-[70vh] overflow-hidden rounded-xl border border-gray-100 bg-white shadow-2xl dark:border-slate-600 dark:bg-slate-700 sm:absolute sm:left-auto sm:right-0 sm:top-auto sm:mt-2 sm:w-80 sm:max-h-none">
           <div class="flex items-center justify-between border-b border-gray-100 p-3 dark:border-slate-600">
             <h3 class="font-semibold text-gray-800 dark:text-slate-100">Notifications</h3>
             <span class="text-[11px] text-slate-400">Admin</span>
@@ -105,12 +105,12 @@
             </div>
           </div>
           <div class="py-2">
-            <a href="#" onclick="alert('Fonctionnalité Mon Profil à implémenter')" class="flex items-center gap-3 px-4 py-2 text-sm text-gray-600 transition hover:bg-gray-50 dark:text-slate-300 dark:hover:bg-slate-600/50">
+            <!-- <a href="#" onclick="alert('Fonctionnalité Mon Profil à implémenter')" class="flex items-center gap-3 px-4 py-2 text-sm text-gray-600 transition hover:bg-gray-50 dark:text-slate-300 dark:hover:bg-slate-600/50">
               <i class="fa-solid fa-user"></i> Mon profil
             </a>
             <a href="#" onclick="alert('Fonctionnalité Paramètres à implémenter')" class="flex items-center gap-3 px-4 py-2 text-sm text-gray-600 transition hover:bg-gray-50 dark:text-slate-300 dark:hover:bg-slate-600/50">
               <i class="fa-solid fa-gear"></i> Paramètres
-            </a>
+            </a> -->
           </div>
           <div class="border-t border-gray-100 py-2 dark:border-slate-600">
             <a href="../pages/deconnection.php" class="flex items-center gap-3 px-4 py-2 text-sm text-red-500 transition hover:bg-red-50 dark:hover:bg-red-950/30">

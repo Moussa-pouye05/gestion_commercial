@@ -20,6 +20,40 @@ function appUrl(path) {
     return new URL(path.replace(/^\/+/, ""), projectBaseUrl).href;
 }
 
+function setLoginButtonState(isLoading) {
+    const btn = document.querySelector(".btn");
+    if (!btn) return;
+    btn.disabled = isLoading;
+    btn.innerHTML = isLoading ? "Connexion..." : "Connexion";
+}
+
+function loadRememberedLogin() {
+    const rememberedEmail = localStorage.getItem("remembered_email") || "";
+    const rememberMe = localStorage.getItem("remember_me") === "1";
+    const emailInput = document.getElementById("email");
+    const rememberCheckbox = document.getElementById("remember_me");
+
+    if (emailInput && rememberedEmail) {
+        emailInput.value = rememberedEmail;
+    }
+
+    if (rememberCheckbox) {
+        rememberCheckbox.checked = rememberMe;
+    }
+}
+
+function persistRememberedLogin(email) {
+    const rememberCheckbox = document.getElementById("remember_me");
+    if (rememberCheckbox?.checked) {
+        localStorage.setItem("remembered_email", email);
+        localStorage.setItem("remember_me", "1");
+        return;
+    }
+
+    localStorage.removeItem("remembered_email");
+    localStorage.removeItem("remember_me");
+}
+
 //Connexion
 const form_connect = document.getElementById("form_connexion")
 if(form_connect){
@@ -35,17 +69,16 @@ async function connexion(){
     try {
         const email = document.getElementById("email").value;
         const password = document.getElementById("password").value;
-        const btn = document.querySelector(".btn")
         const error_connect = document.querySelector(".error_connect")
+        const success_connect = document.querySelector(".success_connect")
         
         let formData = new FormData();
         formData.append("email", email);
         formData.append("password", password);
 
-        btn.disabled = true;
-        btn.innerHTML = "Connexion...";
+        setLoginButtonState(true);
         error_connect.textContent = "";
-        console.log("nif")
+        if (success_connect) success_connect.textContent = "";
         const response = await fetch(appUrl("php/post_connexion.php"),{
             method: 'POST',
             credentials: 'same-origin',
@@ -55,12 +88,14 @@ async function connexion(){
             throw new Error(`HTTP ${response.status}`);
         }
         const data = await response.json();
-        
-        console.log(data)
+
         if (!data.success) {
             error_connect.textContent = data.message || "Email ou mot de passe incorrect";
             return;
         }
+
+        persistRememberedLogin(email);
+        if (success_connect) success_connect.textContent = "Connexion réussie...";
 
         if (data.role === "admin") {
             setTimeout(() => {
@@ -77,19 +112,14 @@ async function connexion(){
         }
 
         error_connect.textContent = "Role utilisateur invalide";
-        btn.disabled = false;
-        btn.innerHTML = "Connexion"
+        setLoginButtonState(false);
     } catch (error) {
         const error_connect = document.querySelector(".error_connect")
         if (error_connect) {
             error_connect.textContent = "Erreur lors de la connexion";
         }
     } finally {
-        const btn = document.querySelector(".btn");
-        if (btn) {
-            btn.disabled = false;
-            btn.innerHTML = "Connexion";
-        }
+        setLoginButtonState(false);
     }
     
 }
@@ -138,3 +168,84 @@ async function inscription(){
         
     }
 }
+
+const forgotPasswordLink = document.getElementById("forgot-password-link");
+const forgotPasswordModal = document.getElementById("forgot-password-modal");
+const closeForgotPasswordBtn = document.getElementById("close-forgot-password");
+const forgotPasswordForm = document.getElementById("forgot-password-form");
+
+function closeForgotPasswordModal() {
+    if (!forgotPasswordModal) return;
+    forgotPasswordModal.classList.remove("open");
+}
+
+if (forgotPasswordLink && forgotPasswordModal) {
+    forgotPasswordLink.addEventListener("click", (e) => {
+        e.preventDefault();
+        const email = document.getElementById("email")?.value || "";
+        const forgotEmail = document.getElementById("forgot_email");
+        if (forgotEmail && email) {
+            forgotEmail.value = email;
+        }
+        forgotPasswordModal.classList.add("open");
+    });
+}
+
+if (closeForgotPasswordBtn) {
+    closeForgotPasswordBtn.addEventListener("click", closeForgotPasswordModal);
+}
+
+if (forgotPasswordModal) {
+    forgotPasswordModal.addEventListener("click", (e) => {
+        if (e.target === forgotPasswordModal) {
+            closeForgotPasswordModal();
+        }
+    });
+}
+
+if (forgotPasswordForm) {
+    forgotPasswordForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const forgotError = document.querySelector(".forgot_error");
+        const forgotSuccess = document.querySelector(".forgot_success");
+        const forgotSubmit = document.getElementById("forgot-password-submit");
+        const email = document.getElementById("forgot_email")?.value?.trim() || "";
+
+        if (forgotError) forgotError.textContent = "";
+        if (forgotSuccess) forgotSuccess.textContent = "";
+
+        forgotSubmit.disabled = true;
+        forgotSubmit.querySelector("span").textContent = "Envoi...";
+
+        try {
+            const formData = new FormData();
+            formData.append("email", email);
+
+            const response = await fetch(appUrl("php/post_forgot_password.php"), {
+                method: "POST",
+                body: formData
+            });
+            const result = await response.json();
+
+            if (!result.success) {
+                if (forgotError) forgotError.textContent = result.message || "Erreur lors de l'envoi";
+                return;
+            }
+
+            if (forgotSuccess) {
+                forgotSuccess.innerHTML = result.delivery === "manual" && result.reset_link
+                    ? `${result.message}<br><a href="${result.reset_link}" style="color:#a5b4fc;word-break:break-all;">${result.reset_link}</a>`
+                    : (result.message || "Lien généré avec succès");
+            }
+        } catch (error) {
+            if (forgotError) forgotError.textContent = "Erreur lors de l'envoi du lien";
+        } finally {
+            forgotSubmit.disabled = false;
+            forgotSubmit.querySelector("span").textContent = "Envoyer le lien";
+        }
+    });
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+    loadRememberedLogin();
+});

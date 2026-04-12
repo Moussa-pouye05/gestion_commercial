@@ -137,7 +137,7 @@
 <!-- Modal Add Categorie -->
 <div class="fixed top-0 left-0 w-full h-full bg-black/50 z-50 flex items-center justify-center hide" id="modalAddCat">
     <form action="" id="addCategorieForm">
-        <div class="bg-white p-6 rounded-md shadow-lg w-[400px]">
+        <div class="bg-white p-2 mx-6 rounded-md shadow-lg w-[400px]">
             <h2 class="text-xl font-semibold mb-4">Ajouter une categorie</h2>
             <input type="text" name="nom" placeholder="Nom de la categorie" class="w-full px-4 py-2 mb-4 rounded-md border border-slate-300 focus:outline-none focus:ring-2 focus:ring-slate-400">
             <div class="flex justify-end gap-2">

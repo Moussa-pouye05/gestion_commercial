@@ -267,6 +267,60 @@
   .contact-admin a:hover { color: #a5b4fc; }
 
   .error-msg { font-size: 12px; color: #f87171; text-align: center; min-height: 18px; margin-top: 10px; }
+  .success-msg { font-size: 12px; color: #4ade80; text-align: center; min-height: 18px; margin-top: 8px; }
+
+  .modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(5, 10, 20, 0.72);
+    backdrop-filter: blur(8px);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    padding: 20px;
+  }
+
+  .modal-backdrop.open { display: flex; }
+
+  .modal-card {
+    width: min(460px, 100%);
+    border-radius: 22px;
+    border: 1px solid rgba(255,255,255,0.08);
+    background: rgba(10,15,30,0.92);
+    box-shadow: 0 30px 70px rgba(0,0,0,0.5);
+    padding: 28px;
+    color: #fff;
+  }
+
+  .modal-card h3 {
+    font-family: 'Syne', sans-serif;
+    font-size: 24px;
+    margin-bottom: 8px;
+  }
+
+  .modal-card p {
+    color: rgba(255,255,255,0.5);
+    font-size: 13px;
+    line-height: 1.6;
+    margin-bottom: 18px;
+  }
+
+  .modal-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 18px;
+  }
+
+  .btn-secondary {
+    flex: 1;
+    padding: 13px;
+    border-radius: 12px;
+    border: 1px solid rgba(255,255,255,0.08);
+    background: rgba(255,255,255,0.04);
+    color: rgba(255,255,255,0.8);
+    cursor: pointer;
+  }
 
   @media (max-width: 640px) {
     .panel-left { display: none; }
@@ -340,7 +394,7 @@
           <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
             <rect x="2" y="4" width="20" height="16" rx="2"/><path d="m2 7 10 7 10-7"/>
           </svg>
-          <input type="email" id="email" name="email" placeholder="vous@exemple.com" autocomplete="email">
+          <input type="email" id="email" name="email" placeholder="vous@exemple.com" autocomplete="email" required>
         </div>
       </div>
 
@@ -350,15 +404,15 @@
           <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
             <rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
           </svg>
-          <input type="password" id="password" name="password" placeholder="••••••••" autocomplete="current-password">
+          <input type="password" id="password" name="password" placeholder="••••••••" autocomplete="current-password" required>
         </div>
       </div>
 
       <div class="form-meta">
         <label class="remember">
-          <input type="checkbox"> Se souvenir de moi
+          <input type="checkbox" id="remember_me" name="remember_me"> Se souvenir de moi
         </label>
-        <a href="#" class="forgot">Mot de passe oublié ?</a>
+        <a href="reset_password.php" class="forgot" id="forgot-password-link">Mot de passe oublié ?</a>
       </div>
 
       <button type="submit" class="btn-submit btn">
@@ -371,6 +425,7 @@
       </button>
 
       <div class="error-msg error_connect"></div>
+      <div class="success-msg success_connect"></div>
 
     </form>
 
@@ -385,6 +440,32 @@
     </div> -->
   </div>
 
+</div>
+
+<div class="modal-backdrop" id="forgot-password-modal">
+  <div class="modal-card">
+    <h3>Mot de passe oublié</h3>
+    <p>Saisissez votre adresse email. Un lien de réinitialisation sera généré pour choisir un nouveau mot de passe.</p>
+    <form id="forgot-password-form">
+      <div class="form-group">
+        <label for="forgot_email">Adresse email</label>
+        <div class="input-wrap">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="2" y="4" width="20" height="16" rx="2"/><path d="m2 7 10 7 10-7"/>
+          </svg>
+          <input type="email" id="forgot_email" name="forgot_email" placeholder="vous@exemple.com" autocomplete="email" required>
+        </div>
+      </div>
+      <div class="error-msg forgot_error"></div>
+      <div class="success-msg forgot_success"></div>
+      <div class="modal-actions">
+        <button type="button" class="btn-secondary" id="close-forgot-password">Fermer</button>
+        <button type="submit" class="btn-submit" id="forgot-password-submit">
+          <span>Envoyer le lien</span>
+        </button>
+      </div>
+    </form>
+  </div>
 </div>
 <script src="js/connexion.js"></script>
 </body>

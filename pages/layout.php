@@ -37,7 +37,7 @@ session_start();
   <?php include "../components/nav.php"; ?>
   <?php include "../components/header.php"; ?>
 
-  <main class="relative ml-0 mt-12 min-h-screen w-full bg-slate-100 px-2 py-[22px] text-inherit transition-colors duration-200 dark:bg-slate-800 md:ml-[20%] md:w-[80%] lg:ml-[18%] lg:w-[82%]">
+  <main class="relative ml-0 mt-12 min-h-screen w-full bg-slate-100 px-2 py-[22px] text-inherit transition-colors duration-200 dark:bg-slate-800 md:ml-[20%] md:w-[80%] lg:ml-[18%] lg:w-[82%] no-print">
       <?php include $content; ?>
   </main>
 

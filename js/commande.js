@@ -1099,201 +1099,337 @@ async function deleteCommande(id) {
 }
 
 function displayCommandeDetails(cmd) {
-    // BLOQUER LE SCROLL DE LA PAGE
     document.body.style.overflow = 'hidden';
-    
-    // Calculer le total des produits
+
     const totalProduits = cmd.details?.reduce((sum, d) => sum + d.quantite, 0) || 0;
-    
-    // Vérifier si le style existe déjà
-    if (!document.getElementById('commande-anim-styles')) {
+
+    if (!document.getElementById('cmd-detail-styles')) {
         const style = document.createElement('style');
-        style.id = 'commande-anim-styles';
+        style.id = 'cmd-detail-styles';
         style.textContent = `
-            @keyframes slideIn {
-                from {
-                    opacity: 0;
-                    transform: translateY(-20px);
-                }
-                to {
-                    opacity: 1;
-                    transform: translateY(0);
-                }
+            @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap');
+
+            #cmdDetailOverlay {
+                font-family: 'Plus Jakarta Sans', sans-serif;
+            }
+
+            @keyframes cmdOverlayIn {
+                from { opacity: 0; }
+                to   { opacity: 1; }
+            }
+            @keyframes cmdPanelIn {
+                from { opacity: 0; transform: translateY(24px) scale(0.98); }
+                to   { opacity: 1; transform: translateY(0)   scale(1);    }
+            }
+            @keyframes cmdRowIn {
+                from { opacity: 0; transform: translateX(-8px); }
+                to   { opacity: 1; transform: translateX(0);    }
+            }
+
+            #cmdDetailOverlay { animation: cmdOverlayIn 0.25s ease both; }
+
+            #cmdDetailPanel { animation: cmdPanelIn 0.35s cubic-bezier(0.22,1,0.36,1) both; }
+
+            .cmd-row-anim {
+                animation: cmdRowIn 0.3s ease both;
+            }
+
+            .cmd-stat-card {
+                background: #fff;
+                border: 1px solid #e8eaf0;
+                border-radius: 12px;
+                padding: 14px 16px;
+                transition: box-shadow 0.2s, transform 0.2s;
+            }
+            .cmd-stat-card:hover {
+                box-shadow: 0 6px 20px rgba(0,0,0,0.07);
+                transform: translateY(-1px);
+            }
+
+            .cmd-table tbody tr {
+                transition: background 0.15s;
+            }
+            .cmd-table tbody tr:hover {
+                background: #f7f8fc;
+            }
+
+            .cmd-close-btn {
+                width: 32px; height: 32px;
+                display: flex; align-items: center; justify-content: center;
+                border-radius: 8px;
+                border: 1px solid rgba(255,255,255,0.2);
+                background: rgba(255,255,255,0.1);
+                cursor: pointer;
+                transition: background 0.2s;
+                color: white;
+            }
+            .cmd-close-btn:hover { background: rgba(255,255,255,0.22); }
+
+            .cmd-badge-en_attente  { background:#fef3c7; color:#92400e; }
+            .cmd-badge-en_cours    { background:#dbeafe; color:#1e40af; }
+            .cmd-badge-livree      { background:#d1fae5; color:#065f46; }
+            .cmd-badge-annulee     { background:#fee2e2; color:#991b1b; }
+            .cmd-badge-default     { background:#f1f5f9; color:#475569; }
+
+            .cmd-progress-bar {
+                height: 4px;
+                border-radius: 2px;
+                background: #e2e8f0;
+                overflow: hidden;
+                margin-top: 6px;
+            }
+            .cmd-progress-fill {
+                height: 100%;
+                border-radius: 2px;
+                background: linear-gradient(90deg, #3b82f6, #6366f1);
+                transition: width 0.8s cubic-bezier(0.22,1,0.36,1);
+            }
+
+            @media (max-width: 480px) {
+                #cmdDetailPanel { border-radius: 16px 16px 0 0 !important; }
+                #cmdDetailOverlay { align-items: flex-end !important; padding: 0 !important; }
             }
         `;
         document.head.appendChild(style);
     }
-    
-    // Créer l'overlay
-    const overlay = document.createElement("div");
-    overlay.id = "detailsModal";
-    overlay.className = "fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-2 sm:p-4 z-50";
-    overlay.style.opacity = "0";
-    overlay.style.transition = "opacity 0.3s ease";
-    
-    // Construire les lignes du tableau des produits
+
+    // Badge statut
+    const badgeClass = {
+        'en_attente': 'cmd-badge-en_attente',
+        'en_cours':   'cmd-badge-en_cours',
+        'livree':     'cmd-badge-livree',
+        'annulee':    'cmd-badge-annulee',
+    }[cmd.etat] || 'cmd-badge-default';
+
+    const etatLabel = getEtatLabel(cmd.etat);
+
+    // Couleur accent header selon statut
+    const headerGrad = {
+        'livree':     'linear-gradient(135deg, #059669 0%, #0d9488 100%)',
+        'annulee':    'linear-gradient(135deg, #dc2626 0%, #9f1239 100%)',
+        'en_cours':   'linear-gradient(135deg, #2563eb 0%, #4f46e5 100%)',
+        'en_attente': 'linear-gradient(135deg, #d97706 0%, #b45309 100%)',
+    }[cmd.etat] || 'linear-gradient(135deg, #1e293b 0%, #334155 100%)';
+
+    // Lignes produits
     let produitsRows = '';
     if (cmd.details && cmd.details.length > 0) {
-        cmd.details.forEach(detail => {
+        cmd.details.forEach((detail, i) => {
+            const pct = cmd.total > 0 ? Math.round((detail.sous_total / cmd.total) * 100) : 0;
             produitsRows += `
-                <tr class="hover:bg-gray-50">
-                    <td class="px-1 sm:px-3 py-1.5 sm:py-2 max-w-[120px] sm:max-w-none">
-                        <span class="font-medium text-gray-800 block truncate" title="${detail.produit_nom || 'Produit'}">${detail.produit_nom || 'Produit'}</span>
+                <tr class="cmd-row-anim" style="animation-delay:${0.05 + i * 0.04}s; border-bottom: 1px solid #f1f5f9;">
+                    <td style="padding: 10px 14px;">
+                        <div style="font-weight:600; font-size:13px; color:#1e293b; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:160px;" title="${detail.produit_nom || 'Produit'}">
+                            ${detail.produit_nom || 'Produit'}
+                        </div>
+                        <div class="cmd-progress-bar" style="max-width:100px;">
+                            <div class="cmd-progress-fill" style="width:${pct}%"></div>
+                        </div>
                     </td>
-                    <td class="px-1 sm:px-3 py-1.5 sm:py-2 text-center text-gray-600">${formatNumber(detail.prix)}</td>                
-                    <td class="px-1 sm:px-3 py-1.5 sm:py-2 text-center">
-                        <span class="bg-gray-100 px-1.5 py-0.5 rounded-full text-xs text-gray-700">
+                    <td style="padding: 10px 14px; text-align:center; font-size:12px; color:#64748b; font-family:'JetBrains Mono', monospace;">
+                        ${formatNumber(detail.prix)}
+                    </td>
+                    <td style="padding: 10px 14px; text-align:center;">
+                        <span style="display:inline-flex; align-items:center; justify-content:center; min-width:28px; height:22px; background:#f1f5f9; border-radius:6px; font-size:12px; font-weight:600; color:#334155; padding: 0 7px;">
                             ${detail.quantite}
                         </span>
                     </td>
-                    <td class="px-1 sm:px-3 py-1.5 sm:py-2 text-center font-semibold text-blue-600">${formatNumber(detail.sous_total)}</td>
+                    <td style="padding: 10px 14px; text-align:right; font-family:'JetBrains Mono', monospace; font-size:13px; font-weight:600; color:#3b82f6; white-space:nowrap;">
+                        ${formatNumber(detail.sous_total)} <span style="font-size:10px; font-weight:400; color:#94a3b8;">FCFA</span>
+                    </td>
                 </tr>
             `;
         });
     } else {
         produitsRows = `
             <tr>
-                <td colspan="4" class="px-3 py-4 text-center text-gray-400">
-                    <i class="fas fa-box-open text-lg mb-1 block"></i>
-                    Aucun produit
+                <td colspan="4" style="padding: 32px; text-align:center; color:#94a3b8; font-size:13px;">
+                    <i class="fas fa-box-open" style="font-size:24px; display:block; margin-bottom:8px; opacity:0.5;"></i>
+                    Aucun produit dans cette commande
                 </td>
             </tr>
         `;
     }
-    
-    // Structure complète du modal
+
+    // Overlay
+    const overlay = document.createElement('div');
+    overlay.id = 'cmdDetailOverlay';
+    overlay.style.cssText = `
+        position:fixed; inset:0; z-index:9999;
+        background: rgba(15,23,42,0.55);
+        backdrop-filter: blur(6px);
+        display:flex; align-items:center; justify-content:center;
+        padding: 16px;
+    `;
+
     overlay.innerHTML = `
-        <div class="bg-white rounded-xl shadow-2xl w-full max-w-full sm:max-w-2xl lg:max-w-3xl flex flex-col" style="max-height: 95vh; animation: slideIn 0.3s ease-out;">
-            <!-- En-tête avec dégradé - FIXE -->
-            <div class="bg-gradient-to-r from-blue-600 to-indigo-600 p-3 sm:p-4 rounded-t-xl flex-shrink-0">
-                <div class="flex justify-between items-start gap-2">
-                    <div class="flex-1 min-w-0">
-                        <h3 class="text-base sm:text-lg font-bold text-white flex items-center gap-1 sm:gap-2">
-                            <i class="fas fa-receipt text-sm sm:text-base"></i>
-                            Détails de la commande
-                        </h3>
-                        <div class="mt-1">
-                            <h1 class="text-sm sm:text-base font-bold text-white">GESTION COMMERCIAL</h1>
-                            <p class="text-xs text-blue-100">contact@gestion.com | +221 77 000 00 00</p>
+        <div id="cmdDetailPanel" style="
+            background:#f8fafc;
+            border-radius: 20px;
+            width: 100%;
+            max-width: 600px;
+            max-height: 92vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            box-shadow: 0 32px 64px rgba(0,0,0,0.25), 0 0 0 1px rgba(255,255,255,0.08);
+        ">
+
+            <!-- HEADER -->
+            <div style="background:${headerGrad}; padding: 20px 22px 18px; flex-shrink:0; position:relative; overflow:hidden;">
+                <!-- Cercles décoratifs -->
+                <div style="position:absolute; top:-30px; right:-30px; width:120px; height:120px; border-radius:50%; background:rgba(255,255,255,0.07); pointer-events:none;"></div>
+                <div style="position:absolute; bottom:-40px; left:20px; width:90px; height:90px; border-radius:50%; background:rgba(255,255,255,0.05); pointer-events:none;"></div>
+
+                <div style="position:relative; display:flex; justify-content:space-between; align-items:flex-start; gap:12px;">
+                    <div style="flex:1; min-width:0;">
+                        <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px;">
+                            <span style="font-size:10px; font-weight:600; letter-spacing:0.1em; text-transform:uppercase; color:rgba(255,255,255,0.6);">
+                                Détail commande
+                            </span>
                         </div>
-                        <p class="text-blue-100 text-xs mt-1">
-                            Réf: <span class="font-mono font-semibold">CMD-${String(cmd.id).padStart(3, '0')}</span>
-                        </p>
+                        <div style="font-family:'JetBrains Mono', monospace; font-size:22px; font-weight:500; color:#fff; letter-spacing:0.03em;">
+                            CMD-${String(cmd.id).padStart(3, '0')}
+                        </div>
+                        <div style="margin-top:6px; display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+                            <span style="font-size:11px; color:rgba(255,255,255,0.65);">
+                                <i class="fas fa-calendar-alt" style="margin-right:4px;"></i>${formatDate(cmd.date_commande)}
+                            </span>
+                            <span style="font-size:11px; padding: 2px 8px; border-radius:20px; background:rgba(255,255,255,0.18); color:#fff; font-weight:500;">
+                                ${etatLabel}
+                            </span>
+                        </div>
                     </div>
-                    <button class="close-modal-btn text-white/80 hover:text-white transition p-1.5 hover:bg-white/10 rounded-lg flex-shrink-0">
-                        <i class="fas fa-times text-lg sm:text-xl"></i>
+                    <button class="cmd-close-btn close-modal-btn">
+                        <i class="fas fa-times" style="font-size:13px;"></i>
                     </button>
                 </div>
+
+                <!-- Montant total en avant -->
+                <div style="margin-top:14px; padding-top:14px; border-top:1px solid rgba(255,255,255,0.15); display:flex; align-items:baseline; gap:6px;">
+                    <span style="font-size:11px; color:rgba(255,255,255,0.6); text-transform:uppercase; letter-spacing:0.06em;">Total</span>
+                    <span style="font-size:26px; font-weight:700; color:#fff; line-height:1;">${formatNumber(cmd.total)}</span>
+                    <span style="font-size:12px; color:rgba(255,255,255,0.6); font-weight:500;">FCFA</span>
+                </div>
             </div>
-            
-            <!-- Contenu scrollable -->
-            <div class="overflow-y-auto p-3 sm:p-4" style="max-height: calc(95vh - 140px);">
-                <!-- Grille d'informations -->
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3 mb-3 sm:mb-4">
-                    <!-- Carte client -->
-                    <div class="bg-gray-50 rounded-lg p-2 sm:p-3 border border-gray-200">
-                        <div class="flex items-center gap-1.5 text-blue-600 mb-1 sm:mb-2">
-                            <i class="fas fa-user-circle text-xs sm:text-sm"></i>
-                            <h4 class="font-medium text-gray-700 text-xs sm:text-sm">Client</h4>
-                        </div>
-                        <div class="space-y-0.5 sm:space-y-1 text-xs">
-                            <p><span class="text-gray-500">Nom:</span> <span class="font-medium text-gray-800">${cmd.client?.nom || 'N/A'}</span></p>
-                            <p><span class="text-gray-500">Tél:</span> <span class="font-medium text-gray-800">${cmd.client?.telephone || 'N/A'}</span></p>
-                            <p class="truncate"><span class="text-gray-500">Adr:</span> <span class="font-medium text-gray-800">${cmd.client?.adresse || 'Non renseignée'}</span></p>
-                        </div>
+
+            <!-- BODY SCROLLABLE -->
+            <div style="overflow-y:auto; flex:1; padding:18px;">
+
+                <!-- Stats cards -->
+                <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; margin-bottom:18px;">
+                    <div class="cmd-stat-card">
+                        <div style="font-size:10px; font-weight:600; color:#94a3b8; text-transform:uppercase; letter-spacing:0.08em; margin-bottom:6px;">Client</div>
+                        <div style="font-size:13px; font-weight:600; color:#1e293b; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${cmd.client?.nom || 'N/A'}</div>
+                        <div style="font-size:11px; color:#64748b; margin-top:2px;">${cmd.client?.telephone || '—'}</div>
                     </div>
-                    
-                    <!-- Carte commande -->
-                    <div class="bg-gray-50 rounded-lg p-2 sm:p-3 border border-gray-200">
-                        <div class="flex items-center gap-1.5 text-indigo-600 mb-1 sm:mb-2">
-                            <i class="fas fa-shopping-cart text-xs sm:text-sm"></i>
-                            <h4 class="font-medium text-gray-700 text-xs sm:text-sm">Commande</h4>
-                        </div>
-                        <div class="space-y-0.5 sm:space-y-1 text-xs">
-                            <div class="flex justify-between">
-                                <span class="text-gray-500">Date:</span>
-                                <span class="font-medium">${formatDate(cmd.date_commande)}</span>
-                            </div>
-                            <div class="flex justify-between items-center">
-                                <span class="text-gray-500">Statut:</span>
-                                <span class="px-1.5 sm:px-2 py-0.5 rounded-full text-xs font-medium bg-${getEtatClass(cmd.etat)}-100 text-${getEtatClass(cmd.etat)}-600">
-                                    ${getEtatLabel(cmd.etat)}
-                                </span>
-                            </div>
-                            <div class="flex justify-between">
-                                <span class="text-gray-500">Articles:</span>
-                                <span class="font-medium">${totalProduits}</span>
-                            </div>
-                            <div class="flex justify-between pt-1 mt-1 border-t border-gray-200">
-                                <span class="text-gray-600 font-medium">Total:</span>
-                                <span class="font-bold text-blue-600">${formatNumber(cmd.total)} FCFA</span>
-                            </div>
+                    <div class="cmd-stat-card">
+                        <div style="font-size:10px; font-weight:600; color:#94a3b8; text-transform:uppercase; letter-spacing:0.08em; margin-bottom:6px;">Articles</div>
+                        <div style="font-size:22px; font-weight:700; color:#1e293b; line-height:1.1;">${totalProduits}</div>
+                        <div style="font-size:11px; color:#64748b; margin-top:2px;">${cmd.details?.length || 0} référence(s)</div>
+                    </div>
+                    <div class="cmd-stat-card">
+                        <div style="font-size:10px; font-weight:600; color:#94a3b8; text-transform:uppercase; letter-spacing:0.08em; margin-bottom:6px;">Statut</div>
+                        <div style="margin-top:4px;">
+                            <span class="${badgeClass}" style="font-size:11px; font-weight:600; padding: 3px 10px; border-radius:20px; display:inline-block;">
+                                ${etatLabel}
+                            </span>
                         </div>
                     </div>
                 </div>
-                
-                <!-- Liste des produits -->
-                <div class="border border-gray-200 rounded-lg overflow-hidden">
-                    <div class="bg-gray-50 px-2 sm:px-3 py-1.5 sm:py-2 border-b border-gray-200">
-                        <h4 class="font-medium text-gray-700 text-xs sm:text-sm flex items-center gap-1.5">
-                            <i class="fas fa-boxes text-blue-500 text-xs"></i>
-                            Produits
-                            <span class="ml-auto text-xs font-normal text-gray-500">${cmd.details?.length || 0} article(s)</span>
-                        </h4>
+
+                <!-- Adresse client si dispo -->
+                ${cmd.client?.adresse ? `
+                <div style="background:#fff; border:1px solid #e8eaf0; border-radius:12px; padding:12px 14px; margin-bottom:18px; display:flex; align-items:flex-start; gap:10px;">
+                    <div style="width:32px; height:32px; flex-shrink:0; background:#eff6ff; border-radius:8px; display:flex; align-items:center; justify-content:center;">
+                        <i class="fas fa-map-marker-alt" style="color:#3b82f6; font-size:13px;"></i>
                     </div>
-                    
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-xs">
-                            <thead class="bg-gray-50 text-gray-500">
-                                <tr>
-                                    <th class="px-1 sm:px-3 py-1.5 text-left">Produit</th>
-                                    <th class="px-1 sm:px-3 py-1.5 text-center">Prix</th>
-                                    <th class="px-1 sm:px-3 py-1.5 text-center">Quantité</th>
-                                    <th class="px-1 sm:px-3 py-1.5 text-right">Total</th>
+                    <div>
+                        <div style="font-size:10px; font-weight:600; color:#94a3b8; text-transform:uppercase; letter-spacing:0.08em; margin-bottom:2px;">Adresse du client</div>
+                        <div style="font-size:13px; color:#334155;">${cmd.client.adresse}</div>
+                    </div>
+                </div>
+                ` : ''}
+
+                <!-- Tableau produits -->
+                <div style="background:#fff; border:1px solid #e8eaf0; border-radius:14px; overflow:hidden;">
+                    <div style="padding:12px 14px; border-bottom:1px solid #f1f5f9; display:flex; justify-content:space-between; align-items:center;">
+                        <span style="font-size:12px; font-weight:600; color:#1e293b; display:flex; align-items:center; gap:6px;">
+                            <i class="fas fa-boxes" style="color:#3b82f6; font-size:11px;"></i>
+                            Produits commandés
+                        </span>
+                        <span style="font-size:11px; background:#f1f5f9; color:#64748b; padding:2px 10px; border-radius:20px; font-weight:500;">
+                            ${cmd.details?.length || 0} article(s)
+                        </span>
+                    </div>
+                    <div style="overflow-x:auto;">
+                        <table class="cmd-table" style="width:100%; border-collapse:collapse; min-width:360px;">
+                            <thead>
+                                <tr style="background:#fafbfc;">
+                                    <th style="padding:8px 14px; text-align:left; font-size:10px; font-weight:600; color:#94a3b8; text-transform:uppercase; letter-spacing:0.08em;">Produit</th>
+                                    <th style="padding:8px 14px; text-align:center; font-size:10px; font-weight:600; color:#94a3b8; text-transform:uppercase; letter-spacing:0.08em;">Prix unit.</th>
+                                    <th style="padding:8px 14px; text-align:center; font-size:10px; font-weight:600; color:#94a3b8; text-transform:uppercase; letter-spacing:0.08em;">Qté</th>
+                                    <th style="padding:8px 14px; text-align:right; font-size:10px; font-weight:600; color:#94a3b8; text-transform:uppercase; letter-spacing:0.08em;">Sous-total</th>
                                 </tr>
                             </thead>
-                            <tbody class="divide-y divide-gray-200">
+                            <tbody>
                                 ${produitsRows}
                             </tbody>
                         </table>
                     </div>
+
+                    <!-- Total ligne footer tableau -->
+                    <div style="padding:12px 14px; background:#f8fafc; border-top:2px solid #e8eaf0; display:flex; justify-content:space-between; align-items:center;">
+                        <span style="font-size:12px; font-weight:600; color:#64748b;">${totalProduits} article(s) au total</span>
+                        <div style="text-align:right;">
+                            <div style="font-size:10px; color:#94a3b8; font-weight:500; text-transform:uppercase; letter-spacing:0.08em;">Montant total</div>
+                            <div style="font-family:'JetBrains Mono', monospace; font-size:18px; font-weight:700; color:#1e293b;">
+                                ${formatNumber(cmd.total)} <span style="font-size:11px; font-weight:400; color:#94a3b8;">FCFA</span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
+
             </div>
-            
-            <!-- FOOTER BOUTONS - FIXE -->
-            <div class="border-t border-gray-200 p-2 sm:p-3 bg-gray-50 rounded-b-xl flex justify-end gap-2 flex-shrink-0">
-                
-                <button class="close-modal-btn px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition flex items-center gap-1 shadow">
-                    <i class="fas fa-check"></i>
+
+            <!-- FOOTER -->
+            <div style="padding:14px 18px; border-top:1px solid #e8eaf0; background:#fff; display:flex; justify-content:flex-end; gap:10px; flex-shrink:0;">
+                <button class="close-modal-btn" style="
+                    padding: 9px 20px;
+                    font-family: 'Plus Jakarta Sans', sans-serif;
+                    font-size: 13px; font-weight: 600;
+                    color: #64748b;
+                    background: #f1f5f9;
+                    border: none; border-radius: 10px;
+                    cursor: pointer; transition: background 0.2s;
+                " onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='#f1f5f9'">
                     Fermer
                 </button>
+                
             </div>
         </div>
     `;
-    
+
     document.body.appendChild(overlay);
-    
-    // Animation d'entrée
-    setTimeout(() => overlay.style.opacity = "1", 10);
-    
-    // Fonction pour fermer le modal
+
+    // Fermeture
     const closeModal = () => {
-        overlay.style.opacity = "0";
+        overlay.style.animation = 'cmdOverlayIn 0.2s ease reverse both';
         document.body.style.overflow = '';
-        setTimeout(() => overlay.remove(), 300);
+        setTimeout(() => overlay.remove(), 200);
     };
-    
-    // Fermeture avec tous les boutons "close"
+
     overlay.querySelectorAll('.close-modal-btn').forEach(btn => {
         btn.addEventListener('click', closeModal);
     });
-    
-    // Fermeture en cliquant sur l'overlay
-    overlay.addEventListener("click", (e) => {
-        if (e.target === overlay) {
-            closeModal();
-        }
+
+    overlay.addEventListener('click', (e) => {
+        if (e.target === overlay) closeModal();
     });
+
+    // Escape key
+    const onKey = (e) => { if (e.key === 'Escape') { closeModal(); document.removeEventListener('keydown', onKey); } };
+    document.addEventListener('keydown', onKey);
 }
 
 // Supprime l'ancien style en bas s'il existe
@@ -1377,222 +1513,397 @@ async function viewFacture(id) {
 
 function displayFacture(cmd) {
     const fact = cmd.facture;
-    
-    // BLOQUER LE SCROLL DE LA PAGE
+
     document.body.style.overflow = 'hidden';
-    
-    // Calculer le total des produits
+
     const totalProduits = fact.details?.reduce((sum, d) => sum + d.quantite, 0) || 0;
-    
-    // Vérifier si le style existe déjà
-    if (!document.getElementById('facture-anim-styles')) {
+
+    if (!document.getElementById('facture-detail-styles')) {
         const style = document.createElement('style');
-        style.id = 'facture-anim-styles';
+        style.id = 'facture-detail-styles';
         style.textContent = `
-            @keyframes slideIn {
-                from {
-                    opacity: 0;
-                    transform: translateY(-20px);
-                }
-                to {
-                    opacity: 1;
-                    transform: translateY(0);
-                }
+            @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap');
+
+            #factureDetailOverlay { font-family: 'Plus Jakarta Sans', sans-serif; }
+
+            @keyframes factOverlayIn {
+                from { opacity: 0; }
+                to   { opacity: 1; }
             }
+            @keyframes factPanelIn {
+                from { opacity: 0; transform: translateY(24px) scale(0.98); }
+                to   { opacity: 1; transform: translateY(0)   scale(1);    }
+            }
+            @keyframes factRowIn {
+                from { opacity: 0; transform: translateX(-8px); }
+                to   { opacity: 1; transform: translateX(0);    }
+            }
+
+            #factureDetailOverlay { animation: factOverlayIn 0.25s ease both; }
+            #factureDetailPanel   { animation: factPanelIn 0.35s cubic-bezier(0.22,1,0.36,1) both; }
+
+            .fact-row-anim { animation: factRowIn 0.3s ease both; }
+
+            .fact-stat-card {
+                background: #fff;
+                border: 1px solid #e8eaf0;
+                border-radius: 12px;
+                padding: 14px 16px;
+                transition: box-shadow 0.2s, transform 0.2s;
+            }
+            .fact-stat-card:hover {
+                box-shadow: 0 6px 20px rgba(0,0,0,0.07);
+                transform: translateY(-1px);
+            }
+
+            .fact-table tbody tr { transition: background 0.15s; }
+            .fact-table tbody tr:hover { background: #f7f8fc; }
+
+            .fact-close-btn {
+                width: 32px; height: 32px;
+                display: flex; align-items: center; justify-content: center;
+                border-radius: 8px;
+                border: 1px solid rgba(255,255,255,0.2);
+                background: rgba(255,255,255,0.1);
+                cursor: pointer;
+                transition: background 0.2s;
+                color: white;
+            }
+            .fact-close-btn:hover { background: rgba(255,255,255,0.22); }
+
+            .fact-progress-bar {
+                height: 4px; border-radius: 2px;
+                background: #e2e8f0; overflow: hidden; margin-top: 6px;
+            }
+            .fact-progress-fill {
+                height: 100%; border-radius: 2px;
+                background: linear-gradient(90deg, #10b981, #059669);
+                transition: width 0.8s cubic-bezier(0.22,1,0.36,1);
+            }
+
+            @media (max-width: 480px) {
+                #factureDetailPanel   { border-radius: 16px 16px 0 0 !important; }
+                #factureDetailOverlay { align-items: flex-end !important; padding: 0 !important; }
+            }
+
+@media print {
+  /* Hide ALL page elements except facture */
+  body > *:not(#factureDetailOverlay),
+  #sidebar,
+  header,
+  main > *:not(#factureDetailOverlay),
+  nav,
+  .no-print { 
+    display: none !important; 
+  }
+  
+  /* Position facture as full printable page */
+  #factureDetailOverlay {
+    position: static !important;
+    background: none !important;
+    backdrop-filter: none !important;
+    display: block !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    width: 100% !important;
+    height: auto !important;
+    max-width: none !important;
+    max-height: none !important;
+    z-index: auto !important;
+  }
+  
+  #factureDetailPanel {
+    position: static !important;
+    box-shadow: none !important;
+    border: none !important;
+    border-radius: 0 !important;
+    max-width: none !important;
+    max-height: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
+    min-height: 100vh !important;
+    animation: none !important;
+  }
+  
+  /* Hide modal footer buttons */
+  .fact-no-print { 
+    display: none !important; 
+  }
+  
+  /* Print page setup */
+  @page {
+    margin: 1cm;
+    size: A4;
+  }
+  
+  body {
+    margin: 0 !important;
+    padding: 0 !important;
+    font-size: 12pt !important;
+  }
+}
         `;
         document.head.appendChild(style);
     }
-    
-    // Créer l'overlay
-    const overlay = document.createElement("div");
-    overlay.id = "factureModal";
-    overlay.className = "fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-2 sm:p-4 z-50";
-    overlay.style.opacity = "0";
-    overlay.style.transition = "opacity 0.3s ease";
-    
-    // Construire les lignes du tableau des produits
+
+    // Lignes produits
     let produitsRows = '';
     if (fact.details && fact.details.length > 0) {
-        fact.details.forEach(detail => {
+        fact.details.forEach((detail, i) => {
+            const pct = cmd.total > 0 ? Math.round((detail.sous_total / cmd.total) * 100) : 0;
             produitsRows += `
-                <tr class="hover:bg-gray-50">
-                    <td class="px-1 sm:px-3 py-1.5 sm:py-2 max-w-[120px] sm:max-w-none">
-                        <span class="font-medium text-gray-800 block truncate" title="${detail.produit_nom || 'Produit'}">${detail.produit_nom || 'Produit'}</span>
+                <tr class="fact-row-anim" style="animation-delay:${0.05 + i * 0.04}s; border-bottom:1px solid #f1f5f9;">
+                    <td style="padding:10px 14px;">
+                        <div style="font-weight:600; font-size:13px; color:#1e293b; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:160px;" title="${detail.produit_nom || 'Produit'}">
+                            ${detail.produit_nom || 'Produit'}
+                        </div>
+                        <div class="fact-progress-bar" style="max-width:100px;">
+                            <div class="fact-progress-fill" style="width:${pct}%"></div>
+                        </div>
                     </td>
-                    <td class="px-1 sm:px-3 py-1.5 sm:py-2 text-center">
-                        <span class="bg-gray-100 px-1.5 py-0.5 rounded-full text-xs text-gray-700">
+                    <td style="padding:10px 14px; text-align:center;">
+                        <span style="display:inline-flex; align-items:center; justify-content:center; min-width:28px; height:22px; background:#f1f5f9; border-radius:6px; font-size:12px; font-weight:600; color:#334155; padding:0 7px;">
                             ${detail.quantite}
                         </span>
                     </td>
-                    <td class="px-1 sm:px-3 py-1.5 sm:py-2 text-center text-gray-600">${formatNumber(detail.montant)}</td>
-                    <td class="px-1 sm:px-3 py-1.5 sm:py-2 text-center font-semibold text-blue-600">${formatNumber(detail.sous_total)}</td>
+                    <td style="padding:10px 14px; text-align:right; font-family:'JetBrains Mono', monospace; font-size:12px; color:#64748b;">
+                        ${formatNumber(detail.montant)}
+                    </td>
+                    <td style="padding:10px 14px; text-align:right; font-family:'JetBrains Mono', monospace; font-size:13px; font-weight:600; color:#10b981; white-space:nowrap;">
+                        ${formatNumber(detail.sous_total)} <span style="font-size:10px; font-weight:400; color:#94a3b8;">FCFA</span>
+                    </td>
                 </tr>
             `;
         });
     } else {
         produitsRows = `
             <tr>
-                <td colspan="4" class="px-3 py-4 text-center text-gray-400">
-                    <i class="fas fa-box-open text-lg mb-1 block"></i>
-                    Aucun produit
+                <td colspan="4" style="padding:32px; text-align:center; color:#94a3b8; font-size:13px;">
+                    <i class="fas fa-box-open" style="font-size:24px; display:block; margin-bottom:8px; opacity:0.5;"></i>
+                    Aucun produit dans cette facture
                 </td>
             </tr>
         `;
     }
-    
-    // Structure complète du modal - SANS MODE DE PAIEMENT ET SANS TVA
+
+    // Overlay
+    const overlay = document.createElement('div');
+    overlay.id = 'factureDetailOverlay';
+    overlay.style.cssText = `
+        position:fixed; inset:0; z-index:9999;
+        background: rgba(15,23,42,0.55);
+        backdrop-filter: blur(6px);
+        display:flex; align-items:center; justify-content:center;
+        padding: 16px;
+    `;
+
     overlay.innerHTML = `
-        <div class="bg-white rounded-xl shadow-2xl w-full max-w-full sm:max-w-2xl lg:max-w-3xl flex flex-col" style="max-height: 98vh; animation: slideIn 0.3s ease-out;">
-            <!-- En-tête avec dégradé - FIXE -->
-            <div class="bg-gradient-to-r from-blue-600 to-indigo-600 p-4 sm:p-5 rounded-t-xl flex-shrink-0">
-                <div class="flex justify-between items-start gap-2">
-                    <div class="flex-1 min-w-0">
-                        <h3 class="text-base sm:text-lg md:text-xl font-bold text-white flex items-center gap-1 sm:gap-2">
-                            <i class="fas fa-file-invoice text-sm sm:text-base"></i>
-                            Facture
-                        </h3>
-                        <div class="mt-2">
-                            <h1 class="text-base sm:text-lg md:text-xl font-bold text-white">GESTION COMMERCIAL</h1>
-                            <p class="text-xs sm:text-sm text-blue-100 mt-0.5">contact@gestion.com | +221 77 000 00 00</p>
+        <div id="factureDetailPanel" style="
+            background:#f8fafc;
+            border-radius: 20px;
+            width: 100%;
+            max-width: 620px;
+            max-height: 92vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            box-shadow: 0 32px 64px rgba(0,0,0,0.25), 0 0 0 1px rgba(255,255,255,0.08);
+        ">
+
+            <!-- HEADER vert (facture = payée) -->
+            <div style="background: linear-gradient(135deg, #059669 0%, #0d9488 100%); padding:20px 22px 18px; flex-shrink:0; position:relative; overflow:hidden;">
+                <!-- Cercles déco -->
+                <div style="position:absolute; top:-30px; right:-30px; width:130px; height:130px; border-radius:50%; background:rgba(255,255,255,0.07); pointer-events:none;"></div>
+                <div style="position:absolute; bottom:-40px; left:20px; width:90px; height:90px; border-radius:50%; background:rgba(255,255,255,0.05); pointer-events:none;"></div>
+
+                <div style="position:relative; display:flex; justify-content:space-between; align-items:flex-start; gap:12px;">
+                    <div style="flex:1; min-width:0;">
+                        <!-- Entête société + badge FACTURE -->
+                        <div style="display:flex; align-items:center; gap:10px; margin-bottom:8px; flex-wrap:wrap;">
+                            <div style="display:flex; align-items:center; gap:7px;">
+                                <div style="width:30px; height:30px; background:rgba(255,255,255,0.2); border-radius:8px; display:flex; align-items:center; justify-content:center;">
+                                    <i class="fas fa-building" style="color:#fff; font-size:13px;"></i>
+                                </div>
+                                <div>
+                                    <div style="font-size:13px; font-weight:700; color:#fff; letter-spacing:0.01em;">GESTION COMMERCIAL</div>
+                                    <div style="font-size:10px; color:rgba(255,255,255,0.6);">contact@gestion.com · +221 77 000 00 00</div>
+                                </div>
+                            </div>
+                            <span style="margin-left:auto; font-size:10px; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; background:rgba(255,255,255,0.18); color:#fff; padding:3px 10px; border-radius:20px;">
+                                Facture
+                            </span>
                         </div>
-                        <p class="text-blue-100 text-xs sm:text-sm mt-2">
-                            N° Facture: <span class="font-mono font-semibold">${fact.numero_facture}</span>
-                        </p>
+
+                        <!-- N° facture -->
+                        <div style="font-family:'JetBrains Mono', monospace; font-size:22px; font-weight:500; color:#fff; letter-spacing:0.03em;">
+                            ${fact.numero_facture}
+                        </div>
+                        <div style="margin-top:5px; display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+                            <span style="font-size:11px; color:rgba(255,255,255,0.65);">
+                                <i class="fas fa-calendar-alt" style="margin-right:4px;"></i>Émise le ${formatDate(fact.date_facture)}
+                            </span>
+                            <span style="font-size:11px; color:rgba(255,255,255,0.65);">
+                                <i class="fas fa-link" style="margin-right:4px;"></i>CMD-${String(cmd.id).padStart(3, '0')}
+                            </span>
+                            <span style="font-size:11px; padding:2px 9px; border-radius:20px; background:rgba(255,255,255,0.2); color:#fff; font-weight:600;">
+                                ✓ Payée
+                            </span>
+                        </div>
                     </div>
-                    <button class="close-facture-btn text-white/80 hover:text-white transition p-1.5 hover:bg-white/10 rounded-lg flex-shrink-0">
-                        <i class="fas fa-times text-lg sm:text-xl"></i>
+                    <button class="fact-close-btn close-facture-btn">
+                        <i class="fas fa-times" style="font-size:13px;"></i>
                     </button>
                 </div>
+
+                <!-- Montant total -->
+                <div style="margin-top:14px; padding-top:14px; border-top:1px solid rgba(255,255,255,0.15); display:flex; align-items:baseline; gap:6px;">
+                    <span style="font-size:11px; color:rgba(255,255,255,0.6); text-transform:uppercase; letter-spacing:0.06em;">Montant total</span>
+                    <span style="font-size:28px; font-weight:700; color:#fff; line-height:1;">${formatNumber(cmd.total)}</span>
+                    <span style="font-size:12px; color:rgba(255,255,255,0.6); font-weight:500;">FCFA</span>
+                </div>
             </div>
-            
-            <!-- Contenu scrollable -->
-            <div class="overflow-y-auto p-3 sm:p-4" style="max-height: calc(98vh - 180px);">
-                <!-- Grille d'informations -->
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3 mb-3 sm:mb-4">
-                    <!-- Carte client -->
-                    <div class="bg-gray-50 rounded-lg p-2 sm:p-3 border border-gray-200">
-                        <div class="flex items-center gap-1.5 text-blue-600 mb-1 sm:mb-2">
-                            <i class="fas fa-user-circle text-xs sm:text-sm"></i>
-                            <h4 class="font-medium text-gray-700 text-xs sm:text-sm">Facturé à</h4>
-                        </div>
-                        <div class="space-y-0.5 sm:space-y-1 text-xs">
-                            <p><span class="text-gray-500">Nom:</span> <span class="font-medium text-gray-800">${cmd.client?.nom || 'N/A'}</span></p>
-                            <p><span class="text-gray-500">Tél:</span> <span class="font-medium text-gray-800">${cmd.client?.telephone || 'N/A'}</span></p>
-                            <p class="truncate"><span class="text-gray-500">Adr:</span> <span class="font-medium text-gray-800">${cmd.client?.adresse || 'Non renseignée'}</span></p>
-                        </div>
+
+            <!-- BODY SCROLLABLE -->
+            <div style="overflow-y:auto; flex:1; padding:18px;">
+
+                <!-- Stat cards -->
+                <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; margin-bottom:18px;">
+                    <div class="fact-stat-card">
+                        <div style="font-size:10px; font-weight:600; color:#94a3b8; text-transform:uppercase; letter-spacing:0.08em; margin-bottom:6px;">Facturé à</div>
+                        <div style="font-size:13px; font-weight:600; color:#1e293b; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${cmd.client?.nom || 'N/A'}</div>
+                        <div style="font-size:11px; color:#64748b; margin-top:2px;">${cmd.client?.telephone || '—'}</div>
                     </div>
-                    
-                    <!-- Carte commande -->
-                    <div class="bg-gray-50 rounded-lg p-2 sm:p-3 border border-gray-200">
-                        <div class="flex items-center gap-1.5 text-indigo-600 mb-1 sm:mb-2">
-                            <i class="fas fa-shopping-cart text-xs sm:text-sm"></i>
-                            <h4 class="font-medium text-gray-700 text-xs sm:text-sm">Commande associée</h4>
-                        </div>
-                        <div class="space-y-0.5 sm:space-y-1 text-xs">
-                            <div class="flex justify-between">
-                                <span class="text-gray-500">Réf:</span>
-                                <span class="font-mono font-medium">CMD-${String(cmd.id).padStart(3, '0')}</span>
-                            </div>
-                            <div class="flex justify-between">
-                                <span class="text-gray-500">Date cmd:</span>
-                                <span class="font-medium">${formatDate(cmd.date_commande)}</span>
-                            </div>
-                            <div class="flex justify-between">
-                                <span class="text-gray-500">Date fact:</span>
-                                <span class="font-medium">${formatDate(fact.date_facture)}</span>
-                            </div>
-                            <div class="flex justify-between items-center">
-                                <span class="text-gray-500">Statut:</span>
-                                <span class="px-1.5 sm:px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-600">
-                                    Payée
-                                </span>
-                            </div>
-                        </div>
+                    <div class="fact-stat-card">
+                        <div style="font-size:10px; font-weight:600; color:#94a3b8; text-transform:uppercase; letter-spacing:0.08em; margin-bottom:6px;">Articles</div>
+                        <div style="font-size:22px; font-weight:700; color:#1e293b; line-height:1.1;">${totalProduits}</div>
+                        <div style="font-size:11px; color:#64748b; margin-top:2px;">${fact.details?.length || 0} référence(s)</div>
+                    </div>
+                    <div class="fact-stat-card">
+                        <div style="font-size:10px; font-weight:600; color:#94a3b8; text-transform:uppercase; letter-spacing:0.08em; margin-bottom:6px;">Date cmd</div>
+                        <div style="font-size:12px; font-weight:600; color:#1e293b; line-height:1.3;">${formatDate(cmd.date_commande)}</div>
+                        <div style="font-size:11px; color:#64748b; margin-top:2px;">Réf: CMD-${String(cmd.id).padStart(3,'0')}</div>
                     </div>
                 </div>
-                
-                <!-- Liste des produits -->
-                <div class="border border-gray-200 rounded-lg overflow-hidden">
-                    <div class="bg-gray-50 px-2 sm:px-3 py-1.5 sm:py-2 border-b border-gray-200">
-                        <h4 class="font-medium text-gray-700 text-xs sm:text-sm flex items-center gap-1.5">
-                            <i class="fas fa-boxes text-blue-500 text-xs"></i>
-                            Produits
-                            <span class="ml-auto text-xs font-normal text-gray-500">${fact.details?.length || 0} article(s)</span>
-                        </h4>
+
+                <!-- Adresse client -->
+                ${cmd.client?.adresse ? `
+                <div style="background:#fff; border:1px solid #e8eaf0; border-radius:12px; padding:12px 14px; margin-bottom:18px; display:flex; align-items:flex-start; gap:10px;">
+                    <div style="width:32px; height:32px; flex-shrink:0; background:#ecfdf5; border-radius:8px; display:flex; align-items:center; justify-content:center;">
+                        <i class="fas fa-map-marker-alt" style="color:#10b981; font-size:13px;"></i>
                     </div>
-                    
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-xs">
-                            <thead class="bg-gray-50 text-gray-500">
-                                <tr>
-                                    <th class="px-1 sm:px-3 py-1.5 text-left">Produit</th>
-                                    <th class="px-1 sm:px-3 py-1.5 text-center">Quantité</th>
-                                    <th class="px-1 sm:px-3 py-1.5 text-right">Prix unitaire</th>
-                                    <th class="px-1 sm:px-3 py-1.5 text-right">Total</th>
+                    <div>
+                        <div style="font-size:10px; font-weight:600; color:#94a3b8; text-transform:uppercase; letter-spacing:0.08em; margin-bottom:2px;">Adresse du client</div>
+                        <div style="font-size:13px; color:#334155;">${cmd.client.adresse}</div>
+                    </div>
+                </div>
+                ` : ''}
+
+                <!-- Tableau produits -->
+                <div style="background:#fff; border:1px solid #e8eaf0; border-radius:14px; overflow:hidden; margin-bottom:16px;">
+                    <div style="padding:12px 14px; border-bottom:1px solid #f1f5f9; display:flex; justify-content:space-between; align-items:center;">
+                        <span style="font-size:12px; font-weight:600; color:#1e293b; display:flex; align-items:center; gap:6px;">
+                            <i class="fas fa-boxes" style="color:#10b981; font-size:11px;"></i>
+                            Lignes de facturation
+                        </span>
+                        <span style="font-size:11px; background:#f1f5f9; color:#64748b; padding:2px 10px; border-radius:20px; font-weight:500;">
+                            ${fact.details?.length || 0} article(s)
+                        </span>
+                    </div>
+                    <div style="overflow-x:auto;">
+                        <table class="fact-table" style="width:100%; border-collapse:collapse; min-width:380px;">
+                            <thead>
+                                <tr style="background:#fafbfc;">
+                                    <th style="padding:8px 14px; text-align:left; font-size:10px; font-weight:600; color:#94a3b8; text-transform:uppercase; letter-spacing:0.08em;">Désignation</th>
+                                    <th style="padding:8px 14px; text-align:center; font-size:10px; font-weight:600; color:#94a3b8; text-transform:uppercase; letter-spacing:0.08em;">Qté</th>
+                                    <th style="padding:8px 14px; text-align:right; font-size:10px; font-weight:600; color:#94a3b8; text-transform:uppercase; letter-spacing:0.08em;">Prix unit.</th>
+                                    <th style="padding:8px 14px; text-align:right; font-size:10px; font-weight:600; color:#94a3b8; text-transform:uppercase; letter-spacing:0.08em;">Montant</th>
                                 </tr>
                             </thead>
-                            <tbody class="divide-y divide-gray-200">
+                            <tbody>
                                 ${produitsRows}
                             </tbody>
                         </table>
                     </div>
-                </div>
-                
-                <!-- TOTAUX SIMPLIFIÉS - JUSTE SOUS-TOTAL ET TOTAL -->
-                <div class="mt-3 sm:mt-4">
-                    <div class="bg-gray-50 rounded-lg border border-gray-200 p-3 sm:p-4">
-                        <div class="space-y-2 text-sm sm:text-base">
-                            <div class="flex justify-between">
-                                <span class="text-gray-600">Sous-total:</span>
-                                <span class="font-mono font-semibold text-gray-800">${formatNumber(cmd.total)} FCFA</span>
+
+                    <!-- Récap totaux -->
+                    <div style="padding:14px; background:#f8fafc; border-top:2px solid #e8eaf0;">
+                        <div style="display:flex; flex-direction:column; align-items:flex-end; gap:8px; max-width:260px; margin-left:auto;">
+                            <div style="display:flex; justify-content:space-between; width:100%; font-size:13px;">
+                                <span style="color:#64748b;">Sous-total HT</span>
+                                <span style="font-family:'JetBrains Mono', monospace; font-weight:500; color:#1e293b;">${formatNumber(cmd.total)} FCFA</span>
                             </div>
-                            <div class="flex justify-between text-lg font-bold border-t border-gray-200 pt-2 mt-2">
-                                <span class="text-gray-700">Total:</span>
-                                <span class="font-mono text-blue-600">${formatNumber(cmd.total)} FCFA</span>
+                            <div style="width:100%; height:1px; background:#e2e8f0;"></div>
+                            <div style="display:flex; justify-content:space-between; align-items:center; width:100%;">
+                                <span style="font-size:13px; font-weight:700; color:#1e293b;">Total TTC</span>
+                                <div style="text-align:right;">
+                                    <span style="font-family:'JetBrains Mono', monospace; font-size:20px; font-weight:700; color:#059669;">${formatNumber(cmd.total)}</span>
+                                    <span style="font-size:11px; color:#94a3b8; margin-left:3px;">FCFA</span>
+                                </div>
+                            </div>
+                            <!-- Tampon payé -->
+                            <div style="margin-top:4px; border:2px solid #10b981; border-radius:8px; padding:4px 16px; color:#059669; font-size:12px; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; opacity:0.85;">
+                                ✓ Payée
                             </div>
                         </div>
                     </div>
                 </div>
+
             </div>
-            
-            <!-- FOOTER BOUTONS - FIXE -->
-            <div class="border-t border-gray-200 p-2 sm:p-3 bg-gray-50 rounded-b-xl flex justify-end gap-2 flex-shrink-0">
-                <button onclick="window.print()" 
-                    class="px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200 transition flex items-center gap-1">
-                    <i class="fas fa-print"></i>
-                    Imprimer
-                </button>
-                <button class="close-facture-btn px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition flex items-center gap-1 shadow">
-                    <i class="fas fa-check"></i>
+
+            <!-- FOOTER -->
+            <div class="fact-no-print" style="padding:14px 18px; border-top:1px solid #e8eaf0; background:#fff; display:flex; justify-content:flex-end; gap:10px; flex-shrink:0;">
+                <button class="close-facture-btn" style="
+                    padding:9px 20px;
+                    font-family:'Plus Jakarta Sans', sans-serif;
+                    font-size:13px; font-weight:600;
+                    color:#64748b; background:#f1f5f9;
+                    border:none; border-radius:10px;
+                    cursor:pointer; transition:background 0.2s;
+                " onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='#f1f5f9'">
                     Fermer
                 </button>
+                <button onclick="window.print()" style="
+                    padding:9px 20px;
+                    font-family:'Plus Jakarta Sans', sans-serif;
+                    font-size:13px; font-weight:600;
+                    color:#fff;
+                    background: linear-gradient(135deg, #059669 0%, #0d9488 100%);
+                    border:none; border-radius:10px;
+                    cursor:pointer;
+                    box-shadow: 0 4px 14px rgba(5,150,105,0.35);
+                    transition:opacity 0.2s, transform 0.2s;
+                    display:flex; align-items:center; gap:6px;
+                " onmouseover="this.style.opacity='0.9'; this.style.transform='translateY(-1px)'" onmouseout="this.style.opacity='1'; this.style.transform='translateY(0)'">
+                    <i class="fas fa-print" style="font-size:12px;"></i>
+                    Imprimer
+                </button>
             </div>
+
         </div>
     `;
-    
+
     document.body.appendChild(overlay);
-    
-    // Animation d'entrée
-    setTimeout(() => overlay.style.opacity = "1", 10);
-    
-    // Fonction pour fermer le modal
+
+    // Fermeture
     const closeModal = () => {
-        overlay.style.opacity = "0";
+        overlay.style.animation = 'factOverlayIn 0.2s ease reverse both';
         document.body.style.overflow = '';
-        setTimeout(() => overlay.remove(), 300);
+        setTimeout(() => overlay.remove(), 200);
     };
-    
-    // Fermeture avec tous les boutons "close"
+
     overlay.querySelectorAll('.close-facture-btn').forEach(btn => {
         btn.addEventListener('click', closeModal);
     });
-    
-    // Fermeture en cliquant sur l'overlay
-    overlay.addEventListener("click", (e) => {
-        if (e.target === overlay) {
-            closeModal();
-        }
+
+    overlay.addEventListener('click', (e) => {
+        if (e.target === overlay) closeModal();
     });
+
+    const onKey = (e) => {
+        if (e.key === 'Escape') { closeModal(); document.removeEventListener('keydown', onKey); }
+    };
+    document.addEventListener('keydown', onKey);
 }
 
 function closeFactureModal() {

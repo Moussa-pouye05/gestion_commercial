@@ -76,7 +76,7 @@
 <div class="no-found text-sm text-slate-500"></div>
 <div id="pagination" class="flex gap-2 mt-4"></div>
 <div class="fixed top-0 left-0 w-full h-full items-center justify-center hidden bg-black/50 z-50" id="modalAddVendeur">
-             <form action="" id="form_client" method="POST" enctype="multipart/form-data" class="p-6 bg-white">
+             <form action="" id="form_client" method="POST" enctype="multipart/form-data" class="p-2 m-4 bg-white">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     
                     <!-- Colonne gauche -->
@@ -138,8 +138,8 @@
             </form>
         </div>
 <div class="fixed top-0 left-0 w-full h-full hidden items-center justify-center  bg-black/50 z-50" id="modalEditVendeur">
-            <form action="" id="form_vendeur" method="POST" enctype="multipart/form-data" >
-                <div class="bg-white p-6 rounded-md shadow-lg w-[400px]">
+            <form action="" id="form_vendeur" method="POST" enctype="multipart/form-data" class="m-4">
+                <div class="bg-white p-2 m-4 rounded-md shadow-lg w-[400px]">
                     <h2 class="text-xl font-semibold mb-4">Modifier un vendeur</h2>
                     <!-- <div class="flex gap-2 direction-column"> -->
                         

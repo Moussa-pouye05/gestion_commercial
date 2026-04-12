@@ -27,8 +27,8 @@ $whereDateAnd = count($whereClauses) > 0 ? "AND " . str_replace("date_commande",
 $whereClosedAlias = $whereDateAlias ? $whereDateAlias . " AND c.etat = 'cloturee'" : "WHERE c.etat = 'cloturee'";
 
 try {
-    $pdo = new PDO("mysql:host=localhost;dbname=gestion_stock;charset=utf8", "root", "12345");
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    // $pdo = new PDO("mysql:host=localhost;dbname=gestion_stock;charset=utf8", "root", "12345");
+    // $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
     // Totaux
     $sqlTotal = "SELECT 

@@ -13,7 +13,7 @@ spl_autoload_register(function($class){
 //     exit;
 // }
 
-$pdo = new PDO("mysql:host=localhost;dbname=gestion_stock;charset=utf8", "root", "12345");
+//$pdo = new PDO("mysql:host=localhost;dbname=gestion_stock;charset=utf8", "root", "12345");
 $produitManager = new ProduitManager($pdo);
 
 $result = $produitManager->loadProduit(100, 0, "", 0);

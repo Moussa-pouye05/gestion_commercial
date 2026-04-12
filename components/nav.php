@@ -1,4 +1,4 @@
-<nav>
+<nav class="no-print">
 
   <!-- Sidebar Modernisée -->
   <div id="sidebar" class="sidebar fixed left-0 top-0 z-50 h-full w-0 overflow-hidden border-r border-gray-100 bg-white shadow-2xl transition-all duration-300 dark:border-slate-600 dark:bg-slate-700 sm:w-0 md:w-[20%] lg:w-[18%]">

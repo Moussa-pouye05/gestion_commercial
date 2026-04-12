@@ -11,8 +11,8 @@ if (!isset($_SESSION['user'])) {
 $userId = (int) ($_SESSION['user']['id'] ?? 0);
 
 try {
-    $pdo = new PDO("mysql:host=localhost;dbname=gestion_stock;charset=utf8", "root", "12345");
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    // $pdo = new PDO("mysql:host=localhost;dbname=gestion_stock;charset=utf8", "root", "12345");
+    // $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
     $startDate = $_GET['start_date'] ?? null;
     $endDate = $_GET['end_date'] ?? null;
