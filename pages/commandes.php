@@ -204,117 +204,175 @@
     
 </div>
 <?php endif?>
-<div class="fixed top-0 left-0 w-full h-full hidden items-center justify-center bg-black/50 z-50"  id="modalAddCommande">
-            <form class="bg-white p-6 rounded-xl shadow-md max-w-5xl mx-auto" id="saveCommande">
+<div class="fixed top-0 left-0 w-full h-full hidden items-center justify-center bg-black/50 backdrop-blur-sm  z-50 p-3 sm:p-5" id="modalAddCommande">
 
-    <h2 class="text-xl font-semibold mb-6" id="formTitle">Nouvelle commande</h2>
+    <form class="flex flex-col w-full max-w-3xl mx-auto bg-white rounded-2xl shadow-2xl overflow-hidden" style="max-height:92vh;" id="saveCommande">
 
-    <!-- Client -->
-    <div class="grid md:grid-cols-1 gap-4 mb-6">
-        <div>
-            <label class="text-sm text-gray-600">Client</label>
-            <div class="space-y-1">
-                <input
-                    type="text"
-                    id="clientSearch"
-                    class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 client-search"
-                    placeholder="Rechercher un client..."
-                    autocomplete="off"
-                    list="clientOptions"
-                    required
-                >
-                <input type="hidden" class="client-id-input" id="clientIdInput">
-                <datalist id="clientOptions" class="client-datalist"></datalist>
-                <div class="text-[11px] text-gray-500 client-meta">Saisissez au moins 2 caracteres</div>
+        <!-- ══════════ HEADER ══════════ -->
+        <div class="flex-shrink-0 relative overflow-hidden" style="background: linear-gradient(135deg, #16a 0%, rgb(15, 18, 206) 100%); padding: 20px 22px 18px;">
+            <!-- Cercles déco -->
+            <div style="position:absolute; top:-30px; right:-30px; width:130px; height:130px; border-radius:50%; background:rgba(255,255,255,0.07); pointer-events:none;"></div>
+            <div style="position:absolute; bottom:-40px; left:20px; width:90px; height:90px; border-radius:50%; background:rgba(255,255,255,0.05); pointer-events:none;"></div>
+
+            <div class="relative flex items-start justify-between gap-3">
+                <div>
+                    <div class="flex items-center gap-2 mb-1">
+                        <div class="w-8 h-8 rounded-lg flex items-center justify-center" style="background:rgba(255,255,255,0.15);">
+                            <i class="fas fa-cart-plus text-white text-sm"></i>
+                        </div>
+                        <span class="text-xs font-semibold tracking-widest uppercase text-green-100">Nouvelle commande</span>
+                    </div>
+                    <h2 class="text-xl font-bold text-white" id="formTitle">Créer une commande</h2>
+                    <p class="text-xs mt-1" style="color:rgba(255,255,255,0.55);">Renseignez le client et les produits</p>
+                </div>
+                <button type="button" id="cancelAddCommande"
+                    class="flex-shrink-0 flex items-center justify-center w-8 h-8 rounded-lg transition"
+                    style="background:rgba(255,255,255,0.12); border:1px solid rgba(255,255,255,0.2); color:white;">
+                    <i class="fas fa-times text-sm"></i>
+                </button>
             </div>
         </div>
-    </div>
 
-    <!-- Produits -->
-    <div class="overflow-x-auto">
-        <table class="w-full text-sm">
+        <!-- ══════════ BODY SCROLLABLE ══════════ -->
+        <div class="overflow-y-auto flex-1 p-5 space-y-6" style="background:#f8fafc;">
 
-            <thead class="bg-gray-100">
-                <tr>
-                    <th class="p-2 text-left">Produit</th>
-                    <th class="p-2">Prix</th>
-                    <th class="p-2">Quantité</th>
-                    <th class="p-2">Sous-total</th>
-                    <th class="p-2"></th>
-                </tr>
-            </thead>
+            <!-- CLIENT -->
+            <div class="bg-white rounded-xl border border-slate-200 p-4">
+                <div class="flex items-center gap-2 mb-3">
+                    <div class="w-7 h-7 rounded-lg flex items-center justify-center bg-green-50">
+                        <i class="fas fa-user text-green-600 text-xs"></i>
+                    </div>
+                    <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Client</span>
+                </div>
+                <div class="relative">
+                    <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-300 text-xs pointer-events-none"></i>
+                    <input
+                        type="text"
+                        id="clientSearch"
+                        class="client-search w-full rounded-lg border border-slate-200 pl-8 pr-4 py-2.5 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition"
+                        placeholder="Rechercher un client..."
+                        autocomplete="off"
+                        list="clientOptions"
+                        required
+                    >
+                    <input type="hidden" class="client-id-input" id="clientIdInput">
+                    <datalist id="clientOptions" class="client-datalist"></datalist>
+                </div>
+                <p class="text-[11px] text-slate-400 mt-1.5 client-meta">Saisissez au moins 2 caractères</p>
+            </div>
 
-            <tbody id="commandeBody">
-
-                <tr>
-                    <td class="p-2">
-                        <div class="space-y-1">
-                            <input
-                                type="text"
-                                class="w-full border rounded-md px-2 py-1 produit-search"
-                                placeholder="Rechercher un produit..."
-                                autocomplete="off"
-                            >
-                            <input type="hidden" class="produit-id-input">
-                            <datalist class="produit-datalist"></datalist>
-                            <div class="text-[11px] text-gray-500 produit-meta">Saisissez au moins 2 caracteres</div>
+            <!-- PRODUITS -->
+            <div class="bg-white rounded-xl border border-slate-200 overflow-hidden">
+                <div class="flex items-center justify-between px-4 py-3 border-b border-slate-100">
+                    <div class="flex items-center gap-2">
+                        <div class="w-7 h-7 rounded-lg flex items-center justify-center bg-green-50">
+                            <i class="fas fa-boxes text-green-600 text-xs"></i>
                         </div>
-                    </td>
+                        <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Produits commandés</span>
+                    </div>
+                    <button type="button" id="addProduit"
+                        class="flex items-center gap-1.5 text-xs font-semibold text-green-600 hover:text-green-700 bg-green-50 hover:bg-green-100 px-3 py-1.5 rounded-lg transition">
+                        <i class="fas fa-plus text-[10px]"></i>
+                        Ajouter produit
+                    </button>
+                </div>
 
-                    <td class="p-2">
-                        <input type="number" class="w-full border rounded-md px-2 py-1 prix-input" value="0" min="0">
-                    </td>
+                <!-- Tableau scroll horizontal sur mobile -->
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm" style="min-width:520px;">
+                        <thead>
+                            <tr style="background:#f8fafc;">
+                                <th class="px-4 py-2.5 text-left text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Désignation</th>
+                                <th class="px-4 py-2.5 text-center text-[10px] font-semibold text-slate-400 uppercase tracking-wider w-28">Prix unit.</th>
+                                <th class="px-4 py-2.5 text-center text-[10px] font-semibold text-slate-400 uppercase tracking-wider w-24">Quantité</th>
+                                <th class="px-4 py-2.5 text-right text-[10px] font-semibold text-slate-400 uppercase tracking-wider w-32">Sous-total</th>
+                                <th class="w-10"></th>
+                            </tr>
+                        </thead>
 
-                    <td class="p-2">
-                        <input type="number" class="w-full border rounded-md px-2 py-1 quantite-input" value="1" min="1">
-                    </td>
+                        <tbody id="commandeBody" class="divide-y divide-slate-100">
 
-                    <td class="p-2 text-center font-medium sous-total">
-                        0 FCFA
-                    </td>
+                            <tr class="hover:bg-slate-50 transition">
+                                <td class="px-4 py-2.5">
+                                    <div class="space-y-1">
+                                        <input
+                                            type="text"
+                                            class="produit-search w-full rounded-lg border border-slate-200 px-3 py-2 text-sm placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition"
+                                            placeholder="Rechercher un produit..."
+                                            autocomplete="off"
+                                        >
+                                        <input type="hidden" class="produit-id-input">
+                                        <datalist class="produit-datalist"></datalist>
+                                        <div class="text-[10px] text-slate-400 produit-meta">Saisissez au moins 2 caractères</div>
+                                    </div>
+                                </td>
 
-                    <td class="p-2 text-center">
-                        <button type="button" class="text-red-500" onclick="removeRow(this)">
-                            <i class="fa-solid fa-trash"></i>
-                        </button>
-                    </td>
-                </tr>
+                                <td class="px-4 py-2.5">
+                                    <input
+                                        type="number"
+                                        class="prix-input w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-center focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition"
+                                        value="0" min="0"
+                                    >
+                                </td>
 
-            </tbody>
+                                <td class="px-4 py-2.5">
+                                    <input
+                                        type="number"
+                                        class="quantite-input w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-center focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition"
+                                        value="1" min="1"
+                                    >
+                                </td>
 
-        </table>
-    </div>
+                                <td class="px-4 py-2.5 text-right">
+                                    <span class="sous-total font-semibold text-sm" style="font-family:'Courier New', monospace; color:#059669;">0 FCFA</span>
+                                </td>
 
-    <!-- Ajouter produit -->
-    <div class="mt-4">
-        <button type="button" id="addProduit"
-            class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700">
-            + Ajouter produit
-        </button>
-    </div>
+                                <td class="px-3 py-2.5 text-center">
+                                    <button type="button" onclick="removeRow(this)"
+                                        class="w-7 h-7 flex items-center justify-center rounded-lg text-slate-300 hover:text-red-500 hover:bg-red-50 transition mx-auto">
+                                        <i class="fas fa-trash text-xs"></i>
+                                    </button>
+                                </td>
+                            </tr>
 
-    <!-- Total -->
-    <div class="flex justify-end mt-6">
-        <div class="bg-gray-100 p-4 rounded-lg w-60">
-            <p class="flex justify-between text-sm">
-                <span>Total</span>
-                <span class="font-semibold total-display">0 FCFA</span>
-            </p>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- TOTAL -->
+            <div class="flex justify-end">
+                <div class="bg-white border border-slate-200 rounded-xl px-5 py-4 w-full sm:w-64 shadow-sm">
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Sous-total</span>
+                        <span class="text-sm font-medium text-slate-600 total-display" style="font-family:'Courier New', monospace;">0 FCFA</span>
+                    </div>
+                    <div class="border-t border-slate-100 pt-2 mt-1 flex justify-between items-center">
+                        <!-- <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Total TTC</span>
+                        <span class="text-lg font-bold total-display" style="font-family:'Courier New', monospace; color:#059669;">0 FCFA</span> -->
+                    </div>
+                </div>
+            </div>
+
         </div>
-    </div>
 
-    <!-- Boutons -->
-    <div class="flex justify-end gap-3 mt-6">
-        <button type="button" class="bg-gray-500 text-white px-4 py-2 rounded-lg" id="cancelAddCommande">
-            Annuler
-        </button>
+        <!-- ══════════ FOOTER ══════════ -->
+        <div class="flex-shrink-0 flex items-center justify-end gap-2 px-5 py-4 border-t border-slate-100 bg-white">
+            <!-- <button type="button" id="cancelAddCommande"
+                class="px-4 py-2 text-sm font-semibold text-slate-500 bg-slate-100 rounded-xl hover:bg-slate-200 transition">
+                Annuler
+            </button> -->
+            <button type="submit"
+                class="flex items-center gap-2 px-5 py-2 text-sm font-semibold text-white rounded-xl transition"
+                style="background: linear-gradient(135deg, #16a 0%, rgb(15, 18, 206) 100%); box-shadow: 0 4px 14px rgba(5,150,105,0.35);"
+                onmouseover="this.style.opacity='0.9'; this.style.transform='translateY(-1px)'"
+                onmouseout="this.style.opacity='1'; this.style.transform='translateY(0)'">
+                <i class="fas fa-check text-xs"></i>
+                Enregistrer la commande
+            </button>
+        </div>
 
-        <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700">
-            Enregistrer la commande
-        </button>
-    </div>
-
-</form>
+    </form>
 </div>
 <?php if($_SESSION['user']['role'] === "admin"):  ?>
 <div class="bg-white shadow-lg rounded-2xl p-4 mt-4 mb-4">

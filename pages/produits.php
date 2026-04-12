@@ -214,61 +214,112 @@
 </div>    
 
 <!-- Modal Add Stock (Approvisionnement) -->
-<div class="fixed top-0 left-0 w-full h-full  items-center justify-center hidden bg-black/50 z-50" id="modalAddStock">
-    <form action="" id="formAppro" class="w-full max-h-[95vh] flex justify-center">
-    
-    <div class="bg-white p-4 sm:p-6 rounded-md shadow-lg w-[95%] max-w-[520px] flex flex-col max-h-[95vh]">
+<div class="fixed top-0 left-0 w-full h-full items-center justify-center hidden bg-black/50 backdrop-blur-sm z-50 p-3 sm:p-5" id="modalAddStock">
 
-        <!-- Contenu scrollable -->
-        <div class="overflow-y-auto flex-1 pr-2">
+    <form action="" id="formAppro" class="flex flex-col w-full max-w-2xl mx-auto bg-white rounded-2xl shadow-2xl overflow-hidden" style="max-height:92vh;">
 
-            <h2 class="text-xl font-semibold mb-4">Ajouter un approvisionnement</h2>
+        <!-- ══════════ HEADER ══════════ -->
+        <div class="flex-shrink-0 relative overflow-hidden" style="background: linear-gradient(135deg, #2563eb 0%, #4f46e5 100%); padding: 20px 22px 18px;">
+            <!-- Cercles déco -->
+            <div style="position:absolute; top:-30px; right:-30px; width:130px; height:130px; border-radius:50%; background:rgba(255,255,255,0.07); pointer-events:none;"></div>
+            <div style="position:absolute; bottom:-40px; left:20px; width:90px; height:90px; border-radius:50%; background:rgba(255,255,255,0.05); pointer-events:none;"></div>
 
-            <!-- Fournisseur -->
-            <div class="mb-4">
-                <label class="text-sm text-gray-600">Fournisseur</label>
-                <div class="space-y-1">
-                    <input type="text" name="fournisseur_search" class="w-full rounded-md border border-slate-300 px-4 py-2 fournisseur-search" placeholder="Rechercher un fournisseur..." autocomplete="off" list="fournisseurOptions">
+            <div class="relative flex items-start justify-between gap-3">
+                <div>
+                    <div class="flex items-center gap-2 mb-1">
+                        <div class="w-8 h-8 rounded-lg flex items-center justify-center" style="background:rgba(255,255,255,0.15);">
+                            <i class="fas fa-truck text-white text-sm"></i>
+                        </div>
+                        <span class="text-xs font-semibold tracking-widest uppercase" style="color:rgba(255,255,255,0.65);">Approvisionnement</span>
+                    </div>
+                    <h2 class="text-xl font-bold text-white">Nouvel approvisionnement</h2>
+                    <p class="text-xs mt-1" style="color:rgba(255,255,255,0.5);">Renseignez le fournisseur et les produits</p>
+                </div>
+                <button type="button" id="cancelAddStock"
+                    class="flex-shrink-0 flex items-center justify-center w-8 h-8 rounded-lg transition"
+                    style="background:rgba(255,255,255,0.12); border:1px solid rgba(255,255,255,0.2); color:white;">
+                    <i class="fas fa-times text-sm"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- ══════════ BODY SCROLLABLE ══════════ -->
+        <div class="overflow-y-auto flex-1 p-5 space-y-5" style="background:#f8fafc;">
+
+            <!-- FOURNISSEUR -->
+            <div class="bg-white rounded-xl border border-slate-200 p-4">
+                <div class="flex items-center gap-2 mb-3">
+                    <div class="w-7 h-7 rounded-lg flex items-center justify-center bg-blue-50">
+                        <i class="fas fa-building text-blue-600 text-xs"></i>
+                    </div>
+                    <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Fournisseur</span>
+                </div>
+                <div class="relative">
+                    <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-300 text-xs pointer-events-none"></i>
+                    <input
+                        type="text"
+                        name="fournisseur_search"
+                        class="fournisseur-search w-full rounded-lg border border-slate-200 pl-8 pr-4 py-2.5 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                        placeholder="Rechercher un fournisseur..."
+                        autocomplete="off"
+                        list="fournisseurOptions"
+                    >
                     <input type="hidden" name="fournisseur" class="fournisseur-id-input">
                     <datalist id="fournisseurOptions" class="fournisseur-datalist"></datalist>
-                    <div class="text-[11px] text-gray-500 fournisseur-meta">Saisissez au moins 2 caractères</div>
+                </div>
+                <p class="text-[11px] text-slate-400 mt-1.5 fournisseur-meta">Saisissez au moins 2 caractères</p>
+            </div>
+
+            <!-- PRODUITS -->
+            <div class="bg-white rounded-xl border border-slate-200 overflow-hidden">
+                <div class="flex items-center justify-between px-4 py-3 border-b border-slate-100">
+                    <div class="flex items-center gap-2">
+                        <div class="w-7 h-7 rounded-lg flex items-center justify-center bg-blue-50">
+                            <i class="fas fa-boxes text-blue-600 text-xs"></i>
+                        </div>
+                        <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Produits à approvisionner</span>
+                    </div>
+                    <button type="button" id="btnAddRow"
+                        class="flex items-center gap-1.5 text-xs font-semibold text-blue-600 hover:text-blue-700 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-lg transition">
+                        <i class="fas fa-plus text-[10px]"></i>
+                        Ajouter produit
+                    </button>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm" style="min-width:480px;">
+                        <thead>
+                            <tr style="background:#f8fafc;">
+                                <th class="px-4 py-2.5 text-left text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Désignation</th>
+                                <th class="px-4 py-2.5 text-center text-[10px] font-semibold text-slate-400 uppercase tracking-wider w-28">Quantité</th>
+                                <th class="px-4 py-2.5 text-center text-[10px] font-semibold text-slate-400 uppercase tracking-wider w-32">Prix achat</th>
+                                <th class="w-10"></th>
+                            </tr>
+                        </thead>
+                        <tbody id="produitBody" class="divide-y divide-slate-100"></tbody>
+                    </table>
                 </div>
             </div>
 
-            <!-- Tableau produits -->
-            <div class="overflow-x-auto">
-                <table class="min-w-[500px] w-full text-sm border rounded-lg overflow-hidden">
-                    <thead class="bg-gray-100">
-                        <tr>
-                            <th class="p-2">Produit</th>
-                            <th class="p-2">Quantité</th>
-                            <th class="p-2">Prix achat</th>
-                            <th class="p-2"></th>
-                        </tr>
-                    </thead>
-                    <tbody id="produitBody"></tbody>
-                </table>
-            </div>
-
-            <!-- bouton ajouter produit -->
-            <button type="button" id="btnAddRow" class="mt-3 text-blue-600 text-sm hover:underline">
-                + Ajouter produit
-            </button>
-
         </div>
 
-        <!-- boutons FIXES (toujours visibles) -->
-        <div class="flex justify-end gap-2 mt-4 pt-3 border-t bg-white">
-            <button type="button" id="cancelAddStock" class="px-4 py-2 bg-gray-500 text-white rounded-md">
+        <!-- ══════════ FOOTER ══════════ -->
+        <div class="flex-shrink-0 flex items-center justify-end gap-2 px-5 py-4 border-t border-slate-100 bg-white">
+            <!-- <button type="button" id="cancelAddStock"
+                class="px-4 py-2 text-sm font-semibold text-slate-500 bg-slate-100 rounded-xl hover:bg-slate-200 transition">
                 Annuler
-            </button>
-            <button type="submit" class="px-4 py-2 bg-blue-500 text-white rounded-md">
+            </button> -->
+            <button type="submit"
+                class="flex items-center gap-2 px-5 py-2 text-sm font-semibold text-white rounded-xl transition"
+                style="background: linear-gradient(135deg, #2563eb 0%, #4f46e5 100%); box-shadow: 0 4px 14px rgba(37,99,235,0.35);"
+                onmouseover="this.style.opacity='0.9'; this.style.transform='translateY(-1px)'"
+                onmouseout="this.style.opacity='1'; this.style.transform='translateY(0)'">
+                <i class="fas fa-check text-xs"></i>
                 Enregistrer
             </button>
         </div>
 
-    </div>
-</form>
+    </form>
 </div>
 
 <!-- Products Grid -->
